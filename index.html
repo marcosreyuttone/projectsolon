@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>US Data Center Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+  :root { --bg:#0e141b; --panel:#161e29; --line:#26323f; --text:#e7eef6; --muted:#93a4b8; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  #map { position:absolute; inset:0; }
+  .panel {
+    position:absolute; z-index:1000; background:rgba(22,30,41,.94); border:1px solid var(--line);
+    border-radius:12px; padding:14px 16px; backdrop-filter: blur(4px);
+    box-shadow:0 8px 28px rgba(0,0,0,.45);
+  }
+  #controls { top:12px; left:12px; width:288px; max-height:calc(100% - 24px); overflow:auto; }
+  #stats { bottom:12px; left:12px; width:288px; }
+  h1 { font-size:16px; margin:0 0 2px; }
+  .sub { font-size:11px; color:var(--muted); margin:0 0 12px; line-height:1.4; }
+  .group { margin:12px 0; }
+  .group h2 { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 6px; }
+  label.row { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; cursor:pointer; }
+  label.row input { accent-color:#4ea1ff; }
+  .swatch { width:12px; height:12px; border-radius:50%; display:inline-block; border:1px solid rgba(255,255,255,.35); }
+  select, input[type=search] { width:100%; background:#0e141b; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font-size:13px; }
+  .stat { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; border-bottom:1px dashed var(--line); }
+  .stat b { font-variant-numeric: tabular-nums; }
+  .stat:last-child { border-bottom:0; }
+  .bar { height:7px; border-radius:4px; background:#0e141b; overflow:hidden; margin:6px 0 2px; display:flex; }
+  .bar > span { display:block; height:100%; }
+  .legend-note { font-size:10px; color:var(--muted); margin-top:8px; line-height:1.4; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background:#0f1620; color:var(--text); border:1px solid var(--line); }
+  .leaflet-popup-content { margin:12px 14px; font-size:13px; line-height:1.5; }
+  .leaflet-popup-content h3 { margin:0 0 6px; font-size:14px; }
+  .pill { display:inline-block; font-size:10px; padding:1px 7px; border-radius:999px; margin-bottom:6px; }
+  .kv { display:flex; justify-content:space-between; gap:18px; }
+  .kv span:first-child { color:var(--muted); }
+  a.link { color:#4ea1ff; }
+  #loading { z-index:2000; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="loading" class="panel">Loading data center data…</div>
+
+<div id="controls" class="panel" style="display:none">
+  <h1>US Data Center Map</h1>
+  <p class="sub" id="meta">—</p>
+
+  <div class="group">
+    <h2>Status</h2>
+    <label class="row"><input type="checkbox" class="f-status" value="constructed" checked><span class="swatch" style="background:#3ad17a"></span> Constructed</label>
+    <label class="row"><input type="checkbox" class="f-status" value="under_construction" checked><span class="swatch" style="background:#ffb648"></span> Under construction</label>
+    <label class="row"><input type="checkbox" class="f-status" value="planned" checked><span class="swatch" style="background:#4ea1ff"></span> Planned</label>
+  </div>
+
+  <div class="group">
+    <h2>Size markers by</h2>
+    <select id="sizeBy">
+      <option value="value_usd">Estimated value (USD)</option>
+      <option value="capacity_mw">Power capacity (MW)</option>
+      <option value="consumed_mw">Power consumed (MW)</option>
+      <option value="available_mw">Power available (MW)</option>
+    </select>
+  </div>
+
+  <div class="group">
+    <h2>Search</h2>
+    <input type="search" id="search" placeholder="name, operator, city, state…" />
+  </div>
+
+  <p class="legend-note">Circle size is relative to the selected metric. Power &amp; value figures are best-effort public estimates for visualization, not authoritative.</p>
+</div>
+
+<div id="stats" class="panel" style="display:none">
+  <div class="stat"><span>Data centers shown</span><b id="s-count">0</b></div>
+  <div class="stat"><span>Total power capacity</span><b id="s-cap">0</b></div>
+  <div class="stat"><span>Power consumed</span><b id="s-con">0</b></div>
+  <div class="stat"><span>Power available</span><b id="s-avail">0</b></div>
+  <div class="bar" id="powerbar"></div>
+  <div class="stat"><span>Total estimated value</span><b id="s-val">0</b></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const STATUS = {
+  constructed:        { color:"#3ad17a", label:"Constructed" },
+  under_construction: { color:"#ffb648", label:"Under construction" },
+  planned:            { color:"#4ea1ff", label:"Planned" },
+  unknown:            { color:"#8aa0b6", label:"Unknown" },
+};
+
+const map = L.map("map", { worldCopyJump:true }).setView([39.5, -98.35], 4);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 19,
+}).addTo(map);
+
+const layer = L.layerGroup().addTo(map);
+let ALL = [];
+
+const fmtUSD = v => v >= 1e9 ? "$" + (v/1e9).toFixed(1) + "B"
+                  : v >= 1e6 ? "$" + (v/1e6).toFixed(0) + "M"
+                  : v ? "$" + v.toLocaleString() : "n/a";
+const fmtMW  = v => v ? v.toLocaleString() + " MW" : "n/a";
+
+function radius(dc, metric, maxVal) {
+  const v = dc[metric] || 0;
+  if (maxVal <= 0) return 6;
+  // sqrt scaling so area ~ value
+  return 5 + 26 * Math.sqrt(v / maxVal);
+}
+
+function popupHtml(dc) {
+  const s = STATUS[dc.status] || STATUS.unknown;
+  const loc = [dc.city, dc.state].filter(Boolean).join(", ");
+  return `
+    <h3>${dc.name}</h3>
+    <span class="pill" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}66">${s.label}</span>
+    ${dc.operator ? `<div class="kv"><span>Operator</span><span>${dc.operator}</span></div>` : ""}
+    ${loc ? `<div class="kv"><span>Location</span><span>${loc}</span></div>` : ""}
+    <div class="kv"><span>Power capacity</span><span>${fmtMW(dc.capacity_mw)}</span></div>
+    <div class="kv"><span>Power consumed</span><span>${fmtMW(dc.consumed_mw)}</span></div>
+    <div class="kv"><span>Power available</span><span>${fmtMW(dc.available_mw)}</span></div>
+    <div class="kv"><span>Estimated value</span><span>${fmtUSD(dc.value_usd)}</span></div>
+    ${dc.year ? `<div class="kv"><span>Year</span><span>${dc.year}</span></div>` : ""}
+    <div class="kv"><span>Source</span><span>${dc.source}</span></div>
+  `;
+}
+
+function activeStatuses() {
+  return new Set([...document.querySelectorAll(".f-status:checked")].map(c => c.value));
+}
+
+function render() {
+  const metric = document.getElementById("sizeBy").value;
+  const statuses = activeStatuses();
+  const q = document.getElementById("search").value.trim().toLowerCase();
+
+  const shown = ALL.filter(dc => {
+    if (!statuses.has(dc.status)) return false;
+    if (q) {
+      const hay = `${dc.name} ${dc.operator} ${dc.city} ${dc.state}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const maxVal = shown.reduce((m, dc) => Math.max(m, dc[metric] || 0), 0);
+  layer.clearLayers();
+
+  // larger drawn first so small ones stay clickable on top
+  shown.slice().sort((a,b) => (b[metric]||0) - (a[metric]||0)).forEach(dc => {
+    const s = STATUS[dc.status] || STATUS.unknown;
+    L.circleMarker([dc.lat, dc.lng], {
+      radius: radius(dc, metric, maxVal),
+      color: s.color, weight: 1.5, fillColor: s.color, fillOpacity: 0.45,
+    }).bindPopup(popupHtml(dc), { maxWidth: 300 }).addTo(layer);
+  });
+
+  updateStats(shown);
+}
+
+function updateStats(shown) {
+  const sum = (k) => shown.reduce((a, d) => a + (d[k] || 0), 0);
+  const cap = sum("capacity_mw"), con = sum("consumed_mw"), avail = sum("available_mw");
+  document.getElementById("s-count").textContent = shown.length.toLocaleString();
+  document.getElementById("s-cap").textContent  = Math.round(cap).toLocaleString() + " MW";
+  document.getElementById("s-con").textContent  = Math.round(con).toLocaleString() + " MW";
+  document.getElementById("s-avail").textContent= Math.round(avail).toLocaleString() + " MW";
+  document.getElementById("s-val").textContent  = fmtUSD(sum("value_usd"));
+  const total = con + avail || 1;
+  document.getElementById("powerbar").innerHTML =
+    `<span style="width:${100*con/total}%;background:#ff6b6b" title="consumed"></span>` +
+    `<span style="width:${100*avail/total}%;background:#3ad17a" title="available"></span>`;
+}
+
+async function init() {
+  let data;
+  try {
+    const res = await fetch("data/datacenters.json?_=" + Date.now());
+    if (!res.ok) throw new Error(res.status);
+    data = await res.json();
+  } catch (e) {
+    document.getElementById("loading").innerHTML =
+      "Could not load <code>data/datacenters.json</code>.<br>Run <code>python3 app.py</code> first to build it.";
+    return;
+  }
+  ALL = data.datacenters || [];
+  const gen = data.generated_at ? new Date(data.generated_at).toLocaleString() : "—";
+  document.getElementById("meta").textContent =
+    `${ALL.length} sites · sources: ${(data.sources||[]).join(", ")} · built ${gen}`;
+
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("controls").style.display = "";
+  document.getElementById("stats").style.display = "";
+
+  document.getElementById("sizeBy").addEventListener("change", render);
+  document.getElementById("search").addEventListener("input", render);
+  document.querySelectorAll(".f-status").forEach(c => c.addEventListener("change", render));
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
