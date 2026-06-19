@@ -425,6 +425,257 @@
       "status": "under_construction", "permit_status": "approved", "capacity_mw": 192, "consumed_mw": 0, "value_usd": 1700000000, "year": 2026,
       "utility": "Georgia Power", "substation": "Atlanta South", "voltage_kv": 230, "interconnection_mw": 210, "interconnection_status": "approved",
       "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+
+    {
+      "name": "xAI Colossus (Memphis)", "operator": "xAI", "owner": "xAI Corp", "legal_entity": "X.AI LLC",
+      "tenants": ["self (xAI Grok)"], "city": "Memphis", "state": "TN", "lat": 35.0600, "lng": -90.0100,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 500, "consumed_mw": 350, "value_usd": 7000000000, "year": 2024,
+      "utility": "Memphis Light, Gas & Water (TVA) + on-site gas turbines", "substation": "Southaven / Boxtown", "voltage_kv": 230, "interconnection_mw": 300, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "xAI Colossus 2 (Memphis / Mississippi)", "operator": "xAI", "owner": "xAI Corp", "legal_entity": "X.AI LLC",
+      "tenants": ["self (xAI Grok)"], "city": "Memphis", "state": "TN", "lat": 35.1200, "lng": -90.0500,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1000, "consumed_mw": 0, "value_usd": 12000000000, "year": 2026,
+      "utility": "MLGW (TVA) + on-site generation", "substation": "Memphis (new)", "voltage_kv": 500, "interconnection_mw": 1100, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "CoreWeave / Core Scientific (Denton)", "operator": "CoreWeave", "owner": "CoreWeave, Inc.", "legal_entity": "CoreWeave, Inc.",
+      "tenants": ["CoreWeave (GPU cloud) / Microsoft"], "city": "Denton", "state": "TX", "lat": 33.2150, "lng": -97.1300,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 0, "value_usd": 2000000000, "year": 2026,
+      "utility": "CoreSite / Denton Municipal Electric (ERCOT)", "substation": "Denton", "voltage_kv": 138, "interconnection_mw": 330, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+    {
+      "name": "Oracle Cloud US-East (Ashburn)", "operator": "Oracle", "owner": "Oracle Corporation", "legal_entity": "Oracle Corporation",
+      "tenants": ["self (OCI)"], "city": "Ashburn", "state": "VA", "lat": 39.0250, "lng": -77.4800,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 180, "consumed_mw": 140, "value_usd": 1600000000, "year": 2017,
+      "utility": "Dominion Energy Virginia", "substation": "Ashburn", "voltage_kv": 230, "interconnection_mw": 200, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Oracle Cloud US-West (Phoenix)", "operator": "Oracle", "owner": "Oracle Corporation", "legal_entity": "Oracle Corporation",
+      "tenants": ["self (OCI)"], "city": "Phoenix", "state": "AZ", "lat": 33.4250, "lng": -112.0500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 110, "value_usd": 1300000000, "year": 2019,
+      "utility": "Arizona Public Service (APS)", "substation": "Phoenix", "voltage_kv": 230, "interconnection_mw": 165, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Meta Henrico (Richmond)", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Sunshine State LLC",
+      "tenants": ["self (Meta)"], "city": "Sandston", "state": "VA", "lat": 37.5050, "lng": -77.3300,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 150, "value_usd": 1750000000, "year": 2020,
+      "utility": "Dominion Energy Virginia", "substation": "White Oak", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Gallatin", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta)"], "city": "Gallatin", "state": "TN", "lat": 36.3880, "lng": -86.4460,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 180, "consumed_mw": 120, "value_usd": 1300000000, "year": 2022,
+      "utility": "TVA / Cumberland EMC", "substation": "Gallatin", "voltage_kv": 161, "interconnection_mw": 200, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta DeKalb", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta)"], "city": "DeKalb", "state": "IL", "lat": 41.9300, "lng": -88.7500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 130, "value_usd": 1500000000, "year": 2023,
+      "utility": "ComEd (Exelon)", "substation": "DeKalb", "voltage_kv": 345, "interconnection_mw": 230, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Sarpy (Papillion)", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta)"], "city": "Papillion", "state": "NE", "lat": 41.1300, "lng": -96.0000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 250, "consumed_mw": 170, "value_usd": 1800000000, "year": 2020,
+      "utility": "Omaha Public Power District (OPPD)", "substation": "Sarpy", "voltage_kv": 345, "interconnection_mw": 280, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Stanton Springs (Social Circle)", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta)"], "city": "Social Circle", "state": "GA", "lat": 33.6560, "lng": -83.7150,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 150, "value_usd": 1600000000, "year": 2018,
+      "utility": "Walton EMC / Georgia Power", "substation": "Stanton Springs", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Temple", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta)"], "city": "Temple", "state": "TX", "lat": 31.1000, "lng": -97.3400,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 0, "value_usd": 2200000000, "year": 2026,
+      "utility": "Oncor (ERCOT)", "substation": "Temple", "voltage_kv": 345, "interconnection_mw": 330, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Los Lunas", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta)"], "city": "Los Lunas", "state": "NM", "lat": 34.8050, "lng": -106.7330,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 140, "value_usd": 1600000000, "year": 2019,
+      "utility": "PNM (Public Service Co. of New Mexico)", "substation": "Los Lunas", "voltage_kv": 345, "interconnection_mw": 220, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Google Storey County (Reno)", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Tahoe Reno LLC",
+      "tenants": ["self (Google Cloud)"], "city": "McCarran", "state": "NV", "lat": 39.4000, "lng": -119.4000,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 0, "value_usd": 1800000000, "year": 2026,
+      "utility": "NV Energy", "substation": "Tahoe Reno Industrial Center", "voltage_kv": 345, "interconnection_mw": 220, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google New Albany (Columbus)", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Pottery Hill LLC",
+      "tenants": ["self (Google Cloud)"], "city": "New Albany", "state": "OH", "lat": 40.0600, "lng": -82.7900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 160, "consumed_mw": 110, "value_usd": 1400000000, "year": 2022,
+      "utility": "AEP Ohio", "substation": "New Albany", "voltage_kv": 138, "interconnection_mw": 180, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Clarksville", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Montgomery County LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Clarksville", "state": "TN", "lat": 36.5000, "lng": -87.3500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 100, "value_usd": 1300000000, "year": 2019,
+      "utility": "TVA / Clarksville Dept. of Electricity", "substation": "Clarksville", "voltage_kv": 161, "interconnection_mw": 165, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Papillion (Omaha)", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Papillion Investments LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Papillion", "state": "NE", "lat": 41.1500, "lng": -96.0400,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 105, "value_usd": 1300000000, "year": 2019,
+      "utility": "Omaha Public Power District (OPPD)", "substation": "Papillion", "voltage_kv": 161, "interconnection_mw": 165, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+
+    {
+      "name": "AWS Oregon (Umatilla / Boardman)", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
+      "tenants": ["self (AWS US-West-2)"], "city": "Umatilla", "state": "OR", "lat": 45.7000, "lng": -119.7000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 500, "consumed_mw": 380, "value_usd": 5000000000, "year": 2011,
+      "utility": "Umatilla Electric Cooperative / BPA", "substation": "Umatilla", "voltage_kv": 230, "interconnection_mw": 550, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "AWS Ohio (US-East-2, New Albany)", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
+      "tenants": ["self (AWS US-East-2)"], "city": "New Albany", "state": "OH", "lat": 40.0400, "lng": -82.8100,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 400, "consumed_mw": 300, "value_usd": 4000000000, "year": 2016,
+      "utility": "AEP Ohio", "substation": "New Albany", "voltage_kv": 138, "interconnection_mw": 440, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "AWS Pennsylvania (Salem Twp / Susquehanna)", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
+      "tenants": ["self (AWS)"], "city": "Berwick", "state": "PA", "lat": 41.0900, "lng": -76.1400,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 960, "consumed_mw": 0, "value_usd": 7500000000, "year": 2027,
+      "utility": "Talen Energy (Susquehanna nuclear, behind-the-meter) / PPL", "substation": "Susquehanna", "voltage_kv": 500, "interconnection_mw": 960, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Microsoft West Des Moines", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "West Des Moines", "state": "IA", "lat": 41.5500, "lng": -93.8000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 220, "value_usd": 3500000000, "year": 2014,
+      "utility": "MidAmerican Energy", "substation": "West Des Moines", "voltage_kv": 345, "interconnection_mw": 330, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft Goodyear (Phoenix West)", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "Goodyear", "state": "AZ", "lat": 33.6000, "lng": -112.3500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 250, "consumed_mw": 160, "value_usd": 2400000000, "year": 2021,
+      "utility": "Arizona Public Service (APS)", "substation": "El Mirage / Goodyear", "voltage_kv": 230, "interconnection_mw": 280, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+
+    {
+      "name": "CoreSite LA1 (One Wilshire)", "operator": "CoreSite", "owner": "American Tower Corporation (REIT)", "legal_entity": "CoreSite, L.L.C.",
+      "tenants": ["multi-tenant: carriers, cloud, media"], "city": "Los Angeles", "state": "CA", "lat": 34.0490, "lng": -118.2570,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 70, "consumed_mw": 58, "value_usd": 700000000, "year": 1992,
+      "utility": "LADWP", "substation": "Downtown LA", "voltage_kv": 34, "interconnection_mw": 75, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 190, "annual_rent_usd": null
+    },
+    {
+      "name": "CoreSite VA (Reston)", "operator": "CoreSite", "owner": "American Tower Corporation (REIT)", "legal_entity": "CoreSite, L.L.C.",
+      "tenants": ["multi-tenant: cloud on-ramps & enterprise"], "city": "Reston", "state": "VA", "lat": 38.9500, "lng": -77.3400,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 90, "consumed_mw": 70, "value_usd": 850000000, "year": 2014,
+      "utility": "Dominion Energy Virginia", "substation": "Reston", "voltage_kv": 230, "interconnection_mw": 100, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 165, "annual_rent_usd": null
+    },
+    {
+      "name": "Sabey Intergate.Quincy", "operator": "Sabey Data Centers", "owner": "Sabey Corporation / National Real Estate Advisors", "legal_entity": "Sabey Data Center Properties, LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Quincy", "state": "WA", "lat": 47.2300, "lng": -119.8500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 72, "value_usd": 800000000, "year": 2014,
+      "utility": "Grant County PUD", "substation": "Quincy", "voltage_kv": 230, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 120, "annual_rent_usd": null
+    },
+    {
+      "name": "Sabey Intergate.Manhattan", "operator": "Sabey Data Centers", "owner": "Sabey Corporation / National Real Estate Advisors", "legal_entity": "Sabey Data Center Properties, LLC",
+      "tenants": ["multi-tenant: financial & enterprise"], "city": "New York", "state": "NY", "lat": 40.7090, "lng": -74.0090,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 45, "consumed_mw": 35, "value_usd": 500000000, "year": 2011,
+      "utility": "Con Edison", "substation": "Lower Manhattan", "voltage_kv": 27, "interconnection_mw": 50, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 210, "annual_rent_usd": null
+    },
+    {
+      "name": "Flexential Hillsboro (Portland)", "operator": "Flexential", "owner": "GI Partners", "legal_entity": "Flexential Corp.",
+      "tenants": ["multi-tenant: enterprise & cloud"], "city": "Hillsboro", "state": "OR", "lat": 45.5200, "lng": -122.9200,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 60, "consumed_mw": 42, "value_usd": 450000000, "year": 2019,
+      "utility": "Portland General Electric", "substation": "Hillsboro", "voltage_kv": 115, "interconnection_mw": 66, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 140, "annual_rent_usd": null
+    },
+    {
+      "name": "EdgeConneX Phoenix (PHX)", "operator": "EdgeConneX", "owner": "EQT Infrastructure", "legal_entity": "EdgeConneX, Inc.",
+      "tenants": ["multi-tenant: hyperscale & content"], "city": "Phoenix", "state": "AZ", "lat": 33.4200, "lng": -112.0700,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 65, "value_usd": 800000000, "year": 2021,
+      "utility": "Arizona Public Service (APS)", "substation": "Phoenix", "voltage_kv": 230, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "DataBank ATL (Atlanta)", "operator": "DataBank", "owner": "DigitalBridge / Swiss Life / EnCap", "legal_entity": "DataBank Holdings, Ltd.",
+      "tenants": ["multi-tenant: enterprise & edge"], "city": "Atlanta", "state": "GA", "lat": 33.7700, "lng": -84.3900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 55, "consumed_mw": 40, "value_usd": 420000000, "year": 2018,
+      "utility": "Georgia Power", "substation": "Atlanta", "voltage_kv": 115, "interconnection_mw": 60, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "TierPoint Dallas", "operator": "TierPoint", "owner": "TierPoint, LLC (Cequel III / Jordan)", "legal_entity": "TierPoint, LLC",
+      "tenants": ["multi-tenant: enterprise & hybrid cloud"], "city": "Dallas", "state": "TX", "lat": 32.7900, "lng": -96.8000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 40, "consumed_mw": 28, "value_usd": 300000000, "year": 2017,
+      "utility": "Oncor (ERCOT)", "substation": "Dallas", "voltage_kv": 138, "interconnection_mw": 44, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+    {
+      "name": "Novva West Jordan (Utah)", "operator": "Novva Data Centers", "owner": "CIM Group", "legal_entity": "Novva Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "West Jordan", "state": "UT", "lat": 40.5900, "lng": -112.0100,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 60, "value_usd": 1000000000, "year": 2022,
+      "utility": "Rocky Mountain Power (PacifiCorp)", "substation": "West Jordan", "voltage_kv": 138, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "T5 Dallas (Alliance)", "operator": "T5 Data Centers", "owner": "QuadReal / T5", "legal_entity": "T5 Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Fort Worth", "state": "TX", "lat": 32.9700, "lng": -97.3200,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 80, "consumed_mw": 55, "value_usd": 650000000, "year": 2019,
+      "utility": "Oncor (ERCOT)", "substation": "Alliance", "voltage_kv": 138, "interconnection_mw": 88, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 124, "annual_rent_usd": null
+    },
+    {
+      "name": "Stream Data Centers (Dallas)", "operator": "Stream Data Centers", "owner": "Stream Realty Partners", "legal_entity": "Stream Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Garland", "state": "TX", "lat": 32.9100, "lng": -96.6400,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 120, "consumed_mw": 0, "value_usd": 1000000000, "year": 2026,
+      "utility": "Oncor (ERCOT)", "substation": "Garland", "voltage_kv": 138, "interconnection_mw": 132, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 123, "annual_rent_usd": null
+    },
+    {
+      "name": "Centersquare Northern Virginia", "operator": "Centersquare (Cyxtera + Evoque)", "owner": "Brookfield / BCEC", "legal_entity": "Centersquare, LLC",
+      "tenants": ["multi-tenant: enterprise & cloud"], "city": "Sterling", "state": "VA", "lat": 39.0060, "lng": -77.4200,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 70, "consumed_mw": 50, "value_usd": 600000000, "year": 2016,
+      "utility": "Dominion Energy Virginia", "substation": "Sterling", "voltage_kv": 230, "interconnection_mw": 78, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+    {
+      "name": "DC BLOX Birmingham", "operator": "DC BLOX", "owner": "Post Road Group", "legal_entity": "DC BLOX, Inc.",
+      "tenants": ["multi-tenant: enterprise & edge"], "city": "Birmingham", "state": "AL", "lat": 33.5200, "lng": -86.8100,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 40, "consumed_mw": 26, "value_usd": 300000000, "year": 2019,
+      "utility": "Alabama Power (Southern Company)", "substation": "Birmingham", "voltage_kv": 115, "interconnection_mw": 44, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 140, "annual_rent_usd": null
+    },
+    {
+      "name": "Prime Data Centers (Santa Clara)", "operator": "Prime Data Centers", "owner": "Prime Asset Management", "legal_entity": "Prime Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Santa Clara", "state": "CA", "lat": 37.3950, "lng": -121.9700,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 60, "consumed_mw": 45, "value_usd": 600000000, "year": 2021,
+      "utility": "Silicon Valley Power", "substation": "Santa Clara", "voltage_kv": 60, "interconnection_mw": 66, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 175, "annual_rent_usd": null
     }
   ]
 }
