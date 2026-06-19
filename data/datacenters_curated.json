@@ -317,6 +317,100 @@
       "status": "constructed", "permit_status": "approved", "capacity_mw": 180, "consumed_mw": 120, "value_usd": 1300000000, "year": 2020,
       "utility": "AEP Ohio", "substation": "Groveport", "voltage_kv": 138, "interconnection_mw": 200, "interconnection_status": "energized",
       "lease_type": "wholesale", "rent_per_kw_month": 123, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Aligned Phoenix (PHX)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Phoenix", "state": "AZ", "lat": 33.4500, "lng": -112.0700,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 120, "consumed_mw": 90, "value_usd": 1200000000, "year": 2018,
+      "utility": "Arizona Public Service (APS)", "substation": "Phoenix", "voltage_kv": 230, "interconnection_mw": 135, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "Aligned Salt Lake City (SLC)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "West Jordan", "state": "UT", "lat": 40.6100, "lng": -111.9600,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 80, "consumed_mw": 55, "value_usd": 700000000, "year": 2019,
+      "utility": "Rocky Mountain Power (PacifiCorp)", "substation": "West Jordan", "voltage_kv": 138, "interconnection_mw": 90, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "Aligned Dallas (DFW)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Plano", "state": "TX", "lat": 33.0500, "lng": -96.7500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 120, "consumed_mw": 85, "value_usd": 1100000000, "year": 2020,
+      "utility": "Oncor (ERCOT)", "substation": "Plano", "voltage_kv": 138, "interconnection_mw": 135, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 124, "annual_rent_usd": null
+    },
+    {
+      "name": "Aligned Ashburn (Virginia)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Ashburn", "state": "VA", "lat": 39.0100, "lng": -77.4700,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 0, "value_usd": 2000000000, "year": 2026,
+      "utility": "Dominion Energy Virginia", "substation": "Ashburn", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 132, "annual_rent_usd": null
+    },
+    {
+      "name": "Aligned Cook (Chicago)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "West Chicago", "state": "IL", "lat": 41.8800, "lng": -88.2000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 70, "value_usd": 1000000000, "year": 2021,
+      "utility": "ComEd (Exelon)", "substation": "West Chicago", "voltage_kv": 138, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 126, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Compass Red Oak (Dallas)", "operator": "Compass Datacenters", "owner": "Brookfield Infrastructure / Ontario Teachers'", "legal_entity": "Compass Datacenters, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Red Oak", "state": "TX", "lat": 32.5200, "lng": -96.8000,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 450, "consumed_mw": 0, "value_usd": 4000000000, "year": 2026,
+      "utility": "Oncor (ERCOT)", "substation": "Red Oak", "voltage_kv": 345, "interconnection_mw": 480, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 125, "annual_rent_usd": null
+    },
+    {
+      "name": "Compass Goodyear (Phoenix)", "operator": "Compass Datacenters", "owner": "Brookfield Infrastructure / Ontario Teachers'", "legal_entity": "Compass Datacenters, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Goodyear", "state": "AZ", "lat": 33.4400, "lng": -112.4200,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 95, "value_usd": 1300000000, "year": 2022,
+      "utility": "Arizona Public Service (APS)", "substation": "Goodyear", "voltage_kv": 230, "interconnection_mw": 165, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 127, "annual_rent_usd": null
+    },
+    {
+      "name": "Compass Channahon (Chicago / Polaris)", "operator": "Compass Datacenters", "owner": "Brookfield Infrastructure / Ontario Teachers'", "legal_entity": "Compass Datacenters, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Channahon", "state": "IL", "lat": 41.4300, "lng": -88.2300,
+      "status": "planned", "permit_status": "pending", "capacity_mw": 1000, "consumed_mw": 0, "value_usd": 8000000000, "year": 2028,
+      "utility": "ComEd (Exelon)", "substation": "Channahon (new)", "voltage_kv": 345, "interconnection_mw": 1100, "interconnection_status": "in queue",
+      "lease_type": "wholesale", "rent_per_kw_month": 122, "annual_rent_usd": null
+    },
+    {
+      "name": "Compass Northern Virginia", "operator": "Compass Datacenters", "owner": "Brookfield Infrastructure / Ontario Teachers'", "legal_entity": "Compass Datacenters, LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Manassas", "state": "VA", "lat": 38.7600, "lng": -77.5500,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 0, "value_usd": 1800000000, "year": 2026,
+      "utility": "Dominion Energy Virginia", "substation": "Gainesville", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Vantage Ashburn (VA)", "operator": "Vantage Data Centers", "owner": "DigitalBridge / Silver Lake", "legal_entity": "Vantage Data Centers LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Ashburn", "state": "VA", "lat": 39.0000, "lng": -77.4950,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 0, "value_usd": 2000000000, "year": 2026,
+      "utility": "Dominion Energy Virginia", "substation": "Ashburn", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 134, "annual_rent_usd": null
+    },
+    {
+      "name": "Vantage Frontier (Shackelford County)", "operator": "Vantage Data Centers", "owner": "DigitalBridge / Silver Lake", "legal_entity": "Vantage Data Centers LLC",
+      "tenants": ["multi-tenant: AI hyperscale (anchor)"], "city": "Abilene area", "state": "TX", "lat": 32.7500, "lng": -99.3000,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1400, "consumed_mw": 0, "value_usd": 10000000000, "year": 2028,
+      "utility": "Oncor (ERCOT) + on-site natural gas generation", "substation": "Shackelford County (new)", "voltage_kv": 345, "interconnection_mw": 1500, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 140, "annual_rent_usd": null
+    },
+    {
+      "name": "Vantage Phoenix (Goodyear)", "operator": "Vantage Data Centers", "owner": "DigitalBridge / Silver Lake", "legal_entity": "Vantage Data Centers LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Goodyear", "state": "AZ", "lat": 33.4350, "lng": -112.4000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 96, "consumed_mw": 70, "value_usd": 850000000, "year": 2021,
+      "utility": "Arizona Public Service (APS)", "substation": "Goodyear", "voltage_kv": 230, "interconnection_mw": 105, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 132, "annual_rent_usd": null
+    },
+    {
+      "name": "Vantage Atlanta (GA)", "operator": "Vantage Data Centers", "owner": "DigitalBridge / Silver Lake", "legal_entity": "Vantage Data Centers LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Atlanta", "state": "GA", "lat": 33.6500, "lng": -84.4500,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 192, "consumed_mw": 0, "value_usd": 1700000000, "year": 2026,
+      "utility": "Georgia Power", "substation": "Atlanta South", "voltage_kv": 230, "interconnection_mw": 210, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
     }
   ]
 }
