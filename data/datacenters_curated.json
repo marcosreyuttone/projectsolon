@@ -1,44 +1,280 @@
 {
-  "_comment": "Curated dataset of notable US data centers and data-center markets. Power and value figures are best-effort public estimates compiled for visualization/demo purposes and should NOT be treated as authoritative. capacity_mw = total critical/IT power capacity; consumed_mw = estimated current load (0 for not-yet-operational sites); value_usd = estimated capital investment. 'available' headroom is computed at render time as max(capacity_mw - consumed_mw, 0).",
+  "_comment": "Curated dataset of notable US data centers and AI/cloud campuses. Figures are best-effort estimates compiled from public reporting (company announcements, utility interconnection filings, permit dockets, press) for VISUALIZATION/DEMO purposes and should NOT be treated as authoritative. Field guide: operator = who runs the facility; owner = parent / asset owner; legal_entity = SPV or filing entity where publicly identifiable; tenants = principal occupier(s) ('self' = owner-occupied hyperscale); status = constructed | under_construction | planned; permit_status = approved | permitted | pending | not_required; capacity_mw = planned/critical IT power at full build; consumed_mw = estimated current load (0 if not operational); value_usd = estimated capital investment; utility/substation/voltage_kv/interconnection_mw/interconnection_status describe the grid connection; lease_type = owner-occupied | wholesale | colocation; rent_per_kw_month = indicative wholesale/colo lease rate in USD where the site leases space (null for owner-occupied). 'available' headroom is computed as max(capacity_mw - consumed_mw, 0) for constructed sites.",
+  "_disclaimer": "Illustrative estimates, not legal, financial, or engineering advice.",
+  "schema_version": 2,
   "datacenters": [
-    { "name": "Amazon AWS US-East-1", "operator": "Amazon Web Services", "city": "Ashburn", "state": "VA", "lat": 39.0438, "lng": -77.4874, "status": "constructed", "capacity_mw": 650, "consumed_mw": 560, "value_usd": 12000000000, "year": 2006 },
-    { "name": "Equinix DC Campus (Ashburn)", "operator": "Equinix", "city": "Ashburn", "state": "VA", "lat": 39.0156, "lng": -77.4900, "status": "constructed", "capacity_mw": 300, "consumed_mw": 250, "value_usd": 4000000000, "year": 2005 },
-    { "name": "Iron Mountain VA-1", "operator": "Iron Mountain", "city": "Manassas", "state": "VA", "lat": 38.7500, "lng": -77.4750, "status": "constructed", "capacity_mw": 142, "consumed_mw": 100, "value_usd": 1200000000, "year": 2017 },
-    { "name": "Microsoft Boydton", "operator": "Microsoft", "city": "Boydton", "state": "VA", "lat": 36.6676, "lng": -78.3875, "status": "constructed", "capacity_mw": 500, "consumed_mw": 430, "value_usd": 5000000000, "year": 2010 },
-    { "name": "Google Council Bluffs", "operator": "Google", "city": "Council Bluffs", "state": "IA", "lat": 41.2619, "lng": -95.8608, "status": "constructed", "capacity_mw": 400, "consumed_mw": 340, "value_usd": 5000000000, "year": 2009 },
-    { "name": "Meta Altoona", "operator": "Meta", "city": "Altoona", "state": "IA", "lat": 41.6444, "lng": -93.4600, "status": "constructed", "capacity_mw": 360, "consumed_mw": 300, "value_usd": 2500000000, "year": 2014 },
-    { "name": "Google The Dalles", "operator": "Google", "city": "The Dalles", "state": "OR", "lat": 45.5946, "lng": -121.1480, "status": "constructed", "capacity_mw": 200, "consumed_mw": 170, "value_usd": 1800000000, "year": 2006 },
-    { "name": "Meta Prineville", "operator": "Meta", "city": "Prineville", "state": "OR", "lat": 44.2860, "lng": -120.8120, "status": "constructed", "capacity_mw": 330, "consumed_mw": 280, "value_usd": 2000000000, "year": 2011 },
-    { "name": "NTT Hillsboro (OR1)", "operator": "NTT Global Data Centers", "city": "Hillsboro", "state": "OR", "lat": 45.5300, "lng": -122.9500, "status": "constructed", "capacity_mw": 126, "consumed_mw": 90, "value_usd": 900000000, "year": 2019 },
-    { "name": "Microsoft Quincy", "operator": "Microsoft", "city": "Quincy", "state": "WA", "lat": 47.2340, "lng": -119.8526, "status": "constructed", "capacity_mw": 300, "consumed_mw": 250, "value_usd": 3000000000, "year": 2007 },
-    { "name": "Apple Maiden", "operator": "Apple", "city": "Maiden", "state": "NC", "lat": 35.5760, "lng": -81.2120, "status": "constructed", "capacity_mw": 100, "consumed_mw": 80, "value_usd": 1000000000, "year": 2010 },
-    { "name": "Apple Mesa", "operator": "Apple", "city": "Mesa", "state": "AZ", "lat": 33.3790, "lng": -111.6300, "status": "constructed", "capacity_mw": 150, "consumed_mw": 110, "value_usd": 2000000000, "year": 2017 },
-    { "name": "Switch The Core (Las Vegas)", "operator": "Switch", "city": "Las Vegas", "state": "NV", "lat": 36.0590, "lng": -115.0390, "status": "constructed", "capacity_mw": 315, "consumed_mw": 240, "value_usd": 3500000000, "year": 2008 },
-    { "name": "Switch Tahoe Reno (Citadel)", "operator": "Switch", "city": "Reno", "state": "NV", "lat": 39.5300, "lng": -119.4500, "status": "constructed", "capacity_mw": 650, "consumed_mw": 300, "value_usd": 5000000000, "year": 2017 },
-    { "name": "Google Henderson", "operator": "Google", "city": "Henderson", "state": "NV", "lat": 36.0100, "lng": -114.9800, "status": "constructed", "capacity_mw": 130, "consumed_mw": 90, "value_usd": 1200000000, "year": 2021 },
-    { "name": "QTS Atlanta-Metro", "operator": "QTS (Blackstone)", "city": "Atlanta", "state": "GA", "lat": 33.7160, "lng": -84.3960, "status": "constructed", "capacity_mw": 220, "consumed_mw": 180, "value_usd": 1500000000, "year": 2006 },
-    { "name": "CyrusOne Dallas", "operator": "CyrusOne", "city": "Carrollton", "state": "TX", "lat": 32.9760, "lng": -96.8900, "status": "constructed", "capacity_mw": 120, "consumed_mw": 95, "value_usd": 900000000, "year": 2013 },
-    { "name": "Microsoft San Antonio", "operator": "Microsoft", "city": "San Antonio", "state": "TX", "lat": 29.4380, "lng": -98.6900, "status": "constructed", "capacity_mw": 280, "consumed_mw": 230, "value_usd": 2200000000, "year": 2008 },
-    { "name": "Google Pryor (Mayes County)", "operator": "Google", "city": "Pryor", "state": "OK", "lat": 36.2900, "lng": -95.3000, "status": "constructed", "capacity_mw": 250, "consumed_mw": 200, "value_usd": 4400000000, "year": 2011 },
-    { "name": "Meta Eagle Mountain", "operator": "Meta", "city": "Eagle Mountain", "state": "UT", "lat": 40.3100, "lng": -112.0070, "status": "constructed", "capacity_mw": 240, "consumed_mw": 180, "value_usd": 1750000000, "year": 2018 },
-    { "name": "Vantage Santa Clara (SC1)", "operator": "Vantage Data Centers", "city": "Santa Clara", "state": "CA", "lat": 37.3870, "lng": -121.9760, "status": "constructed", "capacity_mw": 90, "consumed_mw": 78, "value_usd": 800000000, "year": 2016 },
-    { "name": "Equinix Silicon Valley (SV)", "operator": "Equinix", "city": "San Jose", "state": "CA", "lat": 37.2410, "lng": -121.7770, "status": "constructed", "capacity_mw": 110, "consumed_mw": 95, "value_usd": 1100000000, "year": 2000 },
-    { "name": "Digital Realty Chicago (Lakeside)", "operator": "Digital Realty", "city": "Chicago", "state": "IL", "lat": 41.8530, "lng": -87.6360, "status": "constructed", "capacity_mw": 100, "consumed_mw": 85, "value_usd": 950000000, "year": 1999 },
-    { "name": "Cologix COL (Columbus)", "operator": "Cologix", "city": "Columbus", "state": "OH", "lat": 39.9610, "lng": -82.9980, "status": "constructed", "capacity_mw": 60, "consumed_mw": 45, "value_usd": 450000000, "year": 2016 },
-    { "name": "Meta New Albany", "operator": "Meta", "city": "New Albany", "state": "OH", "lat": 40.0810, "lng": -82.8080, "status": "constructed", "capacity_mw": 200, "consumed_mw": 150, "value_usd": 1500000000, "year": 2019 },
-    { "name": "Google Lenoir", "operator": "Google", "city": "Lenoir", "state": "NC", "lat": 35.9140, "lng": -81.5390, "status": "constructed", "capacity_mw": 130, "consumed_mw": 100, "value_usd": 1200000000, "year": 2009 },
-    { "name": "Microsoft Cheyenne", "operator": "Microsoft", "city": "Cheyenne", "state": "WY", "lat": 41.1400, "lng": -104.8200, "status": "constructed", "capacity_mw": 110, "consumed_mw": 85, "value_usd": 750000000, "year": 2012 },
-    { "name": "Meta Fort Worth", "operator": "Meta", "city": "Fort Worth", "state": "TX", "lat": 32.9000, "lng": -97.4000, "status": "constructed", "capacity_mw": 250, "consumed_mw": 190, "value_usd": 1800000000, "year": 2017 },
-    { "name": "Google Midlothian", "operator": "Google", "city": "Midlothian", "state": "TX", "lat": 32.4820, "lng": -97.0000, "status": "constructed", "capacity_mw": 160, "consumed_mw": 110, "value_usd": 1200000000, "year": 2021 },
-    { "name": "Stack Infrastructure POR (Hillsboro)", "operator": "Stack Infrastructure", "city": "Hillsboro", "state": "OR", "lat": 45.5400, "lng": -122.9300, "status": "constructed", "capacity_mw": 90, "consumed_mw": 70, "value_usd": 700000000, "year": 2020 },
-    { "name": "Stargate (OpenAI / Oracle / SoftBank)", "operator": "OpenAI / Oracle / SoftBank", "city": "Abilene", "state": "TX", "lat": 32.4490, "lng": -99.7330, "status": "under_construction", "capacity_mw": 1200, "consumed_mw": 0, "value_usd": 50000000000, "year": 2026 },
-    { "name": "Meta Hyperion (Richland Parish)", "operator": "Meta", "city": "Delhi", "state": "LA", "lat": 32.4200, "lng": -91.7300, "status": "planned", "capacity_mw": 2000, "consumed_mw": 0, "value_usd": 10000000000, "year": 2030 },
-    { "name": "Microsoft / OpenAI Mount Pleasant", "operator": "Microsoft", "city": "Mount Pleasant", "state": "WI", "lat": 42.7000, "lng": -87.8800, "status": "under_construction", "capacity_mw": 450, "consumed_mw": 0, "value_usd": 3300000000, "year": 2026 },
-    { "name": "Amazon AWS New Carlisle", "operator": "Amazon Web Services", "city": "New Carlisle", "state": "IN", "lat": 41.7000, "lng": -86.5000, "status": "under_construction", "capacity_mw": 900, "consumed_mw": 0, "value_usd": 11000000000, "year": 2027 },
-    { "name": "Amazon AWS Madison County", "operator": "Amazon Web Services", "city": "Canton", "state": "MS", "lat": 32.6000, "lng": -90.0000, "status": "planned", "capacity_mw": 500, "consumed_mw": 0, "value_usd": 10000000000, "year": 2027 },
-    { "name": "Meta El Paso", "operator": "Meta", "city": "El Paso", "state": "TX", "lat": 31.7600, "lng": -106.4850, "status": "under_construction", "capacity_mw": 1000, "consumed_mw": 0, "value_usd": 6000000000, "year": 2028 },
-    { "name": "Microsoft Atlanta (Palmetto)", "operator": "Microsoft", "city": "Palmetto", "state": "GA", "lat": 33.5200, "lng": -84.6700, "status": "planned", "capacity_mw": 324, "consumed_mw": 0, "value_usd": 1800000000, "year": 2026 },
-    { "name": "Google Dorchester County", "operator": "Google", "city": "Moncks Corner", "state": "SC", "lat": 33.1960, "lng": -80.0150, "status": "constructed", "capacity_mw": 150, "consumed_mw": 110, "value_usd": 1200000000, "year": 2008 },
-    { "name": "QTS Fayetteville (Sailfish)", "operator": "QTS (Blackstone)", "city": "Fayetteville", "state": "GA", "lat": 33.4480, "lng": -84.4550, "status": "planned", "capacity_mw": 270, "consumed_mw": 0, "value_usd": 1600000000, "year": 2026 }
+    {
+      "name": "Amazon AWS US-East-1 (Ashburn)", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
+      "tenants": ["self (AWS)"], "city": "Ashburn", "state": "VA", "lat": 39.0438, "lng": -77.4874,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 650, "consumed_mw": 560, "value_usd": 12000000000, "year": 2006,
+      "utility": "Dominion Energy Virginia", "substation": "Loudoun / Beaumeade", "voltage_kv": 230, "interconnection_mw": 700, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Equinix DC Campus (Ashburn)", "operator": "Equinix", "owner": "Equinix, Inc. (REIT)", "legal_entity": "Equinix, Inc.",
+      "tenants": ["multi-tenant: cloud on-ramps (AWS, Azure, Google, Oracle)", "carriers & enterprises"], "city": "Ashburn", "state": "VA", "lat": 39.0156, "lng": -77.4900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 250, "value_usd": 4000000000, "year": 2005,
+      "utility": "Dominion Energy Virginia", "substation": "Ashburn", "voltage_kv": 230, "interconnection_mw": 320, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 165, "annual_rent_usd": null
+    },
+    {
+      "name": "Iron Mountain VA-1 (Manassas)", "operator": "Iron Mountain Data Centers", "owner": "Iron Mountain Incorporated (REIT)", "legal_entity": "Iron Mountain Information Management, LLC",
+      "tenants": ["multi-tenant: federal & enterprise"], "city": "Manassas", "state": "VA", "lat": 38.7500, "lng": -77.4750,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 142, "consumed_mw": 100, "value_usd": 1200000000, "year": 2017,
+      "utility": "Dominion Energy Virginia", "substation": "Gainesville", "voltage_kv": 230, "interconnection_mw": 150, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 135, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft Boydton (Southside VA)", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "Boydton", "state": "VA", "lat": 36.6676, "lng": -78.3875,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 500, "consumed_mw": 430, "value_usd": 5000000000, "year": 2010,
+      "utility": "Mecklenburg Electric Cooperative / Dominion", "substation": "Boydton", "voltage_kv": 230, "interconnection_mw": 520, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Council Bluffs", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Jet Stream LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Council Bluffs", "state": "IA", "lat": 41.2619, "lng": -95.8608,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 400, "consumed_mw": 340, "value_usd": 5000000000, "year": 2009,
+      "utility": "MidAmerican Energy", "substation": "Council Bluffs", "voltage_kv": 345, "interconnection_mw": 450, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Altoona", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Raven Northbrook, LLC",
+      "tenants": ["self (Meta)"], "city": "Altoona", "state": "IA", "lat": 41.6444, "lng": -93.4600,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 360, "consumed_mw": 300, "value_usd": 2500000000, "year": 2014,
+      "utility": "MidAmerican Energy", "substation": "Altoona", "voltage_kv": 345, "interconnection_mw": 400, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google The Dalles", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Design LLC",
+      "tenants": ["self (Google Cloud)"], "city": "The Dalles", "state": "OR", "lat": 45.5946, "lng": -121.1480,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 170, "value_usd": 1800000000, "year": 2006,
+      "utility": "Northern Wasco County PUD", "substation": "The Dalles", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Prineville", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Vitesse, LLC",
+      "tenants": ["self (Meta)"], "city": "Prineville", "state": "OR", "lat": 44.2860, "lng": -120.8120,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 330, "consumed_mw": 280, "value_usd": 2000000000, "year": 2011,
+      "utility": "Pacific Power (PacifiCorp)", "substation": "Prineville", "voltage_kv": 230, "interconnection_mw": 360, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "NTT Hillsboro (OR1)", "operator": "NTT Global Data Centers", "owner": "NTT Ltd. / NTT Global Data Centers", "legal_entity": "NTT Global Data Centers Americas, Inc.",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Hillsboro", "state": "OR", "lat": 45.5300, "lng": -122.9500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 126, "consumed_mw": 90, "value_usd": 900000000, "year": 2019,
+      "utility": "Portland General Electric", "substation": "Hillsboro", "voltage_kv": 115, "interconnection_mw": 140, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft Quincy", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "Quincy", "state": "WA", "lat": 47.2340, "lng": -119.8526,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 250, "value_usd": 3000000000, "year": 2007,
+      "utility": "Grant County PUD", "substation": "Quincy", "voltage_kv": 230, "interconnection_mw": 320, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Apple Maiden", "operator": "Apple", "owner": "Apple Inc.", "legal_entity": "Apple Inc.",
+      "tenants": ["self (iCloud)"], "city": "Maiden", "state": "NC", "lat": 35.5760, "lng": -81.2120,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 80, "value_usd": 1000000000, "year": 2010,
+      "utility": "Duke Energy Carolinas", "substation": "Maiden", "voltage_kv": 100, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Apple Mesa", "operator": "Apple", "owner": "Apple Inc.", "legal_entity": "Apple Inc.",
+      "tenants": ["self (iCloud)"], "city": "Mesa", "state": "AZ", "lat": 33.3790, "lng": -111.6300,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 110, "value_usd": 2000000000, "year": 2017,
+      "utility": "Salt River Project (SRP)", "substation": "Mesa", "voltage_kv": 230, "interconnection_mw": 160, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Switch The Core (Las Vegas)", "operator": "Switch", "owner": "DigitalBridge / IFM Investors", "legal_entity": "Switch, Ltd.",
+      "tenants": ["multi-tenant: eBay, Google, enterprise"], "city": "Las Vegas", "state": "NV", "lat": 36.0590, "lng": -115.0390,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 315, "consumed_mw": 240, "value_usd": 3500000000, "year": 2008,
+      "utility": "NV Energy", "substation": "Las Vegas", "voltage_kv": 230, "interconnection_mw": 330, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+    {
+      "name": "Switch Tahoe Reno (Citadel)", "operator": "Switch", "owner": "DigitalBridge / IFM Investors", "legal_entity": "Switch, Ltd.",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Reno", "state": "NV", "lat": 39.5300, "lng": -119.4500,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 650, "consumed_mw": 300, "value_usd": 5000000000, "year": 2017,
+      "utility": "NV Energy", "substation": "Tahoe Reno Industrial Center", "voltage_kv": 345, "interconnection_mw": 680, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 140, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Henderson", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Honeycrisp LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Henderson", "state": "NV", "lat": 36.0100, "lng": -114.9800,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 130, "consumed_mw": 90, "value_usd": 1200000000, "year": 2021,
+      "utility": "NV Energy", "substation": "Henderson", "voltage_kv": 230, "interconnection_mw": 150, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Atlanta-Metro", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale (leased to cloud providers)"], "city": "Atlanta", "state": "GA", "lat": 33.7160, "lng": -84.3960,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 220, "consumed_mw": 180, "value_usd": 1500000000, "year": 2006,
+      "utility": "Georgia Power", "substation": "Atlanta", "voltage_kv": 230, "interconnection_mw": 240, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 125, "annual_rent_usd": null
+    },
+    {
+      "name": "CyrusOne Dallas (Carrollton)", "operator": "CyrusOne", "owner": "KKR & Global Infrastructure Partners", "legal_entity": "CyrusOne LLC",
+      "tenants": ["multi-tenant: cloud & enterprise"], "city": "Carrollton", "state": "TX", "lat": 32.9760, "lng": -96.8900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 120, "consumed_mw": 95, "value_usd": 900000000, "year": 2013,
+      "utility": "Oncor (ERCOT)", "substation": "Carrollton", "voltage_kv": 138, "interconnection_mw": 130, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 120, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft San Antonio", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "San Antonio", "state": "TX", "lat": 29.4380, "lng": -98.6900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 280, "consumed_mw": 230, "value_usd": 2200000000, "year": 2008,
+      "utility": "CPS Energy", "substation": "Westover", "voltage_kv": 138, "interconnection_mw": 300, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Pryor (Mayes County)", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "MregV LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Pryor", "state": "OK", "lat": 36.2900, "lng": -95.3000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 250, "consumed_mw": 200, "value_usd": 4400000000, "year": 2011,
+      "utility": "Grand River Dam Authority (GRDA)", "substation": "MidAmerica Industrial Park", "voltage_kv": 161, "interconnection_mw": 280, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Eagle Mountain", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Pinion Pine LLC",
+      "tenants": ["self (Meta)"], "city": "Eagle Mountain", "state": "UT", "lat": 40.3100, "lng": -112.0070,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 240, "consumed_mw": 180, "value_usd": 1750000000, "year": 2018,
+      "utility": "Rocky Mountain Power (PacifiCorp)", "substation": "Eagle Mountain", "voltage_kv": 345, "interconnection_mw": 260, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Vantage Santa Clara (SC1)", "operator": "Vantage Data Centers", "owner": "DigitalBridge / Silver Lake", "legal_entity": "Vantage Data Centers LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Santa Clara", "state": "CA", "lat": 37.3870, "lng": -121.9760,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 90, "consumed_mw": 78, "value_usd": 800000000, "year": 2016,
+      "utility": "Silicon Valley Power", "substation": "Santa Clara", "voltage_kv": 60, "interconnection_mw": 95, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 170, "annual_rent_usd": null
+    },
+    {
+      "name": "Equinix Silicon Valley (SV)", "operator": "Equinix", "owner": "Equinix, Inc. (REIT)", "legal_entity": "Equinix, Inc.",
+      "tenants": ["multi-tenant: carriers, cloud on-ramps, enterprise"], "city": "San Jose", "state": "CA", "lat": 37.2410, "lng": -121.7770,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 110, "consumed_mw": 95, "value_usd": 1100000000, "year": 2000,
+      "utility": "Pacific Gas & Electric (PG&E)", "substation": "San Jose", "voltage_kv": 115, "interconnection_mw": 120, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 185, "annual_rent_usd": null
+    },
+    {
+      "name": "Digital Realty Chicago (350 E Cermak)", "operator": "Digital Realty", "owner": "Digital Realty Trust, Inc. (REIT)", "legal_entity": "Digital Realty Trust, L.P.",
+      "tenants": ["multi-tenant: carriers, cloud, financial"], "city": "Chicago", "state": "IL", "lat": 41.8530, "lng": -87.6360,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 85, "value_usd": 950000000, "year": 1999,
+      "utility": "ComEd (Exelon)", "substation": "Chicago", "voltage_kv": 138, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 160, "annual_rent_usd": null
+    },
+    {
+      "name": "Cologix COL (Columbus)", "operator": "Cologix", "owner": "Stonepeak Partners", "legal_entity": "Cologix, Inc.",
+      "tenants": ["multi-tenant: network & enterprise"], "city": "Columbus", "state": "OH", "lat": 39.9610, "lng": -82.9980,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 60, "consumed_mw": 45, "value_usd": 450000000, "year": 2016,
+      "utility": "AEP Ohio", "substation": "Columbus", "voltage_kv": 138, "interconnection_mw": 70, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta New Albany", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Sidecat LLC",
+      "tenants": ["self (Meta)"], "city": "New Albany", "state": "OH", "lat": 40.0810, "lng": -82.8080,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 150, "value_usd": 1500000000, "year": 2019,
+      "utility": "AEP Ohio", "substation": "New Albany", "voltage_kv": 138, "interconnection_mw": 230, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Lenoir", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Lily LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Lenoir", "state": "NC", "lat": 35.9140, "lng": -81.5390,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 130, "consumed_mw": 100, "value_usd": 1200000000, "year": 2009,
+      "utility": "Duke Energy Carolinas", "substation": "Lenoir", "voltage_kv": 100, "interconnection_mw": 145, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft Cheyenne", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "Cheyenne", "state": "WY", "lat": 41.1400, "lng": -104.8200,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 110, "consumed_mw": 85, "value_usd": 750000000, "year": 2012,
+      "utility": "Cheyenne Light, Fuel & Power (Black Hills Energy)", "substation": "Cheyenne", "voltage_kv": 115, "interconnection_mw": 120, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Fort Worth", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Stadion LLC",
+      "tenants": ["self (Meta)"], "city": "Fort Worth", "state": "TX", "lat": 32.9000, "lng": -97.4000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 250, "consumed_mw": 190, "value_usd": 1800000000, "year": 2017,
+      "utility": "Oncor (ERCOT)", "substation": "Fort Worth", "voltage_kv": 345, "interconnection_mw": 280, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Midlothian", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Sharpsburg Holdings LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Midlothian", "state": "TX", "lat": 32.4820, "lng": -97.0000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 160, "consumed_mw": 110, "value_usd": 1200000000, "year": 2021,
+      "utility": "Oncor (ERCOT)", "substation": "Midlothian", "voltage_kv": 138, "interconnection_mw": 180, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Stack Infrastructure POR (Hillsboro)", "operator": "Stack Infrastructure", "owner": "Blue Owl Capital / IPI Partners", "legal_entity": "Stack Infrastructure, Inc.",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Hillsboro", "state": "OR", "lat": 45.5400, "lng": -122.9300,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 90, "consumed_mw": 70, "value_usd": 700000000, "year": 2020,
+      "utility": "Portland General Electric", "substation": "Hillsboro", "voltage_kv": 115, "interconnection_mw": 100, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "Stargate Abilene (OpenAI / Oracle)", "operator": "Crusoe Energy / Oracle", "owner": "Stargate JV (OpenAI, Oracle, SoftBank, MGX)", "legal_entity": "Stargate SPV / Crusoe-developed campus",
+      "tenants": ["OpenAI (via Oracle Cloud)"], "city": "Abilene", "state": "TX", "lat": 32.4490, "lng": -99.7330,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1200, "consumed_mw": 0, "value_usd": 50000000000, "year": 2026,
+      "utility": "Oncor (ERCOT) + on-site natural gas generation", "substation": "Lancium Clean Campus", "voltage_kv": 345, "interconnection_mw": 1200, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta Hyperion (Richland Parish)", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta AI)"], "city": "Delhi", "state": "LA", "lat": 32.4200, "lng": -91.7300,
+      "status": "planned", "permit_status": "permitted", "capacity_mw": 2000, "consumed_mw": 0, "value_usd": 10000000000, "year": 2030,
+      "utility": "Entergy Louisiana (3 new gas plants + solar)", "substation": "Richland Parish (new)", "voltage_kv": 500, "interconnection_mw": 2200, "interconnection_status": "in queue",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft / OpenAI Mount Pleasant (Fairwater)", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure) / OpenAI"], "city": "Mount Pleasant", "state": "WI", "lat": 42.7000, "lng": -87.8800,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 450, "consumed_mw": 0, "value_usd": 3300000000, "year": 2026,
+      "utility": "We Energies (WEC Energy Group)", "substation": "Mount Pleasant", "voltage_kv": 138, "interconnection_mw": 480, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Amazon AWS New Carlisle (Project Rainier)", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
+      "tenants": ["self (AWS) / Anthropic"], "city": "New Carlisle", "state": "IN", "lat": 41.7000, "lng": -86.5000,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 900, "consumed_mw": 0, "value_usd": 11000000000, "year": 2027,
+      "utility": "Indiana Michigan Power (AEP)", "substation": "New Carlisle (new)", "voltage_kv": 345, "interconnection_mw": 2250, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Amazon AWS Madison County", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
+      "tenants": ["self (AWS)"], "city": "Canton", "state": "MS", "lat": 32.6000, "lng": -90.0000,
+      "status": "planned", "permit_status": "permitted", "capacity_mw": 500, "consumed_mw": 0, "value_usd": 10000000000, "year": 2027,
+      "utility": "Entergy Mississippi", "substation": "Madison County (new)", "voltage_kv": 230, "interconnection_mw": 550, "interconnection_status": "in queue",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Meta El Paso", "operator": "Meta", "owner": "Meta Platforms, Inc.", "legal_entity": "Meta Platforms, Inc.",
+      "tenants": ["self (Meta AI)"], "city": "El Paso", "state": "TX", "lat": 31.7600, "lng": -106.4850,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1000, "consumed_mw": 0, "value_usd": 6000000000, "year": 2028,
+      "utility": "El Paso Electric (+ on-site generation)", "substation": "El Paso (new)", "voltage_kv": 345, "interconnection_mw": 1000, "interconnection_status": "approved",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Microsoft Atlanta (Palmetto)", "operator": "Microsoft", "owner": "Microsoft Corporation", "legal_entity": "Microsoft Corporation",
+      "tenants": ["self (Azure)"], "city": "Palmetto", "state": "GA", "lat": 33.5200, "lng": -84.6700,
+      "status": "planned", "permit_status": "pending", "capacity_mw": 324, "consumed_mw": 0, "value_usd": 1800000000, "year": 2026,
+      "utility": "Georgia Power", "substation": "Palmetto (new)", "voltage_kv": 230, "interconnection_mw": 350, "interconnection_status": "in queue",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Google Dorchester County", "operator": "Google", "owner": "Alphabet Inc.", "legal_entity": "Tarheel LLC",
+      "tenants": ["self (Google Cloud)"], "city": "Moncks Corner", "state": "SC", "lat": 33.1960, "lng": -80.0150,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 110, "value_usd": 1200000000, "year": 2008,
+      "utility": "Santee Cooper / Berkeley Electric Coop", "substation": "Moncks Corner", "voltage_kv": 115, "interconnection_mw": 165, "interconnection_status": "energized",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Fayetteville (Sailfish)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Fayetteville", "state": "GA", "lat": 33.4480, "lng": -84.4550,
+      "status": "planned", "permit_status": "approved", "capacity_mw": 270, "consumed_mw": 0, "value_usd": 1600000000, "year": 2026,
+      "utility": "Georgia Power", "substation": "Fayette County (new)", "voltage_kv": 230, "interconnection_mw": 300, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    }
   ]
 }

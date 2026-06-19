@@ -94,19 +94,38 @@ def normalize(d, source):
         available = max(capacity - consumed, 0.0)
     else:
         available = 0.0
+    # Tenants may arrive as a list or a comma-separated string.
+    tenants = d.get("tenants") or []
+    if isinstance(tenants, str):
+        tenants = [t.strip() for t in tenants.split(",") if t.strip()]
+    rent = d.get("rent_per_kw_month")
     return {
         "name": d.get("name") or "Unnamed data center",
         "operator": d.get("operator") or "",
+        "owner": d.get("owner") or "",
+        "legal_entity": d.get("legal_entity") or "",
+        "tenants": tenants,
         "city": d.get("city") or "",
         "state": d.get("state") or "",
         "lat": float(d["lat"]),
         "lng": float(d["lng"]),
         "status": status,
+        "permit_status": (d.get("permit_status") or "").lower(),
         "capacity_mw": round(capacity, 1),
         "consumed_mw": round(consumed, 1),
         "available_mw": round(available, 1),
         "value_usd": float(d.get("value_usd") or 0),
         "year": d.get("year") or None,
+        # Grid connection
+        "utility": d.get("utility") or "",
+        "substation": d.get("substation") or "",
+        "voltage_kv": float(d["voltage_kv"]) if d.get("voltage_kv") else None,
+        "interconnection_mw": float(d["interconnection_mw"]) if d.get("interconnection_mw") else None,
+        "interconnection_status": (d.get("interconnection_status") or "").lower(),
+        # Commercials
+        "lease_type": (d.get("lease_type") or "").lower(),
+        "rent_per_kw_month": float(rent) if rent not in (None, "") else None,
+        "annual_rent_usd": float(d["annual_rent_usd"]) if d.get("annual_rent_usd") else None,
         "source": source,
     }
 
@@ -153,31 +172,55 @@ def parse_overpass(elements):
             status = "under_construction"
         if tags.get("proposed"):
             status = "planned"
-        capacity = 0.0
-        for key in ("power_capacity", "power", "capacity"):
-            v = tags.get(key, "")
-            num = "".join(ch for ch in v if ch.isdigit() or ch == ".")
-            if num:
-                try:
-                    capacity = float(num)
-                    if "gw" in v.lower():
-                        capacity *= 1000.0
-                    break
-                except ValueError:
-                    pass
+        capacity = parse_power_mw(tags, ("power_capacity", "power", "capacity"))
+        # Grid hints occasionally present on OSM features.
+        voltage_kv = None
+        vraw = tags.get("voltage") or ""
+        vnum = "".join(ch for ch in vraw.split(";")[0] if ch.isdigit() or ch == ".")
+        if vnum:
+            try:
+                v = float(vnum)
+                voltage_kv = v / 1000.0 if v > 1000 else v  # volts -> kV
+            except ValueError:
+                pass
+        operator = tags.get("operator") or tags.get("brand") or tags.get("network") or ""
         out.append(normalize({
-            "name": tags.get("name") or tags.get("operator") or "OSM data center",
-            "operator": tags.get("operator") or tags.get("network") or "",
+            "name": tags.get("name") or operator or "OSM data center",
+            "operator": operator,
+            "owner": tags.get("owner") or tags.get("brand") or "",
             "city": tags.get("addr:city") or "",
             "state": tags.get("addr:state") or "",
             "lat": lat,
             "lng": lng,
             "status": status,
+            "permit_status": "",
             "capacity_mw": capacity,
             "consumed_mw": 0,
             "value_usd": 0,
+            "utility": tags.get("operator:power") or "",
+            "voltage_kv": voltage_kv,
         }, source="openstreetmap"))
     return out
+
+
+def parse_power_mw(tags, keys):
+    """Pull a megawatt figure out of free-form OSM power tags. Returns float MW."""
+    for key in keys:
+        v = tags.get(key, "")
+        num = "".join(ch for ch in v if ch.isdigit() or ch == ".")
+        if not num:
+            continue
+        try:
+            val = float(num)
+        except ValueError:
+            continue
+        low = v.lower()
+        if "gw" in low:
+            val *= 1000.0
+        elif "kw" in low:
+            val /= 1000.0
+        return val
+    return 0.0
 
 
 def dedupe(records):
@@ -234,13 +277,23 @@ def summarize(records):
         "consumed_mw": 0.0,
         "available_mw": 0.0,
         "value_usd": 0.0,
+        "interconnection_mw": 0.0,
+        "operators": 0,
+        "permit_approved": 0,
     }
+    operators = set()
     for r in records:
         out[r["status"]] = out.get(r["status"], 0) + 1
         out["capacity_mw"] += r["capacity_mw"]
         out["consumed_mw"] += r["consumed_mw"]
         out["available_mw"] += r["available_mw"]
         out["value_usd"] += r["value_usd"]
+        out["interconnection_mw"] += r.get("interconnection_mw") or 0
+        if r.get("permit_status") == "approved":
+            out["permit_approved"] += 1
+        if r.get("operator"):
+            operators.add(r["operator"])
+    out["operators"] = len(operators)
     return out
 
 
