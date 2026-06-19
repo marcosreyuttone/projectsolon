@@ -275,6 +275,48 @@
       "status": "planned", "permit_status": "approved", "capacity_mw": 270, "consumed_mw": 0, "value_usd": 1600000000, "year": 2026,
       "utility": "Georgia Power", "substation": "Fayette County (new)", "voltage_kv": 230, "interconnection_mw": 300, "interconnection_status": "approved",
       "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "Switch Pyramid (Grand Rapids / Michigan)", "operator": "Switch", "owner": "DigitalBridge / IFM Investors", "legal_entity": "Switch, Ltd.",
+      "tenants": ["multi-tenant: enterprise & cloud"], "city": "Grand Rapids", "state": "MI", "lat": 42.8500, "lng": -85.5800,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 60, "value_usd": 1500000000, "year": 2016,
+      "utility": "Consumers Energy", "substation": "Gaines Township", "voltage_kv": 138, "interconnection_mw": 110, "interconnection_status": "energized",
+      "lease_type": "colocation", "rent_per_kw_month": 135, "annual_rent_usd": null
+    },
+    {
+      "name": "Switch The Keep (Atlanta)", "operator": "Switch", "owner": "DigitalBridge / IFM Investors", "legal_entity": "Switch, Ltd.",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Lithia Springs", "state": "GA", "lat": 33.7900, "lng": -84.6700,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 365, "consumed_mw": 0, "value_usd": 4500000000, "year": 2027,
+      "utility": "Georgia Power", "substation": "Douglas County", "voltage_kv": 230, "interconnection_mw": 400, "interconnection_status": "approved",
+      "lease_type": "colocation", "rent_per_kw_month": 132, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Ashburn (Mega Campus)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Ashburn", "state": "VA", "lat": 39.0180, "lng": -77.4600,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 350, "consumed_mw": 270, "value_usd": 3000000000, "year": 2018,
+      "utility": "Dominion Energy Virginia", "substation": "Ashburn", "voltage_kv": 230, "interconnection_mw": 380, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Richmond (Sandston)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: enterprise, federal & cloud"], "city": "Sandston", "state": "VA", "lat": 37.5100, "lng": -77.3000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 110, "consumed_mw": 80, "value_usd": 900000000, "year": 2010,
+      "utility": "Dominion Energy Virginia", "substation": "Sandston", "voltage_kv": 230, "interconnection_mw": 120, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 122, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Irving (Dallas-Fort Worth)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Irving", "state": "TX", "lat": 32.8600, "lng": -96.9600,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 150, "consumed_mw": 105, "value_usd": 1100000000, "year": 2019,
+      "utility": "Oncor (ERCOT)", "substation": "Irving", "voltage_kv": 138, "interconnection_mw": 165, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 124, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Groveport (Columbus)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Groveport", "state": "OH", "lat": 39.8800, "lng": -82.8800,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 180, "consumed_mw": 120, "value_usd": 1300000000, "year": 2020,
+      "utility": "AEP Ohio", "substation": "Groveport", "voltage_kv": 138, "interconnection_mw": 200, "interconnection_status": "energized",
+      "lease_type": "wholesale", "rent_per_kw_month": 123, "annual_rent_usd": null
     }
   ]
 }
