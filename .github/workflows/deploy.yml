@@ -48,6 +48,11 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # Auto-enable GitHub Pages (Actions source) so no manual repo
+          # Settings toggle is needed. Requires a public repo (or Pages-eligible
+          # plan) and the pages:write permission granted above.
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
