@@ -354,6 +354,20 @@
       "utility": "ComEd (Exelon)", "substation": "West Chicago", "voltage_kv": 138, "interconnection_mw": 110, "interconnection_status": "energized",
       "lease_type": "wholesale", "rent_per_kw_month": 126, "annual_rent_usd": null
     },
+    {
+      "name": "Aligned Shippingport (Pennsylvania)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: AI hyperscale (anchor)"], "city": "Shippingport", "state": "PA", "lat": 40.6200, "lng": -80.4200,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1000, "consumed_mw": 0, "value_usd": 9000000000, "year": 2027,
+      "utility": "Penn Power (FirstEnergy) / PJM + power-adjacent (Beaver Valley)", "substation": "Shippingport", "voltage_kv": 500, "interconnection_mw": 1100, "interconnection_status": "approved",
+      "lease_type": "wholesale", "rent_per_kw_month": 138, "annual_rent_usd": null
+    },
+    {
+      "name": "Aligned Cardinal (Ohio)", "operator": "Aligned Data Centers", "owner": "Macquarie Asset Management", "legal_entity": "Aligned Data Centers, LLC",
+      "tenants": ["multi-tenant: AI hyperscale (anchor)"], "city": "Brilliant", "state": "OH", "lat": 40.2700, "lng": -80.6100,
+      "status": "planned", "permit_status": "pending", "capacity_mw": 600, "consumed_mw": 0, "value_usd": 5000000000, "year": 2028,
+      "utility": "AEP Ohio / Buckeye Power (Cardinal Plant) + power-adjacent", "substation": "Cardinal", "voltage_kv": 345, "interconnection_mw": 650, "interconnection_status": "in queue",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
 
     {
       "name": "Compass Red Oak (Dallas)", "operator": "Compass Datacenters", "owner": "Brookfield Infrastructure / Ontario Teachers'", "legal_entity": "Compass Datacenters, LLC",
