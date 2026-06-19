@@ -1,0 +1,35 @@
+{
+  "_comment": "Curated US connectivity context for the interconnection layer. cable_landings = major submarine cable landing stations with an approximate offshore endpoint used to draw a short stub into the ocean and a list of notable systems landing there. backbone = approximate long-haul terrestrial fiber corridors as metro-to-metro polylines. Positions and cable lists are approximate/illustrative for visualization, NOT survey-grade routes.",
+  "_disclaimer": "Illustrative connectivity context, not authoritative route data.",
+  "cable_landings": [
+    { "name": "Virginia Beach, VA", "city": "Virginia Beach", "state": "VA", "lat": 36.7335, "lng": -75.9670, "offshore": [36.55, -74.7], "cables": ["MAREA", "BRUSA", "Dunant"] },
+    { "name": "Manasquan, NJ", "city": "Manasquan", "state": "NJ", "lat": 40.1037, "lng": -74.0346, "offshore": [40.0, -73.0], "cables": ["Seabras-1", "Havfrue/AEC-2"] },
+    { "name": "Wall Township, NJ", "city": "Wall", "state": "NJ", "lat": 40.1700, "lng": -74.0700, "offshore": [40.05, -72.9], "cables": ["TAT-14", "Apollo"] },
+    { "name": "Tuckerton, NJ", "city": "Tuckerton", "state": "NJ", "lat": 39.6000, "lng": -74.3400, "offshore": [39.4, -73.4], "cables": ["AC-1", "Yellow", "GTT Express"] },
+    { "name": "Shirley, NY", "city": "Shirley", "state": "NY", "lat": 40.7900, "lng": -72.8700, "offshore": [40.6, -71.8], "cables": ["GTT Atlantic", "Tata TGN"] },
+    { "name": "Myrtle Beach, SC", "city": "Myrtle Beach", "state": "SC", "lat": 33.6891, "lng": -78.8867, "offshore": [33.5, -77.9], "cables": ["SAEx", "BRUSA (branch)"] },
+    { "name": "Jacksonville, FL", "city": "Jacksonville", "state": "FL", "lat": 30.3322, "lng": -81.3900, "offshore": [30.2, -80.4], "cables": ["Path / Caribbean systems"] },
+    { "name": "Hollywood, FL", "city": "Hollywood", "state": "FL", "lat": 26.0112, "lng": -80.1200, "offshore": [25.9, -79.3], "cables": ["AMX-1", "ARCOS", "GlobeNet"] },
+    { "name": "North Miami Beach, FL", "city": "North Miami Beach", "state": "FL", "lat": 25.9300, "lng": -80.1200, "offshore": [25.8, -79.2], "cables": ["Maya-1", "Pan American", "Deep Blue"] },
+    { "name": "Tierra del Mar / Pacific City, OR", "city": "Pacific City", "state": "OR", "lat": 45.1900, "lng": -123.9600, "offshore": [45.1, -125.1], "cables": ["Jupiter (branch)", "trans-Pacific"] },
+    { "name": "Bandon, OR", "city": "Bandon", "state": "OR", "lat": 43.1190, "lng": -124.4080, "offshore": [43.0, -125.6], "cables": ["NCP", "trans-Pacific"] },
+    { "name": "Manchester / Point Arena, CA", "city": "Manchester", "state": "CA", "lat": 38.9700, "lng": -123.6900, "offshore": [38.8, -124.9], "cables": ["TPC / Pacific systems"] },
+    { "name": "Grover Beach, CA", "city": "Grover Beach", "state": "CA", "lat": 35.1216, "lng": -120.6210, "offshore": [35.0, -121.8], "cables": ["China-US", "trans-Pacific"] },
+    { "name": "Morro Bay, CA", "city": "Morro Bay", "state": "CA", "lat": 35.3658, "lng": -120.8499, "offshore": [35.2, -122.0], "cables": ["Asia-America Gateway (branch)"] },
+    { "name": "Hermosa Beach / El Segundo, CA", "city": "Hermosa Beach", "state": "CA", "lat": 33.8600, "lng": -118.4000, "offshore": [33.6, -119.5], "cables": ["FASTER", "PLCN", "Bay-to-Bay Express"] },
+    { "name": "Makaha / Kahe Point, Oahu, HI", "city": "Honolulu", "state": "HI", "lat": 21.4700, "lng": -158.2200, "offshore": [21.3, -159.2], "cables": ["SEA-US", "Asia-Pacific Gateway", "central-Pacific hub"] }
+  ],
+  "backbone": [
+    { "name": "Northeast Corridor", "type": "terrestrial", "path": [[42.36,-71.06],[41.31,-72.92],[40.71,-74.01],[39.95,-75.16],[38.90,-77.04],[39.04,-77.49]] },
+    { "name": "Atlantic Seaboard", "type": "terrestrial", "path": [[39.04,-77.49],[35.23,-80.84],[33.75,-84.39],[30.33,-81.66],[25.76,-80.19]] },
+    { "name": "Ashburn–Chicago", "type": "terrestrial", "path": [[39.04,-77.49],[40.44,-79.99],[41.50,-81.69],[41.85,-87.65]] },
+    { "name": "Southern Transcontinental", "type": "terrestrial", "path": [[33.75,-84.39],[32.78,-96.80],[31.76,-106.49],[33.45,-112.07],[34.05,-118.24]] },
+    { "name": "Central Transcontinental", "type": "terrestrial", "path": [[40.71,-74.01],[41.50,-81.69],[41.85,-87.65],[41.26,-95.93],[39.74,-104.99],[40.76,-111.89],[39.53,-119.81],[37.77,-122.42]] },
+    { "name": "Northern Transcontinental", "type": "terrestrial", "path": [[41.85,-87.65],[44.98,-93.27],[46.87,-113.99],[47.61,-122.33]] },
+    { "name": "Pacific Coast", "type": "terrestrial", "path": [[47.61,-122.33],[45.52,-122.68],[38.58,-121.49],[37.34,-121.89],[34.05,-118.24]] },
+    { "name": "Desert Southwest", "type": "terrestrial", "path": [[34.05,-118.24],[36.17,-115.14],[40.76,-111.89]] },
+    { "name": "Phoenix–Las Vegas", "type": "terrestrial", "path": [[33.45,-112.07],[36.17,-115.14]] },
+    { "name": "Texas–Midwest", "type": "terrestrial", "path": [[32.78,-96.80],[39.10,-94.58],[41.85,-87.65]] },
+    { "name": "Gulf Spur", "type": "terrestrial", "path": [[32.78,-96.80],[29.76,-95.37]] }
+  ]
+}

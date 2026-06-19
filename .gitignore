@@ -1,4 +1,5 @@
 # Generated at runtime by app.py
 data/datacenters.json
+data/interconnection.json
 __pycache__/
 *.pyc

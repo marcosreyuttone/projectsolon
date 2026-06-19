@@ -135,6 +135,13 @@
   </div>
 
   <div class="group">
+    <h2>Connectivity layers</h2>
+    <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
+    <label class="row"><input type="checkbox" id="L-cable"><span class="swatch" style="background:#22d3ee"></span> Submarine cables <span class="count" id="c-cable"></span></label>
+    <label class="row"><input type="checkbox" id="L-backbone"><span class="swatch" style="background:#f59e0b"></span> Fiber backbone <span class="count" id="c-bb"></span></label>
+  </div>
+
+  <div class="group">
     <h2>Operator</h2>
     <select id="operator"><option value="">All operators</option></select>
   </div>
@@ -166,7 +173,7 @@
   </div>
 
   <button class="reset" id="reset">Reset filters</button>
-  <p class="legend-note">Circle color = status, size = the selected metric. Power, grid, ownership, tenant &amp; rent figures are best-effort public estimates for visualization, <b>not</b> authoritative.</p>
+  <p class="legend-note">Circle color = status, size = the selected metric. <b style="color:#a78bfa">Interconnection hubs</b> (PeeringDB) are sized by the number of networks present — the bigger the dot, the better-connected the location. <b style="color:#22d3ee">Submarine cable</b> landings and <b style="color:#f59e0b">fiber backbone</b> corridors are approximate. All figures are best-effort estimates for visualization, <b>not</b> authoritative.</p>
 </div>
 
 <div id="stats" class="panel" style="display:none">
@@ -210,6 +217,9 @@ L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
 }).addTo(map);
 
 const layer = L.layerGroup().addTo(map);
+const ixLayer = L.layerGroup();
+const cableLayer = L.layerGroup();
+const backboneLayer = L.layerGroup();
 let ALL = [];
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -354,8 +364,49 @@ function openDrawer(dc) {
 
 function closeDrawer(){ document.getElementById("drawer").classList.remove("open"); }
 
+function ixRadius(nets) { return 3 + 9 * Math.sqrt(Math.min(nets, 520) / 520); }
+
+function buildConnectivity(conn) {
+  // Interconnection hubs (PeeringDB) — bigger/brighter = more networks present.
+  (conn.facilities || []).forEach(f => {
+    const big = f.net_count >= 100;
+    L.circleMarker([f.lat, f.lng], {
+      radius: ixRadius(f.net_count), color: "#a78bfa", weight: big ? 1.5 : 0.8,
+      fillColor: "#a78bfa", fillOpacity: big ? 0.55 : 0.35,
+    }).bindPopup(
+      `<h4>${esc(f.name)}</h4><div class="mini">${esc([f.city,f.state].filter(Boolean).join(", "))}</div>` +
+      `<div class="mini" style="margin-top:4px;color:#a78bfa"><b>${f.net_count}</b> networks · <b>${f.ix_count}</b> exchanges</div>` +
+      `<div class="mini">Source: PeeringDB</div>`, { maxWidth: 240 }
+    ).addTo(ixLayer);
+  });
+  // Fiber backbone corridors.
+  (conn.backbone || []).forEach(r => {
+    L.polyline(r.path, { color: "#f59e0b", weight: 2, opacity: 0.55, dashArray: "1 0" })
+      .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Approx. long-haul fiber corridor</div>`)
+      .addTo(backboneLayer);
+  });
+  // Submarine cable landing stations + offshore stubs.
+  (conn.cable_landings || []).forEach(c => {
+    if (c.offshore) {
+      L.polyline([[c.lat, c.lng], c.offshore], { color: "#22d3ee", weight: 1.6, opacity: 0.6 }).addTo(cableLayer);
+    }
+    L.circleMarker([c.lat, c.lng], {
+      radius: 5, color: "#22d3ee", weight: 1.5, fillColor: "#0e151d", fillOpacity: 1,
+    }).bindPopup(
+      `<h4>${esc(c.name)}</h4><div class="mini">Submarine cable landing</div>` +
+      `<div class="mini" style="margin-top:4px;color:#22d3ee">${esc((c.cables||[]).join(" · "))}</div>`, { maxWidth: 240 }
+    ).addTo(cableLayer);
+  });
+}
+
+function wireLayerToggle(id, lyr) {
+  document.getElementById(id).addEventListener("change", e => {
+    if (e.target.checked) lyr.addTo(map); else map.removeLayer(lyr);
+  });
+}
+
 async function init() {
-  let data;
+  let data, conn = null;
   try {
     const res = await fetch("data/datacenters.json?_=" + Date.now());
     if (!res.ok) throw new Error(res.status);
@@ -365,6 +416,10 @@ async function init() {
       "Could not load <code>data/datacenters.json</code>.<br>Run <code>python3 app.py</code> first to build it.";
     return;
   }
+  try {
+    const r2 = await fetch("data/interconnection.json?_=" + Date.now());
+    if (r2.ok) conn = await r2.json();
+  } catch (e) { /* connectivity layer is optional */ }
   ALL = (data.datacenters || []).map((d, i) => (d._i = i, d));
 
   // status counts
@@ -378,6 +433,19 @@ async function init() {
   const ops = [...new Set(ALL.map(d => d.operator).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const sel = document.getElementById("operator");
   ops.forEach(o => { const opt = document.createElement("option"); opt.value = o; opt.textContent = o; sel.appendChild(opt); });
+
+  // Connectivity layers (optional)
+  if (conn) {
+    buildConnectivity(conn);
+    document.getElementById("c-ix").textContent = `(${(conn.facilities||[]).length})`;
+    document.getElementById("c-cable").textContent = `(${(conn.cable_landings||[]).length})`;
+    document.getElementById("c-bb").textContent = `(${(conn.backbone||[]).length})`;
+  } else {
+    ["L-ix","L-cable","L-backbone"].forEach(id => document.getElementById(id).disabled = true);
+  }
+  wireLayerToggle("L-ix", ixLayer);
+  wireLayerToggle("L-cable", cableLayer);
+  wireLayerToggle("L-backbone", backboneLayer);
 
   document.getElementById("loading").style.display = "none";
   document.getElementById("controls").style.display = "";

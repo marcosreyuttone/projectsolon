@@ -64,17 +64,47 @@ automatically falls back to the curated dataset so the map still works.
 - **Click any site** to open the full profile drawer (power, ownership & legal
   entity, tenants, grid connection, and commercials/rent). `Esc` closes it.
 
+## Connectivity layer (best-interconnected places)
+
+Toggle three connectivity overlays from the left panel:
+
+- **Interconnection hubs** — live from **PeeringDB**. Each peering facility is
+  sized by the number of networks present (`net_count`); the bigger/brighter the
+  purple dot, the better-connected the location (e.g. Equinix Ashburn ~500
+  networks, One Wilshire LA, Equinix Chicago/Miami, Hurricane Electric Fremont).
+- **Submarine cables** — major US landing stations with the systems that land
+  there (curated, approximate).
+- **Fiber backbone** — approximate long-haul terrestrial corridors between
+  metros (curated).
+
+## Live data & refresh (does it pick up news?)
+
+Re-running `python3 app.py` **re-downloads the live sources every time**:
+
+- **OpenStreetMap (Overpass)** — mapped data-center locations.
+- **PeeringDB** — interconnection facilities.
+
+So the open/live layers stay current on each build. The **curated figures**
+(capacity, owners, tenants, rent, status, grid) are maintained by hand — there
+is no free real-time "data-center news" feed, so news-driven facts are updated
+by editing the curated JSON (or by a future importer). To refresh on a schedule,
+run the build on a cron / CI job, e.g. `python3 app.py --build-only` nightly.
+
 ## Data sources & accuracy
 
 - **OpenStreetMap (Overpass API)** — locations of mapped data centers, plus any
   `operator`, `owner`, `voltage`, and `power` tags present. Good for *where*
   facilities are; it rarely carries financial, tenant, or grid data.
+- **PeeringDB API** — US interconnection facilities with network/exchange counts,
+  powering the interconnection-hubs layer.
 - **Curated dataset** (`data/datacenters_curated.json`) — notable facilities and
   AI/cloud campuses with best-effort **public estimates** for status, approval,
   power, grid connection (utility / substation / voltage / interconnection),
   ownership, legal entity, tenants, lease type, rent, and capex. These are
   compiled from company announcements, utility interconnection filings, permit
   dockets, and press reporting.
+- **Curated connectivity** (`data/connectivity_curated.json`) — submarine cable
+  landing stations and long-haul fiber corridors (approximate).
 
 > ⚠️ All power, grid, ownership, tenant, rent, and value numbers are
 > **illustrative estimates** compiled for visualization, **not** authoritative
@@ -103,7 +133,9 @@ automatically falls back to the curated dataset so the map still works.
 
 | File                               | Purpose                                            |
 |------------------------------------|----------------------------------------------------|
-| `app.py`                           | Downloads + merges data, then serves the map       |
-| `index.html`                       | The interactive Leaflet map UI + profile drawer    |
+| `app.py`                           | Downloads + merges data (OSM + PeeringDB), serves the map |
+| `index.html`                       | The interactive Leaflet map UI + profile drawer + layers |
 | `data/datacenters_curated.json`    | Editable curated dataset (schema v2)               |
+| `data/connectivity_curated.json`   | Editable cable landings + fiber backbone           |
 | `data/datacenters.json`            | Generated combined dataset the map reads           |
+| `data/interconnection.json`        | Generated connectivity layer (PeeringDB + curated) |
