@@ -64,10 +64,13 @@ automatically falls back to the curated dataset so the map still works.
 - **Click any site** to open the full profile drawer (power, ownership & legal
   entity, tenants, grid connection, and commercials/rent). `Esc` closes it.
 
-## Connectivity layer (best-interconnected places)
+## Connectivity, power & geography layers
 
-Toggle three connectivity overlays from the left panel:
+Toggle these overlays from the left panel:
 
+- **Cable corridors** — metro-to-metro internet links drawn as lines whose
+  thickness reflects how well-connected the endpoints are (weighted live by
+  PeeringDB network counts aggregated per metro).
 - **Interconnection hubs** — live from **PeeringDB**. Each peering facility is
   sized by the number of networks present (`net_count`); the bigger/brighter the
   purple dot, the better-connected the location (e.g. Equinix Ashburn ~500
@@ -76,6 +79,14 @@ Toggle three connectivity overlays from the left panel:
   there (curated, approximate).
 - **Fiber backbone** — approximate long-haul terrestrial corridors between
   metros (curated).
+- **Power / central stations** — major generating stations (nuclear / hydro /
+  gas) that feed nearby campuses, including power-adjacent AI builds.
+- **Major rivers** — simplified courses of key rivers used for cooling-water
+  context (Ohio, Columbia, Colorado, Mississippi, Tennessee, Missouri).
+
+Each site profile also now carries **power authority (ISO/RTO)**, **water
+source**, **on-site / dedicated power** (gas/nuclear/hydro), and **nearby
+routes / fiber** fields.
 
 ## Live data & refresh (does it pick up news?)
 

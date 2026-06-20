@@ -159,9 +159,16 @@
 
   <div class="group">
     <h2>Connectivity layers</h2>
+    <label class="row"><input type="checkbox" id="L-corridors"><span class="swatch" style="background:#38bdf8"></span> Cable corridors <span class="count" id="c-cor"></span></label>
     <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
     <label class="row"><input type="checkbox" id="L-cable"><span class="swatch" style="background:#22d3ee"></span> Submarine cables <span class="count" id="c-cable"></span></label>
     <label class="row"><input type="checkbox" id="L-backbone"><span class="swatch" style="background:#f59e0b"></span> Fiber backbone <span class="count" id="c-bb"></span></label>
+  </div>
+
+  <div class="group">
+    <h2>Power & geography</h2>
+    <label class="row"><input type="checkbox" id="L-power"><span class="swatch" style="background:#f472b6"></span> Power / central stations <span class="count" id="c-pow"></span></label>
+    <label class="row"><input type="checkbox" id="L-rivers"><span class="swatch" style="background:#2dd4bf"></span> Major rivers <span class="count" id="c-riv"></span></label>
   </div>
 
   <div class="group">
@@ -207,6 +214,7 @@
   <div class="bar" id="powerbar"></div>
   <div class="barlbl"><span id="bl-con">consumed</span><span id="bl-avail">available</span></div>
   <div class="stat" style="margin-top:8px"><span>Total estimated capex</span><b id="s-val">0</b></div>
+  <p class="legend-note" id="provenance" style="margin-top:10px">—</p>
 </div>
 
 <div id="drawer" class="panel">
@@ -243,6 +251,9 @@ const layer = L.layerGroup().addTo(map);
 const ixLayer = L.layerGroup();
 const cableLayer = L.layerGroup();
 const backboneLayer = L.layerGroup();
+const corridorLayer = L.layerGroup();
+const powerLayer = L.layerGroup();
+const riverLayer = L.layerGroup();
 let ALL = [];
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -369,10 +380,15 @@ function openDrawer(dc) {
 
     <div class="sec">Grid connection</div>
     ${kv("Utility", dc.utility)}
+    ${kv("Power authority (ISO/RTO)", dc.iso_rto)}
     ${kv("Substation", dc.substation)}
     ${kv("Voltage", dc.voltage_kv ? fmtKV(dc.voltage_kv) : "")}
     ${kv("Interconnect capacity", dc.interconnection_mw ? fmtMW(dc.interconnection_mw) : "")}
     ${kv("Interconnect status", dc.interconnection_status)}
+    ${(dc.water_source || dc.onsite_power || dc.near_route) ? `<div class="sec">Site context</div>
+    ${kv("On-site / dedicated power", dc.onsite_power)}
+    ${kv("Water source", dc.water_source)}
+    ${kv("Routes / fiber nearby", dc.near_route)}` : ""}
 
     <div class="sec">Commercial</div>
     ${kv("Lease type", dc.lease_type)}
@@ -420,6 +436,33 @@ function buildConnectivity(conn) {
       `<div class="mini" style="margin-top:4px;color:#22d3ee">${esc((c.cables||[]).join(" · "))}</div>`, { maxWidth: 240 }
     ).addTo(cableLayer);
   });
+  // Cable corridors — metro-to-metro links, thicker = better connected endpoints.
+  const maxW = Math.max(1, ...(conn.corridors || []).map(c => c.weight || 0));
+  (conn.corridors || []).forEach(c => {
+    const w = 1.2 + 5 * Math.sqrt((c.weight || 0) / maxW);
+    L.polyline(c.path, { color: "#38bdf8", weight: w, opacity: 0.5 })
+      .bindPopup(`<h4>${esc(c.from)} ↔ ${esc(c.to)}</h4><div class="mini">Cable corridor · ~${(c.weight||0).toLocaleString()} peering networks at the weaker hub</div>`)
+      .addTo(corridorLayer);
+  });
+  (conn.metros || []).forEach(m => {
+    L.circleMarker([m.lat, m.lng], { radius: 3.5, color: "#38bdf8", weight: 1, fillColor: "#38bdf8", fillOpacity: 0.7 })
+      .bindPopup(`<h4>${esc(m.name)}</h4><div class="mini" style="color:#38bdf8">${(m.net_count||0).toLocaleString()} peering networks (metro)</div>`)
+      .addTo(corridorLayer);
+  });
+  // Power / central stations.
+  const FUEL = { nuclear:"#f472b6", hydro:"#38bdf8", fossil:"#fbbf24" };
+  (conn.power_stations || []).forEach(p => {
+    const col = FUEL[p.type] || "#f472b6";
+    L.marker([p.lat, p.lng], { icon: L.divIcon({ className:"", html:`<div style="font-size:15px;line-height:1;filter:drop-shadow(0 0 2px #000)">⚡</div>`, iconSize:[16,16], iconAnchor:[8,8] }) })
+      .bindPopup(`<h4>${esc(p.name)}</h4><div class="mini" style="color:${col}">${esc(p.fuel||p.type)} · ${(p.mw||0).toLocaleString()} MW</div>${p.note?`<div class="mini" style="margin-top:4px">${esc(p.note)}</div>`:""}`, { maxWidth: 250 })
+      .addTo(powerLayer);
+  });
+  // Major rivers.
+  (conn.rivers || []).forEach(r => {
+    L.polyline(r.path, { color: "#2dd4bf", weight: 2.5, opacity: 0.55 })
+      .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Major river (cooling water context)</div>`)
+      .addTo(riverLayer);
+  });
 }
 
 function wireLayerToggle(id, lyr) {
@@ -445,6 +488,15 @@ async function init() {
   } catch (e) { /* connectivity layer is optional */ }
   ALL = (data.datacenters || []).map((d, i) => (d._i = i, d));
 
+  // Data provenance + refresh cadence note.
+  const built = data.generated_at ? new Date(data.generated_at).toLocaleString() : "—";
+  const dcSrc = (data.sources || []).join(", ");
+  const ixSrc = conn ? (conn.sources || []).join(", ") : "";
+  document.getElementById("provenance").innerHTML =
+    `<b>Data:</b> ${esc(dcSrc)}${ixSrc ? "; " + esc(ixSrc) : ""}. ` +
+    `<b>Built:</b> ${esc(built)}. <b>Auto-refresh:</b> daily 06:00 UTC via GitHub Actions ` +
+    `(live OpenStreetMap + PeeringDB re-pulled each build; curated figures are best-effort estimates).`;
+
   // status counts
   const byStatus = {};
   ALL.forEach(d => byStatus[d.status] = (byStatus[d.status]||0)+1);
@@ -460,15 +512,21 @@ async function init() {
   // Connectivity layers (optional)
   if (conn) {
     buildConnectivity(conn);
+    document.getElementById("c-cor").textContent = `(${(conn.corridors||[]).length})`;
     document.getElementById("c-ix").textContent = `(${(conn.facilities||[]).length})`;
     document.getElementById("c-cable").textContent = `(${(conn.cable_landings||[]).length})`;
     document.getElementById("c-bb").textContent = `(${(conn.backbone||[]).length})`;
+    document.getElementById("c-pow").textContent = `(${(conn.power_stations||[]).length})`;
+    document.getElementById("c-riv").textContent = `(${(conn.rivers||[]).length})`;
   } else {
-    ["L-ix","L-cable","L-backbone"].forEach(id => document.getElementById(id).disabled = true);
+    ["L-corridors","L-ix","L-cable","L-backbone","L-power","L-rivers"].forEach(id => document.getElementById(id).disabled = true);
   }
+  wireLayerToggle("L-corridors", corridorLayer);
   wireLayerToggle("L-ix", ixLayer);
   wireLayerToggle("L-cable", cableLayer);
   wireLayerToggle("L-backbone", backboneLayer);
+  wireLayerToggle("L-power", powerLayer);
+  wireLayerToggle("L-rivers", riverLayer);
 
   document.getElementById("loading").style.display = "none";
   document.getElementById("controls").style.display = "";
