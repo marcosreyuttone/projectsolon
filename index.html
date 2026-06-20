@@ -60,6 +60,7 @@
 
   /* ---- Stats / legend bottom-left ---- */
   #stats { bottom:14px; left:14px; width:300px; padding:14px 16px; }
+  .stats-head { display:none; }
   .stat { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; padding:4px 0;
     border-bottom:1px dashed var(--line-soft); }
   .stat:last-of-type { border-bottom:0; }
@@ -128,7 +129,16 @@
     #panelToggle { display:block; }
     #controls { top:104px; left:8px; right:8px; width:auto; max-height:60%; }
     #controls.collapsed { display:none !important; }
-    #stats { left:8px; right:8px; bottom:8px; width:auto; }
+    #stats { left:8px; right:8px; bottom:8px; width:auto; max-height:58%; overflow:auto; padding:0; }
+    .stats-head { display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+      padding:12px 16px; position:sticky; top:0; background:rgba(18,26,36,.97); border-radius:14px 14px 0 0;
+      font-size:13.5px; z-index:1; }
+    .stats-head .chev { transition:transform .2s ease; color:var(--muted); }
+    .stats-body { padding:0 16px 14px; }
+    #stats.collapsed { max-height:none; overflow:visible; }
+    #stats.collapsed .stats-head { border-radius:14px; }
+    #stats.collapsed .stats-head .chev { transform:rotate(-90deg); }
+    #stats.collapsed .stats-body { display:none; }
     #drawer { top:auto; left:8px; right:8px; bottom:8px; width:auto; max-height:78%;
       transform:translateY(120%); }
     #drawer.open { transform:translateY(0); }
@@ -223,6 +233,8 @@
 </div>
 
 <div id="stats" class="panel" style="display:none">
+  <div class="stats-head" id="statsHead"><b>Metrics &amp; coverage</b><span class="chev">▾</span></div>
+  <div class="stats-body">
   <div class="stat"><span>Data centers shown</span><b id="s-count">0</b></div>
   <div class="stat"><span>Operators</span><b id="s-ops">0</b></div>
   <div class="stat"><span>Total power capacity</span><b id="s-cap">0</b></div>
@@ -241,6 +253,7 @@
   </div>
 
   <p class="legend-note" id="provenance" style="margin-top:10px">—</p>
+  </div>
 </div>
 
 <div id="operators" class="panel">
@@ -642,11 +655,16 @@ async function init() {
   document.getElementById("opsClose").addEventListener("click", () => document.getElementById("operators").classList.remove("open"));
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); document.getElementById("operators").classList.remove("open"); } });
 
-  // Mobile: toggle the filters panel so the map stays usable on small screens.
+  // Mobile: collapse the filters and metrics panels so the map stays usable.
   const panelToggle = document.getElementById("panelToggle");
   const controlsEl = document.getElementById("controls");
-  if (window.matchMedia("(max-width:680px)").matches) controlsEl.classList.add("collapsed");
+  const statsEl = document.getElementById("stats");
+  if (window.matchMedia("(max-width:680px)").matches) {
+    controlsEl.classList.add("collapsed");
+    statsEl.classList.add("collapsed");
+  }
   panelToggle.addEventListener("click", () => controlsEl.classList.toggle("collapsed"));
+  document.getElementById("statsHead").addEventListener("click", () => statsEl.classList.toggle("collapsed"));
 
   // "View full profile" link inside popups
   map.on("popupopen", e => {
