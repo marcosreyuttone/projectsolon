@@ -94,6 +94,15 @@ def load_curated():
     return out
 
 
+def load_benchmark():
+    """External estimate of total US data-center capacity (coverage reference)."""
+    try:
+        with open(CURATED_PATH, "r", encoding="utf-8") as f:
+            return json.load(f).get("us_benchmark")
+    except (FileNotFoundError, ValueError):
+        return None
+
+
 def normalize(d, source):
     """Coerce a record into the common schema used by the map."""
     capacity = float(d.get("capacity_mw") or 0)
@@ -266,6 +275,7 @@ def build_dataset(download=True):
         "sources": ["OpenStreetMap (Overpass API)", "curated dataset"]
         if osm else ["curated dataset"],
         "counts": totals,
+        "us_benchmark": load_benchmark(),
         "datacenters": records,
     }
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -423,6 +433,8 @@ def summarize(records):
         "permit_approved": 0,
     }
     operators = set()
+    out["operational_capacity_mw"] = 0.0
+    out["pipeline_capacity_mw"] = 0.0
     for r in records:
         out[r["status"]] = out.get(r["status"], 0) + 1
         out["capacity_mw"] += r["capacity_mw"]
@@ -430,6 +442,10 @@ def summarize(records):
         out["available_mw"] += r["available_mw"]
         out["value_usd"] += r["value_usd"]
         out["interconnection_mw"] += r.get("interconnection_mw") or 0
+        if r["status"] == "constructed":
+            out["operational_capacity_mw"] += r["capacity_mw"]
+        else:
+            out["pipeline_capacity_mw"] += r["capacity_mw"]
         if r.get("permit_status") == "approved":
             out["permit_approved"] += 1
         if r.get("operator"):

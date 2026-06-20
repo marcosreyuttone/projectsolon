@@ -101,6 +101,24 @@ is no free real-time "data-center news" feed, so news-driven facts are updated
 by editing the curated JSON (or by a future importer). To refresh on a schedule,
 run the build on a cron / CI job, e.g. `python3 app.py --build-only` nightly.
 
+## Coverage vs US total
+
+The stats panel shows how the mapped capacity compares to the whole country:
+
+- **In map — operational** — sum of capacity for *constructed* sites in the
+  dataset (~17 GW).
+- **In map — pipeline** — under-construction + planned capacity (~36 GW), mostly
+  the announced AI buildout.
+- **Est. US operational total** — external benchmark (~**50 GW** online end-2025
+  per FERC / Utility Dive; Goldman Sachs cites ~31 GW demand, S&P/451 ~62 GW
+  grid power — methodologies differ). Edit `us_benchmark` in
+  `data/datacenters_curated.json` to adjust.
+
+So the map currently covers **~⅓ of estimated US operational capacity** by the
+notable-operator layer, plus a large announced pipeline. The rest is the long
+tail of smaller/edge facilities (partly captured by the live OpenStreetMap
+layer, which adds locations but rarely power figures).
+
 ## Data sources & accuracy
 
 - **OpenStreetMap (Overpass API)** — locations of mapped data centers, plus any

@@ -2,6 +2,14 @@
   "_comment": "Curated dataset of notable US data centers and AI/cloud campuses. Figures are best-effort estimates compiled from public reporting (company announcements, utility interconnection filings, permit dockets, press) for VISUALIZATION/DEMO purposes and should NOT be treated as authoritative. Field guide: operator = who runs the facility; owner = parent / asset owner; legal_entity = SPV or filing entity where publicly identifiable; tenants = principal occupier(s) ('self' = owner-occupied hyperscale); status = constructed | under_construction | planned; permit_status = approved | permitted | pending | not_required; capacity_mw = planned/critical IT power at full build; consumed_mw = estimated current load (0 if not operational); value_usd = estimated capital investment; utility/substation/voltage_kv/interconnection_mw/interconnection_status describe the grid connection; lease_type = owner-occupied | wholesale | colocation; rent_per_kw_month = indicative wholesale/colo lease rate in USD where the site leases space (null for owner-occupied). 'available' headroom is computed as max(capacity_mw - consumed_mw, 0) for constructed sites.",
   "_disclaimer": "Illustrative estimates, not legal, financial, or engineering advice.",
   "schema_version": 2,
+  "us_benchmark": {
+    "operational_gw": 50,
+    "pipeline_gw_2025": 80,
+    "projected_gw_2028": 150,
+    "source": "FERC / Utility Dive (≈50 GW online end-2025, 24% CAGR since 2020); Goldman Sachs (~31 GW demand 2025); S&P/451 Research (~62 GW grid power)",
+    "year": 2025,
+    "note": "External industry estimates of total US data-center capacity, used as a coverage benchmark. Methodologies differ (operational IT load vs total utility power)."
+  },
   "datacenters": [
     {
       "name": "Amazon AWS US-East-1 (Ashburn)", "operator": "Amazon Web Services", "owner": "Amazon.com, Inc.", "legal_entity": "Vadata, Inc.",
