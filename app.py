@@ -46,6 +46,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(HERE, "data")
 CURATED_PATH = os.path.join(DATA_DIR, "datacenters_curated.json")
 OUTPUT_PATH = os.path.join(DATA_DIR, "datacenters.json")
+CONNECTIVITY_CURATED = os.path.join(DATA_DIR, "connectivity_curated.json")
+INTERCONNECT_OUTPUT = os.path.join(DATA_DIR, "interconnection.json")
+
+# PeeringDB public API: facilities carry lat/lng plus net_count (number of
+# networks present) and ix_count (number of internet exchanges) -- a strong
+# proxy for how well-interconnected a location is.
+PEERINGDB_FAC = "https://www.peeringdb.com/api/fac?country=US"
+# Only keep facilities with at least this many networks to surface real
+# interconnection hubs and keep the map legible.
+IX_MIN_NETS = 5
 
 # Public Overpass mirrors; tried in order until one responds.
 OVERPASS_ENDPOINTS = [
@@ -94,19 +104,38 @@ def normalize(d, source):
         available = max(capacity - consumed, 0.0)
     else:
         available = 0.0
+    # Tenants may arrive as a list or a comma-separated string.
+    tenants = d.get("tenants") or []
+    if isinstance(tenants, str):
+        tenants = [t.strip() for t in tenants.split(",") if t.strip()]
+    rent = d.get("rent_per_kw_month")
     return {
         "name": d.get("name") or "Unnamed data center",
         "operator": d.get("operator") or "",
+        "owner": d.get("owner") or "",
+        "legal_entity": d.get("legal_entity") or "",
+        "tenants": tenants,
         "city": d.get("city") or "",
         "state": d.get("state") or "",
         "lat": float(d["lat"]),
         "lng": float(d["lng"]),
         "status": status,
+        "permit_status": (d.get("permit_status") or "").lower(),
         "capacity_mw": round(capacity, 1),
         "consumed_mw": round(consumed, 1),
         "available_mw": round(available, 1),
         "value_usd": float(d.get("value_usd") or 0),
         "year": d.get("year") or None,
+        # Grid connection
+        "utility": d.get("utility") or "",
+        "substation": d.get("substation") or "",
+        "voltage_kv": float(d["voltage_kv"]) if d.get("voltage_kv") else None,
+        "interconnection_mw": float(d["interconnection_mw"]) if d.get("interconnection_mw") else None,
+        "interconnection_status": (d.get("interconnection_status") or "").lower(),
+        # Commercials
+        "lease_type": (d.get("lease_type") or "").lower(),
+        "rent_per_kw_month": float(rent) if rent not in (None, "") else None,
+        "annual_rent_usd": float(d["annual_rent_usd"]) if d.get("annual_rent_usd") else None,
         "source": source,
     }
 
@@ -153,31 +182,55 @@ def parse_overpass(elements):
             status = "under_construction"
         if tags.get("proposed"):
             status = "planned"
-        capacity = 0.0
-        for key in ("power_capacity", "power", "capacity"):
-            v = tags.get(key, "")
-            num = "".join(ch for ch in v if ch.isdigit() or ch == ".")
-            if num:
-                try:
-                    capacity = float(num)
-                    if "gw" in v.lower():
-                        capacity *= 1000.0
-                    break
-                except ValueError:
-                    pass
+        capacity = parse_power_mw(tags, ("power_capacity", "power", "capacity"))
+        # Grid hints occasionally present on OSM features.
+        voltage_kv = None
+        vraw = tags.get("voltage") or ""
+        vnum = "".join(ch for ch in vraw.split(";")[0] if ch.isdigit() or ch == ".")
+        if vnum:
+            try:
+                v = float(vnum)
+                voltage_kv = v / 1000.0 if v > 1000 else v  # volts -> kV
+            except ValueError:
+                pass
+        operator = tags.get("operator") or tags.get("brand") or tags.get("network") or ""
         out.append(normalize({
-            "name": tags.get("name") or tags.get("operator") or "OSM data center",
-            "operator": tags.get("operator") or tags.get("network") or "",
+            "name": tags.get("name") or operator or "OSM data center",
+            "operator": operator,
+            "owner": tags.get("owner") or tags.get("brand") or "",
             "city": tags.get("addr:city") or "",
             "state": tags.get("addr:state") or "",
             "lat": lat,
             "lng": lng,
             "status": status,
+            "permit_status": "",
             "capacity_mw": capacity,
             "consumed_mw": 0,
             "value_usd": 0,
+            "utility": tags.get("operator:power") or "",
+            "voltage_kv": voltage_kv,
         }, source="openstreetmap"))
     return out
+
+
+def parse_power_mw(tags, keys):
+    """Pull a megawatt figure out of free-form OSM power tags. Returns float MW."""
+    for key in keys:
+        v = tags.get(key, "")
+        num = "".join(ch for ch in v if ch.isdigit() or ch == ".")
+        if not num:
+            continue
+        try:
+            val = float(num)
+        except ValueError:
+            continue
+        low = v.lower()
+        if "gw" in low:
+            val *= 1000.0
+        elif "kw" in low:
+            val /= 1000.0
+        return val
+    return 0.0
 
 
 def dedupe(records):
@@ -224,6 +277,86 @@ def build_dataset(download=True):
     return dataset
 
 
+# --------------------------------------------------------------------------- #
+# Connectivity / interconnection layer
+# --------------------------------------------------------------------------- #
+
+def fetch_peeringdb(timeout=60, min_nets=IX_MIN_NETS):
+    """Download US interconnection facilities from PeeringDB. Returns a list."""
+    headers = {
+        "User-Agent": "us-datacenter-map/1.0 (educational visualization)",
+        "Accept": "application/json",
+    }
+    try:
+        log(f"Downloading interconnection facilities from PeeringDB ...")
+        req = Request(PEERINGDB_FAC, headers=headers)
+        with urlopen(req, timeout=timeout) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, ValueError) as e:
+        log(f"  ! PeeringDB failed: {e}; skipping interconnection facilities.")
+        return []
+    out = []
+    for f in payload.get("data", []):
+        lat, lng = f.get("latitude"), f.get("longitude")
+        if lat is None or lng is None:
+            continue
+        nets = f.get("net_count") or 0
+        if nets < min_nets:
+            continue
+        out.append({
+            "name": f.get("name") or "Facility",
+            "operator": f.get("org_name") or "",
+            "city": f.get("city") or "",
+            "state": f.get("state") or "",
+            "lat": float(lat),
+            "lng": float(lng),
+            "net_count": int(nets),
+            "ix_count": int(f.get("ix_count") or 0),
+            "source": "peeringdb",
+        })
+    out.sort(key=lambda r: r["net_count"], reverse=True)
+    log(f"  -> kept {len(out)} interconnection hubs (>= {min_nets} networks)")
+    return out
+
+
+def load_connectivity():
+    """Curated submarine cable landings + long-haul fiber backbone routes."""
+    try:
+        with open(CONNECTIVITY_CURATED, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        return raw.get("cable_landings", []), raw.get("backbone", [])
+    except (FileNotFoundError, ValueError) as e:
+        log(f"  ! could not load {CONNECTIVITY_CURATED}: {e}")
+        return [], []
+
+
+def build_interconnection(download=True):
+    facilities = fetch_peeringdb() if download else []
+    cable_landings, backbone = load_connectivity()
+    counts = {
+        "facilities": len(facilities),
+        "cable_landings": len(cable_landings),
+        "backbone_routes": len(backbone),
+        "networks_total": sum(f["net_count"] for f in facilities),
+        "top_metro_nets": facilities[0]["net_count"] if facilities else 0,
+    }
+    dataset = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "sources": (["PeeringDB"] if facilities else []) + ["curated connectivity"],
+        "counts": counts,
+        "facilities": facilities,
+        "cable_landings": cable_landings,
+        "backbone": backbone,
+    }
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(INTERCONNECT_OUTPUT, "w", encoding="utf-8") as f:
+        json.dump(dataset, f, indent=2)
+    log(f"Wrote interconnection layer to {INTERCONNECT_OUTPUT}")
+    log(f"  facilities={counts['facilities']}  cable_landings={counts['cable_landings']}  "
+        f"backbone_routes={counts['backbone_routes']}")
+    return dataset
+
+
 def summarize(records):
     out = {
         "total": len(records),
@@ -234,13 +367,23 @@ def summarize(records):
         "consumed_mw": 0.0,
         "available_mw": 0.0,
         "value_usd": 0.0,
+        "interconnection_mw": 0.0,
+        "operators": 0,
+        "permit_approved": 0,
     }
+    operators = set()
     for r in records:
         out[r["status"]] = out.get(r["status"], 0) + 1
         out["capacity_mw"] += r["capacity_mw"]
         out["consumed_mw"] += r["consumed_mw"]
         out["available_mw"] += r["available_mw"]
         out["value_usd"] += r["value_usd"]
+        out["interconnection_mw"] += r.get("interconnection_mw") or 0
+        if r.get("permit_status") == "approved":
+            out["permit_approved"] += 1
+        if r.get("operator"):
+            operators.add(r["operator"])
+    out["operators"] = len(operators)
     return out
 
 
@@ -274,6 +417,7 @@ def main():
     args = ap.parse_args()
 
     build_dataset(download=not args.no_download)
+    build_interconnection(download=not args.no_download)
     if args.build_only:
         return
     serve(args.port, open_browser=not args.no_browser)
