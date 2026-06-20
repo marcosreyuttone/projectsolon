@@ -97,6 +97,21 @@
   .metric span { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; display:block; }
   .metric b { font-size:15px; font-variant-numeric:tabular-nums; }
 
+  /* Operators leaderboard panel */
+  #operators { position:absolute; z-index:1200; top:64px; right:14px; width:340px; max-height:calc(100% - 78px);
+    overflow:auto; padding:0; transform:translateX(380px); opacity:0; transition:transform .22s ease, opacity .22s ease;
+    pointer-events:none; }
+  #operators.open { transform:translateX(0); opacity:1; pointer-events:auto; }
+  .op-row { display:grid; grid-template-columns:18px 1fr auto; gap:9px; align-items:center; padding:8px 9px;
+    border-radius:9px; cursor:pointer; border:1px solid transparent; }
+  .op-row:hover { background:var(--panel-2); border-color:var(--line); }
+  .op-row .rk { font-size:11px; color:var(--muted-2); text-align:right; font-variant-numeric:tabular-nums; }
+  .op-row .nm { font-size:12.5px; line-height:1.25; }
+  .op-row .nm .tg { display:inline-block; font-size:9.5px; padding:1px 6px; border-radius:999px; margin-top:3px; }
+  .op-row .gw { text-align:right; font-variant-numeric:tabular-nums; }
+  .op-row .gw b { font-size:13px; } .op-row .gw span { display:block; font-size:10px; color:var(--muted); }
+  .op-bar { height:4px; border-radius:3px; background:#4ea1ff; margin-top:4px; }
+
   #loading { z-index:2000; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; padding:20px 26px; }
 
   /* Mobile toggle button (hidden on desktop) */
@@ -174,6 +189,7 @@
   <div class="group">
     <h2>Operator</h2>
     <select id="operator"><option value="">All operators</option></select>
+    <button class="reset" id="openOps" style="margin-top:8px">▤ Rank operators by GW</button>
   </div>
 
   <div class="group">
@@ -215,6 +231,15 @@
   <div class="barlbl"><span id="bl-con">consumed</span><span id="bl-avail">available</span></div>
   <div class="stat" style="margin-top:8px"><span>Total estimated capex</span><b id="s-val">0</b></div>
   <p class="legend-note" id="provenance" style="margin-top:10px">—</p>
+</div>
+
+<div id="operators" class="panel">
+  <div class="dh">
+    <button class="close" id="opsClose">×</button>
+    <h3 style="margin-bottom:4px">Operators by capacity</h3>
+    <div class="mini" style="font-size:11px;color:var(--muted)">Click a row to filter the map. GW &amp; counts cover curated + mapped sites.</div>
+  </div>
+  <div class="body" id="op-list" style="padding:8px 10px 16px"></div>
 </div>
 
 <div id="drawer" class="panel">
@@ -403,6 +428,44 @@ function openDrawer(dc) {
 
 function closeDrawer(){ document.getElementById("drawer").classList.remove("open"); }
 
+function buildOperators() {
+  const m = {};
+  ALL.forEach(d => {
+    const op = d.operator || "(unmapped)";
+    const o = m[op] || (m[op] = { op, sites:0, cap:0, lease:{} });
+    o.sites++; o.cap += d.capacity_mw || 0;
+    const lt = d.lease_type || (d.source === "openstreetmap" ? "" : "unknown");
+    if (lt) o.lease[lt] = (o.lease[lt] || 0) + 1;
+  });
+  const rows = Object.values(m).sort((a,b) => b.cap - a.cap);
+  const maxCap = Math.max(1, ...rows.map(r => r.cap));
+  const tagFor = o => {
+    const owner = o.lease["owner-occupied"] || 0;
+    const leased = (o.lease["wholesale"] || 0) + (o.lease["colocation"] || 0);
+    if (owner && owner >= leased) return { t:"Self-operated", c:"#34d399" };
+    if (leased) return { t:"Leased / multi-tenant", c:"#4ea1ff" };
+    return { t:"—", c:"#5f7388" };
+  };
+  document.getElementById("op-list").innerHTML = rows.map((o, i) => {
+    const tg = tagFor(o);
+    const gw = (o.cap/1000);
+    return `<div class="op-row" data-op="${esc(o.op)}">
+      <div class="rk">${i+1}</div>
+      <div class="nm">${esc(o.op)}
+        <span class="tg" style="background:${tg.c}1f;color:${tg.c};border:1px solid ${tg.c}55">${tg.t}</span>
+        <div class="op-bar" style="width:${Math.max(4,100*o.cap/maxCap)}%"></div>
+      </div>
+      <div class="gw"><b>${gw >= 1 ? gw.toFixed(1) : gw.toFixed(2)} GW</b><span>${o.sites} site${o.sites!==1?"s":""}</span></div>
+    </div>`;
+  }).join("");
+  document.querySelectorAll("#op-list .op-row").forEach(el => el.addEventListener("click", () => {
+    const op = el.dataset.op;
+    const sel = document.getElementById("operator");
+    if ([...sel.options].some(o => o.value === op)) { sel.value = op; render(); }
+    document.getElementById("operators").classList.remove("open");
+  }));
+}
+
 function ixRadius(nets) { return 3 + 9 * Math.sqrt(Math.min(nets, 520) / 520); }
 
 function buildConnectivity(conn) {
@@ -508,6 +571,7 @@ async function init() {
   const ops = [...new Set(ALL.map(d => d.operator).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const sel = document.getElementById("operator");
   ops.forEach(o => { const opt = document.createElement("option"); opt.value = o; opt.textContent = o; sel.appendChild(opt); });
+  buildOperators();
 
   // Connectivity layers (optional)
   if (conn) {
@@ -544,7 +608,9 @@ async function init() {
     render();
   });
   document.getElementById("dclose").addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+  document.getElementById("openOps").addEventListener("click", () => document.getElementById("operators").classList.add("open"));
+  document.getElementById("opsClose").addEventListener("click", () => document.getElementById("operators").classList.remove("open"));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); document.getElementById("operators").classList.remove("open"); } });
 
   // Mobile: toggle the filters panel so the map stays usable on small screens.
   const panelToggle = document.getElementById("panelToggle");
