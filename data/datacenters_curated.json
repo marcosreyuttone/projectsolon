@@ -866,6 +866,241 @@
       "utility": "Portland General Electric", "iso_rto": "WECC", "substation": "Hillsboro", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "approved",
       "water_source": "Tualatin River / reclaimed", "onsite_power": "Grid (Pacific NW hydro)", "near_route": "Hillsboro subsea cable landing / US-26",
       "lease_type": "wholesale", "rent_per_kw_month": 126, "annual_rent_usd": null
+    },
+
+    {
+      "name": "Applied Digital Polaris Forge (Ellendale)", "operator": "Applied Digital", "owner": "Applied Digital Corp", "legal_entity": "Applied Digital Corporation",
+      "tenants": ["CoreWeave (AI cloud)"], "city": "Ellendale", "state": "ND", "lat": 46.0030, "lng": -98.5290,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1000, "consumed_mw": 100, "value_usd": 5000000000, "year": 2026,
+      "utility": "Otter Tail Power", "iso_rto": "MISO", "substation": "Ellendale", "voltage_kv": 345, "interconnection_mw": 1000, "interconnection_status": "approved",
+      "water_source": "Closed-loop (arid)", "onsite_power": "Wind-rich MISO grid", "near_route": "US-281 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "TeraWulf Lake Mariner (Somerset)", "operator": "TeraWulf", "owner": "TeraWulf Inc.", "legal_entity": "TeraWulf (Lake Mariner Data) LLC",
+      "tenants": ["Core42 / Fluidstack (AI/HPC)"], "city": "Barker", "state": "NY", "lat": 43.3290, "lng": -78.5560,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 500, "consumed_mw": 160, "value_usd": 3000000000, "year": 2026,
+      "utility": "NYSEG / NYPA", "iso_rto": "NYISO", "substation": "Somerset (ex-coal)", "voltage_kv": 345, "interconnection_mw": 750, "interconnection_status": "energized",
+      "water_source": "Lake Ontario", "onsite_power": "Former coal plant interconnect; ~90% zero-carbon", "near_route": "Lake Ontario / NY-18 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 132, "annual_rent_usd": null
+    },
+    {
+      "name": "IREN Childress (West Texas)", "operator": "IREN", "owner": "IREN Limited", "legal_entity": "IREN US Holdings",
+      "tenants": ["IREN (AI cloud) / self"], "city": "Childress", "state": "TX", "lat": 34.4260, "lng": -100.2040,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 750, "consumed_mw": 300, "value_usd": 2800000000, "year": 2026,
+      "utility": "AEP Texas / SPS", "iso_rto": "ERCOT", "substation": "Childress", "voltage_kv": 345, "interconnection_mw": 750, "interconnection_status": "energized",
+      "water_source": "Closed-loop (arid)", "onsite_power": "Wind/solar-rich ERCOT West", "near_route": "US-287 corridor",
+      "lease_type": "owner-occupied", "rent_per_kw_month": null, "annual_rent_usd": null
+    },
+    {
+      "name": "Galaxy Helios (Dickens County)", "operator": "Galaxy Digital", "owner": "Galaxy Digital Holdings", "legal_entity": "Galaxy Digital LLC",
+      "tenants": ["CoreWeave (AI cloud, long-term lease)"], "city": "Dickens", "state": "TX", "lat": 33.6190, "lng": -100.8360,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 800, "consumed_mw": 0, "value_usd": 4500000000, "year": 2026,
+      "utility": "AEP Texas", "iso_rto": "ERCOT", "substation": "Helios / Dickens", "voltage_kv": 345, "interconnection_mw": 800, "interconnection_status": "approved",
+      "water_source": "Closed-loop", "onsite_power": "ERCOT West (wind-rich)", "near_route": "US-82 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 140, "annual_rent_usd": null
+    },
+    {
+      "name": "Cipher Mining Barber Lake (Black Pearl)", "operator": "Cipher Mining", "owner": "Cipher Mining Inc. (Bitfury)", "legal_entity": "Cipher Mining Technologies",
+      "tenants": ["AI/HPC (negotiating hyperscale)"], "city": "Colorado City", "state": "TX", "lat": 32.4060, "lng": -100.8640,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 0, "value_usd": 1500000000, "year": 2026,
+      "utility": "AEP Texas", "iso_rto": "ERCOT", "substation": "Barber Lake", "voltage_kv": 345, "interconnection_mw": 300, "interconnection_status": "approved",
+      "water_source": "Closed-loop", "onsite_power": "ERCOT West", "near_route": "I-20 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 138, "annual_rent_usd": null
+    },
+    {
+      "name": "Core Scientific Denton (CoreWeave)", "operator": "Core Scientific", "owner": "Core Scientific, Inc.", "legal_entity": "Core Scientific Operating Company",
+      "tenants": ["CoreWeave (AI cloud, 12-yr lease)"], "city": "Denton", "state": "TX", "lat": 33.2080, "lng": -97.1010,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 150, "value_usd": 1200000000, "year": 2023,
+      "utility": "Denton Municipal Electric", "iso_rto": "ERCOT", "substation": "Denton", "voltage_kv": 138, "interconnection_mw": 220, "interconnection_status": "energized",
+      "water_source": "Closed-loop", "onsite_power": "ERCOT grid", "near_route": "I-35 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "Crusoe Abilene Phase 2", "operator": "Crusoe Energy", "owner": "Crusoe Energy Systems", "legal_entity": "Crusoe Energy Systems LLC",
+      "tenants": ["Oracle / OpenAI (Stargate)"], "city": "Abilene", "state": "TX", "lat": 32.4600, "lng": -99.7000,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 1000, "consumed_mw": 0, "value_usd": 12000000000, "year": 2027,
+      "utility": "Oncor", "iso_rto": "ERCOT", "substation": "Lancium Clean Campus", "voltage_kv": 345, "interconnection_mw": 1000, "interconnection_status": "approved",
+      "water_source": "Closed-loop", "onsite_power": "On-site natural gas + grid", "near_route": "I-20 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "Nebius Kansas City", "operator": "Nebius", "owner": "Nebius Group N.V.", "legal_entity": "Nebius US LLC",
+      "tenants": ["Nebius (AI cloud) / self"], "city": "Kansas City", "state": "MO", "lat": 39.1200, "lng": -94.5500,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 0, "value_usd": 2000000000, "year": 2026,
+      "utility": "Evergy", "iso_rto": "SPP", "substation": "Kansas City", "voltage_kv": 230, "interconnection_mw": 330, "interconnection_status": "approved",
+      "water_source": "Missouri River", "onsite_power": "Grid (SPP)", "near_route": "I-70 / I-35 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 135, "annual_rent_usd": null
+    },
+
+    {
+      "name": "EdgeConneX Portland (Hillsboro)", "operator": "EdgeConneX", "owner": "EQT Infrastructure", "legal_entity": "EdgeConneX, Inc.",
+      "tenants": ["multi-tenant: hyperscale & content"], "city": "Hillsboro", "state": "OR", "lat": 45.5250, "lng": -122.9100,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 96, "consumed_mw": 65, "value_usd": 800000000, "year": 2020,
+      "utility": "Portland General Electric", "iso_rto": "WECC", "substation": "Hillsboro", "voltage_kv": 115, "interconnection_mw": 105, "interconnection_status": "energized",
+      "water_source": "Tualatin River / reclaimed", "onsite_power": "Pacific NW hydro", "near_route": "Hillsboro cable landing / US-26",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "Sabey Ashburn (Intergate.Ashburn)", "operator": "Sabey Data Centers", "owner": "Sabey Corporation / National Real Estate Advisors", "legal_entity": "Sabey Data Center Properties, LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Ashburn", "state": "VA", "lat": 39.0220, "lng": -77.4640,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 130, "consumed_mw": 95, "value_usd": 1100000000, "year": 2020,
+      "utility": "Dominion Energy Virginia", "iso_rto": "PJM", "substation": "Ashburn", "voltage_kv": 230, "interconnection_mw": 145, "interconnection_status": "energized",
+      "water_source": "Potomac (regional)", "onsite_power": "Grid (PJM)", "near_route": "Dulles fiber corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "STACK Northern Virginia (Manassas)", "operator": "Stack Infrastructure", "owner": "Blue Owl Capital / IPI Partners", "legal_entity": "Stack Infrastructure, Inc.",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Manassas", "state": "VA", "lat": 38.7700, "lng": -77.5100,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 300, "consumed_mw": 0, "value_usd": 2500000000, "year": 2026,
+      "utility": "Dominion Energy Virginia", "iso_rto": "PJM", "substation": "Gainesville", "voltage_kv": 230, "interconnection_mw": 330, "interconnection_status": "approved",
+      "water_source": "Potomac (regional)", "onsite_power": "Grid (PJM)", "near_route": "Route 28 / I-66 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "Yondr Northlake (Chicago)", "operator": "Yondr", "owner": "Yondr Group (DigitalBridge-backed)", "legal_entity": "Yondr Group Ltd",
+      "tenants": ["multi-tenant: single-tenant hyperscale"], "city": "Northlake", "state": "IL", "lat": 41.9170, "lng": -87.8950,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 240, "consumed_mw": 0, "value_usd": 2000000000, "year": 2026,
+      "utility": "ComEd (Exelon)", "iso_rto": "PJM", "substation": "Northlake", "voltage_kv": 138, "interconnection_mw": 260, "interconnection_status": "approved",
+      "water_source": "Lake Michigan (regional)", "onsite_power": "Grid (PJM)", "near_route": "I-294 / I-290 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "PowerHouse Data Centers (Manassas)", "operator": "PowerHouse Data Centers", "owner": "American Real Estate Partners", "legal_entity": "PowerHouse Data Centers LLC",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Manassas", "state": "VA", "lat": 38.7560, "lng": -77.4900,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 220, "consumed_mw": 0, "value_usd": 1800000000, "year": 2026,
+      "utility": "Dominion Energy Virginia", "iso_rto": "PJM", "substation": "Manassas", "voltage_kv": 230, "interconnection_mw": 240, "interconnection_status": "approved",
+      "water_source": "Potomac (regional)", "onsite_power": "Grid (PJM)", "near_route": "Route 28 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "EdgeCore Mesa (Phoenix)", "operator": "EdgeCore Digital Infrastructure", "owner": "Partners Group", "legal_entity": "EdgeCore Digital Infrastructure",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Mesa", "state": "AZ", "lat": 33.3370, "lng": -111.6800,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 450, "consumed_mw": 0, "value_usd": 3500000000, "year": 2026,
+      "utility": "Salt River Project (SRP)", "iso_rto": "WECC", "substation": "Mesa / Elliot Road", "voltage_kv": 230, "interconnection_mw": 480, "interconnection_status": "approved",
+      "water_source": "Reclaimed", "onsite_power": "Palo Verde region grid", "near_route": "Loop 202 / US-60 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 124, "annual_rent_usd": null
+    },
+    {
+      "name": "Edged / Endeavour Atlanta", "operator": "Edged (Endeavour)", "owner": "Endeavour Infrastructure", "legal_entity": "Edged Data Centers LLC",
+      "tenants": ["multi-tenant: waterless cooling, enterprise & AI"], "city": "Atlanta", "state": "GA", "lat": 33.7900, "lng": -84.3300,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 96, "consumed_mw": 55, "value_usd": 700000000, "year": 2024,
+      "utility": "Georgia Power", "iso_rto": "SERC (no organized market)", "substation": "Atlanta", "voltage_kv": 115, "interconnection_mw": 105, "interconnection_status": "energized",
+      "water_source": "Waterless (closed-loop) cooling", "onsite_power": "Grid (Southern Co.)", "near_route": "I-85 corridor",
+      "lease_type": "colocation", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "H5 Data Centers (Denver)", "operator": "H5 Data Centers", "owner": "H5 (IPI Partners)", "legal_entity": "H5 Data Centers LLC",
+      "tenants": ["multi-tenant: enterprise & network"], "city": "Denver", "state": "CO", "lat": 39.7400, "lng": -104.9900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 60, "consumed_mw": 42, "value_usd": 450000000, "year": 2018,
+      "utility": "Xcel Energy", "iso_rto": "WECC", "substation": "Denver", "voltage_kv": 115, "interconnection_mw": 66, "interconnection_status": "energized",
+      "water_source": "South Platte (regional)", "onsite_power": "Grid (WECC)", "near_route": "I-25 corridor",
+      "lease_type": "colocation", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+    {
+      "name": "DataBank Salt Lake City", "operator": "DataBank", "owner": "DigitalBridge / Swiss Life / EnCap", "legal_entity": "DataBank Holdings, Ltd.",
+      "tenants": ["multi-tenant: enterprise & edge"], "city": "Salt Lake City", "state": "UT", "lat": 40.7600, "lng": -111.8900,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 45, "consumed_mw": 30, "value_usd": 350000000, "year": 2019,
+      "utility": "Rocky Mountain Power", "iso_rto": "WECC", "substation": "Salt Lake City", "voltage_kv": 138, "interconnection_mw": 50, "interconnection_status": "energized",
+      "water_source": "Jordan River (regional)", "onsite_power": "Grid (WECC)", "near_route": "I-15 corridor",
+      "lease_type": "colocation", "rent_per_kw_month": 145, "annual_rent_usd": null
+    },
+    {
+      "name": "Flexential Charlotte", "operator": "Flexential", "owner": "GI Partners", "legal_entity": "Flexential Corp.",
+      "tenants": ["multi-tenant: enterprise & cloud"], "city": "Charlotte", "state": "NC", "lat": 35.2270, "lng": -80.8430,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 55, "consumed_mw": 38, "value_usd": 420000000, "year": 2020,
+      "utility": "Duke Energy Carolinas", "iso_rto": "SERC (no organized market)", "substation": "Charlotte", "voltage_kv": 115, "interconnection_mw": 60, "interconnection_status": "energized",
+      "water_source": "Catawba River (regional)", "onsite_power": "Grid (Duke)", "near_route": "I-85 corridor",
+      "lease_type": "colocation", "rent_per_kw_month": 140, "annual_rent_usd": null
+    },
+    {
+      "name": "fifteenfortyseven (1547) Orangeburg", "operator": "fifteenfortyseven Critical Systems Realty", "owner": "1547 / GCM Grosvenor", "legal_entity": "1547 Critical Systems Realty",
+      "tenants": ["multi-tenant: financial & enterprise"], "city": "Orangeburg", "state": "NY", "lat": 41.0470, "lng": -73.9490,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 50, "consumed_mw": 35, "value_usd": 450000000, "year": 2017,
+      "utility": "Orange & Rockland (ConEd)", "iso_rto": "NYISO", "substation": "Orangeburg", "voltage_kv": 138, "interconnection_mw": 55, "interconnection_status": "energized",
+      "water_source": "Hudson River (regional)", "onsite_power": "Grid (NYISO)", "near_route": "NYC metro fiber / Palisades corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 160, "annual_rent_usd": null
+    },
+    {
+      "name": "Lumen (CenturyLink) Denver", "operator": "Lumen Technologies", "owner": "Lumen Technologies, Inc.", "legal_entity": "Lumen Technologies",
+      "tenants": ["multi-tenant: network & enterprise"], "city": "Denver", "state": "CO", "lat": 39.7390, "lng": -104.9840,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 40, "consumed_mw": 28, "value_usd": 300000000, "year": 2010,
+      "utility": "Xcel Energy", "iso_rto": "WECC", "substation": "Denver", "voltage_kv": 115, "interconnection_mw": 44, "interconnection_status": "energized",
+      "water_source": "South Platte (regional)", "onsite_power": "Grid (WECC)", "near_route": "I-25 long-haul backbone hub",
+      "lease_type": "colocation", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+
+    {
+      "name": "QTS Chicago (Elk Grove)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Elk Grove Village", "state": "IL", "lat": 41.9970, "lng": -87.9700,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 140, "value_usd": 1600000000, "year": 2019,
+      "utility": "ComEd (Exelon)", "iso_rto": "PJM", "substation": "Elk Grove", "voltage_kv": 138, "interconnection_mw": 220, "interconnection_status": "energized",
+      "water_source": "Lake Michigan (regional)", "onsite_power": "Grid (PJM)", "near_route": "O'Hare fiber hub / I-90 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 128, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Santa Clara", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Santa Clara", "state": "CA", "lat": 37.3840, "lng": -121.9830,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 90, "consumed_mw": 70, "value_usd": 900000000, "year": 2018,
+      "utility": "Silicon Valley Power", "iso_rto": "CAISO", "substation": "Santa Clara", "voltage_kv": 60, "interconnection_mw": 100, "interconnection_status": "energized",
+      "water_source": "Reclaimed", "onsite_power": "Grid (CAISO)", "near_route": "US-101 / Silicon Valley fiber",
+      "lease_type": "wholesale", "rent_per_kw_month": 170, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Prince William (Manassas)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "Manassas", "state": "VA", "lat": 38.7900, "lng": -77.5300,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 500, "consumed_mw": 0, "value_usd": 4000000000, "year": 2027,
+      "utility": "Dominion Energy Virginia", "iso_rto": "PJM", "substation": "Gainesville (new)", "voltage_kv": 230, "interconnection_mw": 550, "interconnection_status": "approved",
+      "water_source": "Potomac (regional)", "onsite_power": "Grid (PJM)", "near_route": "Route 28 / I-66 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 130, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS San Antonio", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: hyperscale wholesale"], "city": "San Antonio", "state": "TX", "lat": 29.4600, "lng": -98.6300,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 160, "consumed_mw": 110, "value_usd": 1300000000, "year": 2021,
+      "utility": "CPS Energy", "iso_rto": "ERCOT", "substation": "San Antonio", "voltage_kv": 138, "interconnection_mw": 175, "interconnection_status": "energized",
+      "water_source": "Edwards Aquifer / reclaimed", "onsite_power": "Grid (ERCOT)", "near_route": "I-10 / US-90 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 122, "annual_rent_usd": null
+    },
+    {
+      "name": "QTS Denver (Aurora)", "operator": "QTS Data Centers", "owner": "Blackstone Inc.", "legal_entity": "QualityTech, LP",
+      "tenants": ["multi-tenant: enterprise & cloud"], "city": "Aurora", "state": "CO", "lat": 39.7290, "lng": -104.8310,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 70, "consumed_mw": 48, "value_usd": 600000000, "year": 2017,
+      "utility": "Xcel Energy", "iso_rto": "WECC", "substation": "Aurora", "voltage_kv": 115, "interconnection_mw": 78, "interconnection_status": "energized",
+      "water_source": "South Platte (regional)", "onsite_power": "Grid (WECC)", "near_route": "I-70 / E-470 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 132, "annual_rent_usd": null
+    },
+    {
+      "name": "CyrusOne Austin", "operator": "CyrusOne", "owner": "KKR & Global Infrastructure Partners", "legal_entity": "CyrusOne LLC",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Austin", "state": "TX", "lat": 30.2240, "lng": -97.6200,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 100, "consumed_mw": 72, "value_usd": 850000000, "year": 2016,
+      "utility": "Austin Energy", "iso_rto": "ERCOT", "substation": "Austin", "voltage_kv": 138, "interconnection_mw": 110, "interconnection_status": "energized",
+      "water_source": "Colorado River (TX) / reclaimed", "onsite_power": "Grid (ERCOT)", "near_route": "US-183 / SH-71 corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 124, "annual_rent_usd": null
+    },
+    {
+      "name": "CyrusOne Houston (West)", "operator": "CyrusOne", "owner": "KKR & Global Infrastructure Partners", "legal_entity": "CyrusOne LLC",
+      "tenants": ["multi-tenant: energy & enterprise"], "city": "Houston", "state": "TX", "lat": 29.7800, "lng": -95.6300,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 120, "consumed_mw": 90, "value_usd": 950000000, "year": 2014,
+      "utility": "CenterPoint Energy", "iso_rto": "ERCOT", "substation": "Houston West", "voltage_kv": 138, "interconnection_mw": 132, "interconnection_status": "energized",
+      "water_source": "Closed-loop", "onsite_power": "Grid (ERCOT)", "near_route": "I-10 Energy Corridor",
+      "lease_type": "wholesale", "rent_per_kw_month": 120, "annual_rent_usd": null
+    },
+    {
+      "name": "CyrusOne Somerset (New Jersey)", "operator": "CyrusOne", "owner": "KKR & Global Infrastructure Partners", "legal_entity": "CyrusOne LLC",
+      "tenants": ["multi-tenant: financial & enterprise"], "city": "Somerset", "state": "NJ", "lat": 40.5000, "lng": -74.5000,
+      "status": "constructed", "permit_status": "approved", "capacity_mw": 110, "consumed_mw": 82, "value_usd": 1000000000, "year": 2017,
+      "utility": "PSE&G", "iso_rto": "PJM", "substation": "Somerset", "voltage_kv": 230, "interconnection_mw": 120, "interconnection_status": "energized",
+      "water_source": "Raritan River", "onsite_power": "Grid (PJM)", "near_route": "I-287 / NY-NJ metro fiber",
+      "lease_type": "wholesale", "rent_per_kw_month": 150, "annual_rent_usd": null
+    },
+    {
+      "name": "Switch Las Vegas 11-15 (Core expansion)", "operator": "Switch", "owner": "DigitalBridge / IFM Investors", "legal_entity": "Switch, Ltd.",
+      "tenants": ["multi-tenant: hyperscale & enterprise"], "city": "Las Vegas", "state": "NV", "lat": 36.0490, "lng": -115.0290,
+      "status": "under_construction", "permit_status": "approved", "capacity_mw": 200, "consumed_mw": 0, "value_usd": 2000000000, "year": 2026,
+      "utility": "NV Energy", "iso_rto": "WECC", "substation": "Las Vegas", "voltage_kv": 230, "interconnection_mw": 220, "interconnection_status": "approved",
+      "water_source": "Reclaimed (arid)", "onsite_power": "100% renewable PPA (Switch)", "near_route": "I-15 / I-215 corridor",
+      "lease_type": "colocation", "rent_per_kw_month": 150, "annual_rent_usd": null
     }
   ]
 }
