@@ -230,6 +230,16 @@
   <div class="bar" id="powerbar"></div>
   <div class="barlbl"><span id="bl-con">consumed</span><span id="bl-avail">available</span></div>
   <div class="stat" style="margin-top:8px"><span>Total estimated capex</span><b id="s-val">0</b></div>
+
+  <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px">
+    <div class="group" style="margin:0 0 6px"><h2 style="margin:0">Coverage vs US total</h2></div>
+    <div class="stat"><span>In map — operational</span><b id="cov-op">—</b></div>
+    <div class="stat"><span>In map — pipeline (UC+planned)</span><b id="cov-pipe">—</b></div>
+    <div class="stat"><span>Est. US operational total</span><b id="cov-us">—</b></div>
+    <div class="bar" id="covbar"><span style="background:#34d399"></span></div>
+    <div class="barlbl"><span id="cov-pct">—</span><span id="cov-src">—</span></div>
+  </div>
+
   <p class="legend-note" id="provenance" style="margin-top:10px">—</p>
 </div>
 
@@ -550,6 +560,26 @@ async function init() {
     if (r2.ok) conn = await r2.json();
   } catch (e) { /* connectivity layer is optional */ }
   ALL = (data.datacenters || []).map((d, i) => (d._i = i, d));
+
+  // Coverage vs estimated US total (dataset-wide, not affected by filters).
+  const cts = data.counts || {};
+  const bm = data.us_benchmark || null;
+  const opGW = (cts.operational_capacity_mw || 0) / 1000;
+  const pipeGW = (cts.pipeline_capacity_mw || 0) / 1000;
+  document.getElementById("cov-op").textContent = opGW.toFixed(1) + " GW";
+  document.getElementById("cov-pipe").textContent = pipeGW.toFixed(1) + " GW";
+  if (bm && bm.operational_gw) {
+    const usGW = bm.operational_gw;
+    const pct = Math.min(100, 100 * opGW / usGW);
+    document.getElementById("cov-us").textContent = "~" + usGW + " GW";
+    document.getElementById("covbar").firstElementChild.style.width = pct + "%";
+    document.getElementById("cov-pct").textContent = `map shows ~${pct.toFixed(0)}% of US operational`;
+    document.getElementById("cov-src").textContent = `${bm.source ? bm.source.split("(")[0].trim() : ""} ${bm.year || ""}`.trim();
+    document.getElementById("cov-us").title = bm.note || "";
+    document.getElementById("cov-src").title = bm.source || "";
+  } else {
+    document.getElementById("cov-us").textContent = "n/a";
+  }
 
   // Data provenance + refresh cadence note.
   const built = data.generated_at ? new Date(data.generated_at).toLocaleString() : "—";
