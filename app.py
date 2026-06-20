@@ -128,10 +128,15 @@ def normalize(d, source):
         "year": d.get("year") or None,
         # Grid connection
         "utility": d.get("utility") or "",
+        "iso_rto": d.get("iso_rto") or "",
         "substation": d.get("substation") or "",
         "voltage_kv": float(d["voltage_kv"]) if d.get("voltage_kv") else None,
         "interconnection_mw": float(d["interconnection_mw"]) if d.get("interconnection_mw") else None,
         "interconnection_status": (d.get("interconnection_status") or "").lower(),
+        # Site context
+        "water_source": d.get("water_source") or "",
+        "onsite_power": d.get("onsite_power") or "",
+        "near_route": d.get("near_route") or "",
         # Commercials
         "lease_type": (d.get("lease_type") or "").lower(),
         "rent_per_kw_month": float(rent) if rent not in (None, "") else None,
@@ -320,23 +325,64 @@ def fetch_peeringdb(timeout=60, min_nets=IX_MIN_NETS):
 
 
 def load_connectivity():
-    """Curated submarine cable landings + long-haul fiber backbone routes."""
+    """Curated connectivity context: cable landings, backbone, metro hubs,
+    cable corridors, power stations, and rivers."""
     try:
         with open(CONNECTIVITY_CURATED, "r", encoding="utf-8") as f:
             raw = json.load(f)
-        return raw.get("cable_landings", []), raw.get("backbone", [])
+        return raw
     except (FileNotFoundError, ValueError) as e:
         log(f"  ! could not load {CONNECTIVITY_CURATED}: {e}")
-        return [], []
+        return {}
+
+
+def attach_metro_connectivity(metros, facilities):
+    """Sum PeeringDB network counts onto each curated metro hub (within ~0.6deg)
+    so cable corridors can be weighted by live interconnection density."""
+    for m in metros:
+        nets = 0
+        for f in facilities:
+            if abs(f["lat"] - m["lat"]) < 0.6 and abs(f["lng"] - m["lng"]) < 0.6:
+                nets += f["net_count"]
+        m["net_count"] = nets
+    return metros
+
+
+def build_corridors(metros, corridor_pairs):
+    """Turn curated metro adjacency pairs into weighted cable corridors."""
+    by_id = {m["id"]: m for m in metros}
+    out = []
+    for a, b in corridor_pairs:
+        ma, mb = by_id.get(a), by_id.get(b)
+        if not ma or not mb:
+            continue
+        # Corridor strength = the weaker of the two endpoints' connectivity.
+        weight = min(ma.get("net_count", 0), mb.get("net_count", 0))
+        out.append({
+            "from": ma["name"], "to": mb["name"],
+            "path": [[ma["lat"], ma["lng"]], [mb["lat"], mb["lng"]]],
+            "weight": weight,
+        })
+    return out
 
 
 def build_interconnection(download=True):
     facilities = fetch_peeringdb() if download else []
-    cable_landings, backbone = load_connectivity()
+    conn = load_connectivity()
+    cable_landings = conn.get("cable_landings", [])
+    backbone = conn.get("backbone", [])
+    metros = attach_metro_connectivity(conn.get("metros", []), facilities)
+    corridors = build_corridors(metros, conn.get("corridor_pairs", []))
+    power_stations = conn.get("power_stations", [])
+    rivers = conn.get("rivers", [])
     counts = {
         "facilities": len(facilities),
         "cable_landings": len(cable_landings),
         "backbone_routes": len(backbone),
+        "metros": len(metros),
+        "corridors": len(corridors),
+        "power_stations": len(power_stations),
+        "rivers": len(rivers),
         "networks_total": sum(f["net_count"] for f in facilities),
         "top_metro_nets": facilities[0]["net_count"] if facilities else 0,
     }
@@ -347,13 +393,18 @@ def build_interconnection(download=True):
         "facilities": facilities,
         "cable_landings": cable_landings,
         "backbone": backbone,
+        "metros": metros,
+        "corridors": corridors,
+        "power_stations": power_stations,
+        "rivers": rivers,
     }
     os.makedirs(DATA_DIR, exist_ok=True)
     with open(INTERCONNECT_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(dataset, f, indent=2)
     log(f"Wrote interconnection layer to {INTERCONNECT_OUTPUT}")
-    log(f"  facilities={counts['facilities']}  cable_landings={counts['cable_landings']}  "
-        f"backbone_routes={counts['backbone_routes']}")
+    log(f"  facilities={counts['facilities']}  corridors={counts['corridors']}  "
+        f"power_stations={counts['power_stations']}  rivers={counts['rivers']}  "
+        f"cable_landings={counts['cable_landings']}")
     return dataset
 
 
