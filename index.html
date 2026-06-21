@@ -121,7 +121,7 @@
   #mapLegend .ends { display:flex; justify-content:space-between; color:var(--muted); font-size:10px; }
   #mapLegend .lines { margin-top:8px; border-top:1px solid var(--line-soft); padding-top:7px; line-height:1.7; }
   #mapLegend .ln { display:inline-block; width:22px; height:0; vertical-align:middle; margin-right:6px; }
-  @media (max-width:680px){ #mapLegend{ display:none !important; } }
+  @media (max-width:900px){ #mapLegend{ display:none !important; } }
 
   #loading { z-index:2000; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; padding:20px 26px; }
 
@@ -132,11 +132,13 @@
     box-shadow:0 6px 20px rgba(0,0,0,.45); }
 
   /* ---- Mobile / small screens ---- */
-  @media (max-width:680px) {
+  @media (max-width:900px) {
     #topbar { height:46px; padding:0 12px; }
     #topbar .brand { font-size:13px; }
     #topbar .tag { display:none; }
     #panelToggle { display:block; }
+    /* keep the zoom +/- clear of the bottom sheet panels on compact screens */
+    .leaflet-bottom.leaflet-right { top:54px; bottom:auto; }
     #controls { top:104px; left:8px; right:8px; width:auto; max-height:60%; }
     #controls.collapsed { display:none !important; }
     #stats { left:8px; right:8px; bottom:8px; width:auto; max-height:58%; overflow:auto; padding:0; }
@@ -174,8 +176,8 @@
   <div class="spacer"></div>
   <div class="kpi">
     <div class="k"><b id="kpi-sites">—</b><span>Sites shown</span></div>
-    <div class="k"><b id="kpi-cap">—</b><span>Capacity</span></div>
-    <div class="k"><b id="kpi-grid">—</b><span>Grid interconnect</span></div>
+    <div class="k"><b id="kpi-cap">—</b><span>Operational</span></div>
+    <div class="k"><b id="kpi-grid">—</b><span>Pipeline</span></div>
     <div class="k"><b id="kpi-val">—</b><span>Capex</span></div>
   </div>
 </div>
@@ -279,10 +281,11 @@
   <div class="stats-body">
   <div class="stat"><span>Data centers shown</span><b id="s-count">0</b></div>
   <div class="stat"><span>Operators</span><b id="s-ops">0</b></div>
-  <div class="stat"><span>Total power capacity</span><b id="s-cap">0</b></div>
-  <div class="stat"><span>Grid interconnection</span><b id="s-grid">0</b></div>
+  <div class="stat"><span>Operational capacity</span><b id="s-cap">0</b></div>
+  <div class="stat"><span>Pipeline (UC + planned)</span><b id="s-grid">0</b></div>
+  <div class="barlbl" style="margin-top:7px"><span>operational capacity split</span></div>
   <div class="bar" id="powerbar"></div>
-  <div class="barlbl"><span id="bl-con">consumed</span><span id="bl-avail">available</span></div>
+  <div class="barlbl"><span id="bl-con">load</span><span id="bl-avail">headroom</span></div>
   <div class="stat" style="margin-top:8px"><span>Total estimated capex</span><b id="s-val">0</b></div>
 
   <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px">
@@ -460,27 +463,33 @@ function render() {
 
 function updateStats(shown, metric) {
   const sum = k => shown.reduce((a, d) => a + (d[k] || 0), 0);
-  const cap = sum("capacity_mw"), con = sum("consumed_mw"), avail = sum("available_mw");
-  const grid = sum("interconnection_mw"), val = sum("value_usd");
+  const sumIf = (k, ok) => shown.reduce((a, d) => a + (ok(d) ? (d[k] || 0) : 0), 0);
+  const opCap = sumIf("capacity_mw", d => d.status === "constructed");      // operational
+  const pipeCap = sumIf("capacity_mw", d => d.status !== "constructed");    // UC + planned
+  const con = sum("consumed_mw");          // operational load
+  const head = sum("available_mw");        // operational headroom (cap - load)
+  const val = sum("value_usd");
   const ops = new Set(shown.map(d => d.operator).filter(Boolean)).size;
+  const mw = v => Math.round(v).toLocaleString() + " MW";
 
   document.getElementById("s-count").textContent = shown.length.toLocaleString();
   document.getElementById("s-ops").textContent   = ops.toLocaleString();
-  document.getElementById("s-cap").textContent   = Math.round(cap).toLocaleString() + " MW";
-  document.getElementById("s-grid").textContent  = Math.round(grid).toLocaleString() + " MW";
+  document.getElementById("s-cap").textContent   = mw(opCap);
+  document.getElementById("s-grid").textContent  = mw(pipeCap);
   document.getElementById("s-val").textContent   = fmtUSD(val);
 
-  const total = con + avail || 1;
+  // Operational capacity split into consumed load vs headroom (con + head = opCap).
+  const total = con + head || 1;
   document.getElementById("powerbar").innerHTML =
-    `<span style="width:${100*con/total}%;background:#f87171" title="consumed ${Math.round(con)} MW"></span>` +
-    `<span style="width:${100*avail/total}%;background:#34d399" title="available ${Math.round(avail)} MW"></span>`;
-  document.getElementById("bl-con").textContent = `consumed ${Math.round(con).toLocaleString()} MW`;
-  document.getElementById("bl-avail").textContent = `available ${Math.round(avail).toLocaleString()} MW`;
+    `<span style="width:${100*con/total}%;background:#f87171" title="consumed ${mw(con)}"></span>` +
+    `<span style="width:${100*head/total}%;background:#34d399" title="headroom ${mw(head)}"></span>`;
+  document.getElementById("bl-con").textContent = `load ${mw(con)}`;
+  document.getElementById("bl-avail").textContent = `headroom ${mw(head)}`;
 
   // top KPIs
   document.getElementById("kpi-sites").textContent = shown.length.toLocaleString();
-  document.getElementById("kpi-cap").textContent   = Math.round(cap).toLocaleString() + " MW";
-  document.getElementById("kpi-grid").textContent  = Math.round(grid).toLocaleString() + " MW";
+  document.getElementById("kpi-cap").textContent   = (opCap/1000).toFixed(1) + " GW";
+  document.getElementById("kpi-grid").textContent  = (pipeCap/1000).toFixed(1) + " GW";
   document.getElementById("kpi-val").textContent   = fmtUSD(val);
 }
 
@@ -878,7 +887,7 @@ async function init() {
   const panelToggle = document.getElementById("panelToggle");
   const controlsEl = document.getElementById("controls");
   const statsEl = document.getElementById("stats");
-  if (window.matchMedia("(max-width:680px)").matches) {
+  if (window.matchMedia("(max-width:900px)").matches) {
     controlsEl.classList.add("collapsed");
     statsEl.classList.add("collapsed");
   }
