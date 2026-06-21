@@ -39,7 +39,7 @@
   .panel { position:absolute; z-index:1000; background:rgba(18,26,36,.95); border:1px solid var(--line);
     border-radius:14px; box-shadow:0 10px 34px rgba(0,0,0,.5); backdrop-filter:blur(8px); }
 
-  #controls { top:64px; left:14px; width:300px; max-height:calc(100% - 78px); overflow:auto; padding:16px; }
+  #controls { top:64px; left:14px; width:300px; max-height:calc(100% - 460px); overflow:auto; padding:16px; }
   #controls::-webkit-scrollbar{ width:8px; } #controls::-webkit-scrollbar-thumb{ background:var(--line); border-radius:8px; }
   .group { margin:14px 0; }
   .group:first-child { margin-top:4px; }
@@ -59,7 +59,7 @@
   .reset:hover { background:rgba(78,161,255,.1); }
 
   /* ---- Stats / legend bottom-left ---- */
-  #stats { bottom:14px; left:14px; width:300px; padding:14px 16px; }
+  #stats { bottom:14px; left:14px; width:300px; padding:14px 16px; max-height:430px; overflow:auto; }
   .stats-head { display:none; }
   .stat { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; padding:4px 0;
     border-bottom:1px dashed var(--line-soft); }
@@ -188,6 +188,7 @@
     <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
     <label class="row"><input type="checkbox" id="L-cable"><span class="swatch" style="background:#22d3ee"></span> Submarine cables <span class="count" id="c-cable"></span></label>
     <label class="row"><input type="checkbox" id="L-backbone"><span class="swatch" style="background:#f59e0b"></span> Fiber backbone <span class="count" id="c-bb"></span></label>
+    <label class="row" style="margin-top:2px"><input type="checkbox" id="L-major"><span style="width:11px"></span> High-capacity only <span style="color:var(--muted-2);font-size:10px">(Tier-1 + major)</span></label>
   </div>
 
   <div class="group">
@@ -220,7 +221,19 @@
       <option value="interconnection_mw">Grid interconnect (MW)</option>
       <option value="consumed_mw">Power consumed (MW)</option>
       <option value="available_mw">Power available (MW)</option>
+      <option value="feasibility">Feasibility score</option>
     </select>
+  </div>
+
+  <div class="group">
+    <h2>Site feasibility</h2>
+    <select id="minScore">
+      <option value="0">Any feasibility</option>
+      <option value="60">Score 60+</option>
+      <option value="70">Score 70+ (good)</option>
+      <option value="80">Score 80+ (excellent)</option>
+    </select>
+    <label class="row" style="margin-top:6px"><input type="checkbox" id="colorFeas"><span style="width:11px"></span> Color markers by feasibility</label>
   </div>
 
   <div class="group">
@@ -304,6 +317,7 @@ const corridorLayer = L.layerGroup();
 const powerLayer = L.layerGroup();
 const riverLayer = L.layerGroup();
 let ALL = [];
+let CONN = {};
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtUSD = v => v >= 1e9 ? "$" + (v/1e9).toFixed(1) + "B"
@@ -312,10 +326,18 @@ const fmtUSD = v => v >= 1e9 ? "$" + (v/1e9).toFixed(1) + "B"
 const fmtMW  = v => v ? Number(v).toLocaleString() + " MW" : "n/a";
 const fmtKV  = v => v ? Number(v).toLocaleString() + " kV" : "n/a";
 
+function metricVal(dc, metric) {
+  if (metric === "feasibility") return dc.feasibility ? dc.feasibility.score : 0;
+  return dc[metric] || 0;
+}
 function radius(dc, metric, maxVal) {
-  const v = dc[metric] || 0;
+  const v = metricVal(dc, metric);
   if (maxVal <= 0) return 6;
   return 5 + 26 * Math.sqrt(v / maxVal); // sqrt scaling so area ~ value
+}
+function feasColor(s) {
+  return s >= 80 ? "#34d399" : s >= 70 ? "#a3e635" : s >= 60 ? "#fbbf24"
+       : s >= 50 ? "#fb923c" : "#f87171";
 }
 
 function popupHtml(dc, idx) {
@@ -332,12 +354,15 @@ function render() {
   const statuses = new Set([...document.querySelectorAll(".f-status:checked")].map(c => c.value));
   const op = document.getElementById("operator").value;
   const permit = document.getElementById("permit").value;
+  const minScore = +document.getElementById("minScore").value;
+  const colorByFeas = document.getElementById("colorFeas").checked;
   const q = document.getElementById("search").value.trim().toLowerCase();
 
   const shown = ALL.filter(dc => {
     if (!statuses.has(dc.status)) return false;
     if (op && dc.operator !== op) return false;
     if (permit && dc.permit_status !== permit) return false;
+    if (minScore && (!dc.feasibility || dc.feasibility.score < minScore)) return false;
     if (q) {
       const hay = `${dc.name} ${dc.operator} ${dc.owner} ${dc.legal_entity} ${(dc.tenants||[]).join(" ")} ${dc.utility} ${dc.city} ${dc.state}`.toLowerCase();
       if (!hay.includes(q)) return false;
@@ -345,14 +370,15 @@ function render() {
     return true;
   });
 
-  const maxVal = shown.reduce((m, dc) => Math.max(m, dc[metric] || 0), 0);
+  const maxVal = shown.reduce((m, dc) => Math.max(m, metricVal(dc, metric)), 0);
   layer.clearLayers();
 
-  shown.slice().sort((a,b) => (b[metric]||0) - (a[metric]||0)).forEach(dc => {
+  shown.slice().sort((a,b) => metricVal(b, metric) - metricVal(a, metric)).forEach(dc => {
     const s = STATUS[dc.status] || STATUS.unknown;
+    const col = (colorByFeas && dc.feasibility) ? feasColor(dc.feasibility.score) : s.color;
     const m = L.circleMarker([dc.lat, dc.lng], {
       radius: radius(dc, metric, maxVal),
-      color: s.color, weight: 1.5, fillColor: s.color, fillOpacity: 0.42,
+      color: col, weight: 1.5, fillColor: col, fillOpacity: 0.42,
     });
     m.bindPopup(popupHtml(dc, dc._i), { maxWidth: 260 });
     m.on("click", () => openDrawer(dc));
@@ -390,6 +416,29 @@ function updateStats(shown, metric) {
 
 function kv(k, v) { return v ? `<div class="kv"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>` : ""; }
 
+function feasLabel(s){ return s>=80?"Excellent":s>=70?"Good":s>=60?"Fair":s>=50?"Marginal":"Challenging"; }
+function feasHtml(dc) {
+  const f = dc.feasibility; if (!f) return "";
+  const c = feasColor(f.score), cm = f.components, fa = f.factors;
+  const bar = (label, val) => `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
+    <span style="width:96px;font-size:11px;color:var(--muted)">${label}</span>
+    <span style="flex:1;height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden"><span style="display:block;height:100%;width:${val}%;background:${feasColor(val)}"></span></span>
+    <b style="width:22px;text-align:right;font-size:11px">${val}</b></div>`;
+  const dots = n => `<span style="letter-spacing:1px">${"●".repeat(n)}<span style="color:var(--line)">${"○".repeat(5-n)}</span></span>`;
+  return `<div class="sec">Site feasibility</div>
+    <div style="display:flex;align-items:center;gap:12px;margin:4px 0 8px">
+      <div style="font-size:30px;font-weight:700;color:${c};line-height:1">${f.score}</div>
+      <div><div style="color:${c};font-weight:600">${feasLabel(f.score)}</div><div class="mini">0–100 composite${fa.estimated?" · state estimate":""}</div></div>
+    </div>
+    ${bar("Power cost", cm.power)}${bar("Power / grid", cm.grid)}${bar("Connectivity", cm.connectivity)}${bar("Land cost", cm.land)}${bar("Incentives", cm.incentives)}${bar("Low hazard", cm.complexity)}${bar("LT viability", cm.viability)}
+    <div class="kv" style="margin-top:7px"><span class="k">Power cost</span><span class="v">${fa.power_cost_cents_kwh}¢/kWh</span></div>
+    <div class="kv"><span class="k">Land cost index</span><span class="v">${fa.land_index}/100</span></div>
+    <div class="kv"><span class="k">State incentives</span><span class="v">${dots(fa.incentives)}</span></div>
+    <div class="kv"><span class="k">Flood / seismic risk</span><span class="v">${dots(fa.flood)} / ${dots(fa.seismic)}</span></div>
+    <div class="kv"><span class="k">Hurricane / water</span><span class="v">${dots(fa.hurricane)} / ${dots(fa.water_stress)}</span></div>
+    ${fa.nearest_metro_km!=null?`<div class="kv"><span class="k">Nearest fiber metro</span><span class="v">~${fa.nearest_metro_km} km</span></div>`:""}`;
+}
+
 function openDrawer(dc) {
   const s = STATUS[dc.status] || STATUS.unknown;
   const p = PERMIT[dc.permit_status];
@@ -419,6 +468,8 @@ function openDrawer(dc) {
       <div class="metric"><span>Available</span><b>${fmtMW(dc.available_mw)}</b></div>
       <div class="metric"><span>Est. capex</span><b>${fmtUSD(dc.value_usd)}</b></div>
     </div>
+
+    ${feasHtml(dc)}
 
     <div class="sec">Ownership &amp; legal</div>
     ${kv("Owner / parent", dc.owner)}
@@ -505,33 +556,7 @@ function buildConnectivity(conn) {
       `<div class="mini">Source: PeeringDB</div>`, { maxWidth: 240 }
     ).addTo(ixLayer);
   });
-  // Fiber backbone corridors.
-  (conn.backbone || []).forEach(r => {
-    L.polyline(r.path, { color: "#f59e0b", weight: 2, opacity: 0.55, dashArray: "1 0" })
-      .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Approx. long-haul fiber corridor</div>`)
-      .addTo(backboneLayer);
-  });
-  // All US-touching submarine cables (TeleGeography).
-  (conn.submarine_cables || []).forEach(c => {
-    (c.paths || []).forEach(path => {
-      if (path && path.length > 1)
-        L.polyline(path, { color:"#22d3ee", weight:1, opacity:0.45, noClip:true })
-          .bindPopup(`<h4>${esc(c.name)}</h4><div class="mini">Submarine cable · TeleGeography</div>`)
-          .addTo(cableLayer);
-    });
-  });
-  // Submarine cable landing stations + offshore stubs.
-  (conn.cable_landings || []).forEach(c => {
-    if (c.offshore) {
-      L.polyline([[c.lat, c.lng], c.offshore], { color: "#22d3ee", weight: 1.6, opacity: 0.6 }).addTo(cableLayer);
-    }
-    L.circleMarker([c.lat, c.lng], {
-      radius: 5, color: "#22d3ee", weight: 1.5, fillColor: "#0e151d", fillOpacity: 1,
-    }).bindPopup(
-      `<h4>${esc(c.name)}</h4><div class="mini">Submarine cable landing</div>` +
-      `<div class="mini" style="margin-top:4px;color:#22d3ee">${esc((c.cables||[]).join(" · "))}</div>`, { maxWidth: 240 }
-    ).addTo(cableLayer);
-  });
+  renderCables(false);
   // Cable corridors — metro-to-metro links, thicker = better connected endpoints.
   const maxW = Math.max(1, ...(conn.corridors || []).map(c => c.weight || 0));
   (conn.corridors || []).forEach(c => {
@@ -558,6 +583,38 @@ function buildConnectivity(conn) {
     L.polyline(r.path, { color: "#2dd4bf", weight: 2.5, opacity: 0.55 })
       .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Major river (cooling water context)</div>`)
       .addTo(riverLayer);
+  });
+}
+
+// (Re)draw the dimensioned fiber backbone + submarine cables. Tier-1 routes and
+// major (high-capacity) cables are drawn thicker; majorOnly hides the rest.
+function renderCables(majorOnly) {
+  backboneLayer.clearLayers();
+  cableLayer.clearLayers();
+  (CONN.backbone || []).forEach(r => {
+    if (majorOnly && r.tier !== 1) return;
+    const w = r.tier === 1 ? 3.2 : 1.5;
+    const op = r.tier === 1 ? 0.7 : 0.4;
+    L.polyline(r.path, { color: "#f59e0b", weight: w, opacity: op })
+      .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Long-haul fiber · Tier ${r.tier} · ~${(r.length_km||0).toLocaleString()} km</div>`)
+      .addTo(backboneLayer);
+  });
+  (CONN.submarine_cables || []).forEach(c => {
+    if (majorOnly && !c.major) return;
+    const w = c.major ? 1.8 : 0.8, op = c.major ? 0.65 : 0.3;
+    (c.paths || []).forEach(path => {
+      if (path && path.length > 1)
+        L.polyline(path, { color:"#22d3ee", weight:w, opacity:op, noClip:true })
+          .bindPopup(`<h4>${esc(c.name)}</h4><div class="mini">Submarine cable${c.major ? " · major / high-capacity" : ""} · TeleGeography</div>`)
+          .addTo(cableLayer);
+    });
+  });
+  (CONN.cable_landings || []).forEach(c => {
+    if (c.offshore)
+      L.polyline([[c.lat, c.lng], c.offshore], { color: "#22d3ee", weight: 1.6, opacity: 0.6 }).addTo(cableLayer);
+    L.circleMarker([c.lat, c.lng], { radius: 5, color: "#22d3ee", weight: 1.5, fillColor: "#0e151d", fillOpacity: 1 })
+      .bindPopup(`<h4>${esc(c.name)}</h4><div class="mini">Submarine cable landing</div><div class="mini" style="margin-top:4px;color:#22d3ee">${esc((c.cables||[]).join(" · "))}</div>`, { maxWidth: 240 })
+      .addTo(cableLayer);
   });
 }
 
@@ -628,6 +685,7 @@ async function init() {
 
   // Connectivity layers (optional)
   if (conn) {
+    CONN = conn;
     buildConnectivity(conn);
     document.getElementById("c-cor").textContent = `(${(conn.corridors||[]).length})`;
     document.getElementById("c-ix").textContent = `(${(conn.facilities||[]).length})`;
@@ -649,7 +707,8 @@ async function init() {
   document.getElementById("controls").style.display = "";
   document.getElementById("stats").style.display = "";
 
-  ["sizeBy","operator","permit"].forEach(id => document.getElementById(id).addEventListener("change", render));
+  ["sizeBy","operator","permit","minScore","colorFeas"].forEach(id => document.getElementById(id).addEventListener("change", render));
+  document.getElementById("L-major").addEventListener("change", e => renderCables(e.target.checked));
   document.getElementById("search").addEventListener("input", render);
   document.querySelectorAll(".f-status").forEach(c => c.addEventListener("change", render));
   document.getElementById("reset").addEventListener("click", () => {
@@ -658,6 +717,8 @@ async function init() {
     document.getElementById("permit").value = "";
     document.getElementById("search").value = "";
     document.getElementById("sizeBy").value = "value_usd";
+    document.getElementById("minScore").value = "0";
+    document.getElementById("colorFeas").checked = false;
     render();
   });
   document.getElementById("dclose").addEventListener("click", closeDrawer);

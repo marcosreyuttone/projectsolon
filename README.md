@@ -101,6 +101,34 @@ is no free real-time "data-center news" feed, so news-driven facts are updated
 by editing the curated JSON (or by a future importer). To refresh on a schedule,
 run the build on a cron / CI job, e.g. `python3 app.py --build-only` nightly.
 
+## Site feasibility scoring
+
+Every site gets a **0–100 feasibility score** (shown in the profile drawer, and
+selectable as a marker size/colour). It's a weighted composite of:
+
+| Factor | Weight | Source |
+|--------|--------|--------|
+| Power cost | 22% | EIA industrial ¢/kWh by state |
+| Power / grid availability | 18% | interconnection status + headroom |
+| Connectivity | 20% | distance to nearest fiber metro |
+| Land cost | 10% | relative land-price index by state |
+| State / local incentives | 12% | state data-center incentive level |
+| Low hazard (complexity) | 10% | flood + seismic + hurricane + water stress |
+| Long-term viability | 8% | connectivity + grid blend |
+
+Factor tables live in `data/factors_curated.json` (editable). Each site's drawer
+shows the score, a component breakdown, and the underlying **FEMA/NOAA-style
+hazards** (flood, seismic, hurricane, water stress), **power cost**, **land
+index**, and **incentives**. Filter with "Min feasibility", colour markers by
+feasibility, or size markers by score. *(All factors are best-effort
+state-level estimates for visualization, not site surveys.)*
+
+## Cable & fiber dimensioning
+
+Terrestrial **fiber backbone** routes are tiered (Tier-1 long-haul drawn thicker
+than Tier-2 regional); **submarine cables** flag major high-capacity systems.
+The **"High-capacity only"** toggle shows just Tier-1 fiber + major cables.
+
 ## Coverage vs US total
 
 The stats panel shows how the mapped capacity compares to the whole country:

@@ -32,6 +32,7 @@ Usage
 
 import argparse
 import json
+import math
 import os
 import sys
 import time
@@ -48,6 +49,7 @@ CURATED_PATH = os.path.join(DATA_DIR, "datacenters_curated.json")
 OUTPUT_PATH = os.path.join(DATA_DIR, "datacenters.json")
 CONNECTIVITY_CURATED = os.path.join(DATA_DIR, "connectivity_curated.json")
 INTERCONNECT_OUTPUT = os.path.join(DATA_DIR, "interconnection.json")
+FACTORS_PATH = os.path.join(DATA_DIR, "factors_curated.json")
 
 # PeeringDB public API: facilities carry lat/lng plus net_count (number of
 # networks present) and ix_count (number of internet exchanges) -- a strong
@@ -268,11 +270,98 @@ def dedupe(records):
     return kept
 
 
+def load_factors():
+    try:
+        with open(FACTORS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, ValueError):
+        return None
+
+
+def _clamp(v, lo=0.0, hi=100.0):
+    return max(lo, min(hi, v))
+
+
+def nearest_metro_km(lat, lng, metros):
+    """Rough great-circle distance (km) to the nearest connectivity metro."""
+    best = 9e9
+    for m in metros:
+        dlat = (lat - m["lat"]) * 111.0
+        dlng = (lng - m["lng"]) * 111.0 * math.cos(math.radians(lat))
+        d = (dlat * dlat + dlng * dlng) ** 0.5
+        if d < best:
+            best = d
+    return best
+
+
+def score_feasibility(rec, factors, metros):
+    """0-100 data-center site-feasibility score with a component breakdown.
+    Uses state factor tables (power/land/incentives/hazards) + connectivity
+    distance + grid interconnection status."""
+    if not factors:
+        return None
+    st = factors["states"].get(rec.get("state"))
+    used_default = st is None
+    st = st or factors["defaults"]
+    pc_lo, pc_hi = factors.get("power_cost_range", [5.5, 16.0])
+
+    # Power cost: cheaper -> higher score.
+    power = _clamp(100 * (pc_hi - st["power_cost"]) / (pc_hi - pc_lo))
+    # Land: cheaper -> higher score.
+    land = _clamp(100 - st["land_index"])
+    # Connectivity: closer to a major interconnection metro -> higher.
+    dist = nearest_metro_km(rec["lat"], rec["lng"], metros) if metros else 300
+    connectivity = _clamp(100 - dist / 6.0)
+    # Grid / power availability: interconnection status + headroom.
+    gmap = {"energized": 90, "approved": 72, "in queue": 45, "": 62}
+    grid = gmap.get(rec.get("interconnection_status", ""), 62)
+    if rec.get("status") == "constructed" and (rec.get("available_mw") or 0) > 0:
+        grid = min(100, grid + 8)
+    # Local / state support.
+    incentives = _clamp(st["incentives"] * 20)
+    # Complexity: hazards -> lower score is worse.
+    hazard = st["flood"] + st["seismic"] + st["hurricane"] + st["water_stress"]
+    complexity = _clamp(100 - hazard * 5)
+    # Long-term viability: connectivity + grid headroom blend.
+    viability = _clamp(0.55 * connectivity + 0.45 * grid)
+
+    w = factors["weights"]
+    score = (power * w["power_cost"] + grid * w["grid"] + connectivity * w["connectivity"]
+             + land * w["land"] + incentives * w["incentives"] + complexity * w["complexity"]
+             + viability * w["viability"])
+    comp = {k: round(v) for k, v in {
+        "power": power, "grid": grid, "connectivity": connectivity, "land": land,
+        "incentives": incentives, "complexity": complexity, "viability": viability,
+    }.items()}
+    return {
+        "score": round(score),
+        "components": comp,
+        "factors": {
+            "power_cost_cents_kwh": st["power_cost"], "land_index": st["land_index"],
+            "incentives": st["incentives"], "flood": st["flood"], "seismic": st["seismic"],
+            "hurricane": st["hurricane"], "water_stress": st["water_stress"],
+            "nearest_metro_km": round(dist) if metros else None,
+            "estimated": used_default,
+        },
+    }
+
+
 def build_dataset(download=True):
     curated = load_curated()
     log(f"Loaded {len(curated)} curated data centers.")
     osm = fetch_overpass() if download else []
     records = dedupe(curated + osm)
+
+    # Attach site-feasibility scores.
+    factors = load_factors()
+    metros = load_connectivity().get("metros", [])
+    scored = 0
+    for r in records:
+        fs = score_feasibility(r, factors, metros)
+        r["feasibility"] = fs
+        if fs:
+            scored += 1
+    log(f"Scored feasibility for {scored} sites.")
 
     totals = summarize(records)
     dataset = {
@@ -424,16 +513,45 @@ def build_corridors(metros, corridor_pairs, knn=3):
     return out
 
 
+# Keywords identifying major high-capacity (modern multi-Tbps) submarine cables.
+MAJOR_CABLE_KEYWORDS = (
+    "marea", "dunant", "grand", "amitie", "amitié", "anjana", "nuvem", "firmina",
+    "curie", "junior", "jupiter", "faster", "plcn", "pacific light", "bay to bay",
+    "bifrost", "echo", "topaz", "new cross pacific", "ncp", "sea-us", "seabras",
+    "monet", "tannat", "brusa", "havfrue", "aec", "confluence", "gold data",
+    "tgn", "pacific crossing", "tata", "google", "meta", "2africa",
+)
+
+
+def _path_len_km(path):
+    total = 0.0
+    for (a_lat, a_lng), (b_lat, b_lng) in zip(path, path[1:]):
+        dlat = (a_lat - b_lat) * 111.0
+        dlng = (a_lng - b_lng) * 111.0 * math.cos(math.radians((a_lat + b_lat) / 2))
+        total += (dlat * dlat + dlng * dlng) ** 0.5
+    return total
+
+
 def build_interconnection(download=True):
     facilities = fetch_peeringdb() if download else []
     conn = load_connectivity()
     cable_landings = conn.get("cable_landings", [])
     backbone = conn.get("backbone", [])
+    # Dimension terrestrial backbone routes: tier 1 (primary, long-haul) vs
+    # tier 2 (regional), by route length.
+    for r in backbone:
+        L = _path_len_km(r.get("path", []))
+        r["length_km"] = round(L)
+        r["tier"] = 1 if L >= 1400 else 2
     metros = attach_metro_connectivity(conn.get("metros", []), facilities)
     corridors = build_corridors(metros, conn.get("corridor_pairs", []))
     power_stations = conn.get("power_stations", [])
     rivers = conn.get("rivers", [])
     submarine_cables = fetch_submarine_cables() if download else []
+    # Dimension submarine cables: flag major high-capacity systems.
+    for c in submarine_cables:
+        nm = c["name"].lower()
+        c["major"] = any(k in nm for k in MAJOR_CABLE_KEYWORDS)
     counts = {
         "facilities": len(facilities),
         "cable_landings": len(cable_landings),
