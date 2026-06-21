@@ -137,6 +137,18 @@ Two *different* connectivity layers (not tiers of the same thing):
 
 The **"⚡ High-capacity only"** toggle filters all three to the high-capacity
 set: Tier-1 long-haul fiber, major subsea cables, and the busiest corridors.
+Route popups show **indicative capacity** (Tier-1 fiber ~100–400 Tbps, Tier-2
+~10–100 Tbps, major subsea ~100–300+ Tbps), and an on-map legend explains that
+line thickness ≈ capacity.
+
+## Land & site-factor choropleth
+
+The **State choropleth** layer ("Land & site factors") shades US states by a
+selectable factor — **site attractiveness** (a composite of power cost, land,
+incentives and hazards), **power cost**, **land cost**, **incentives**, **water
+stress**, **flood**, or **seismic** risk — on a red→amber→green ramp (red =
+worse, green = better) with a matching legend. State data joins the live US
+states GeoJSON with `data/factors_curated.json`.
 
 ## Coverage vs US total
 
