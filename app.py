@@ -64,6 +64,24 @@ SUBMARINE_CABLES_URL = "https://www.submarinecablemap.com/api/v3/cable/cable-geo
 # Keep cables that pass near US coasts (lat, lng window incl. HI).
 US_CABLE_BBOX = (15.0, -162.0, 52.0, -64.0)
 
+# Open US states GeoJSON for the state-factor choropleth.
+US_STATES_URL = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
+STATE_ABBR = {
+    "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
+    "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
+    "District of Columbia": "DC", "Florida": "FL", "Georgia": "GA", "Hawaii": "HI",
+    "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA", "Kansas": "KS",
+    "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+    "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS",
+    "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV",
+    "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY",
+    "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK",
+    "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+    "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT",
+    "Vermont": "VT", "Virginia": "VA", "Washington": "WA", "West Virginia": "WV",
+    "Wisconsin": "WI", "Wyoming": "WY", "Puerto Rico": "PR",
+}
+
 # Public Overpass mirrors; tried in order until one responds.
 OVERPASS_ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
@@ -461,6 +479,47 @@ def fetch_submarine_cables(timeout=45):
     return out
 
 
+def fetch_states_choropleth(timeout=45):
+    """US states GeoJSON joined with factor data + a composite 'attractiveness'
+    score per state, for the land/site-factor choropleth layer."""
+    factors = load_factors()
+    if not factors:
+        return None
+    headers = {"User-Agent": "us-datacenter-map/1.0 (educational visualization)"}
+    try:
+        log("Downloading US states GeoJSON ...")
+        req = Request(US_STATES_URL, headers=headers)
+        with urlopen(req, timeout=timeout) as resp:
+            gj = json.loads(resp.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, ValueError) as e:
+        log(f"  ! states GeoJSON failed: {e}; skipping choropleth.")
+        return None
+    pc_lo, pc_hi = factors.get("power_cost_range", [5.5, 16.0])
+    kept = []
+    for feat in gj.get("features", []):
+        nm = (feat.get("properties") or {}).get("name", "")
+        abbr = STATE_ABBR.get(nm)
+        st = factors["states"].get(abbr) if abbr else None
+        if not st:
+            continue
+        power = _clamp(100 * (pc_hi - st["power_cost"]) / (pc_hi - pc_lo))
+        land = _clamp(100 - st["land_index"])
+        inc = _clamp(st["incentives"] * 20)
+        hazard = st["flood"] + st["seismic"] + st["hurricane"] + st["water_stress"]
+        low_haz = _clamp(100 - hazard * 5)
+        attractiveness = round(0.35 * power + 0.15 * land + 0.20 * inc + 0.30 * low_haz)
+        feat["properties"] = {
+            "name": nm, "st": abbr, "attractiveness": attractiveness,
+            "power_cost": st["power_cost"], "land_index": st["land_index"],
+            "incentives": st["incentives"], "flood": st["flood"],
+            "seismic": st["seismic"], "hurricane": st["hurricane"],
+            "water_stress": st["water_stress"],
+        }
+        kept.append(feat)
+    log(f"  -> built choropleth for {len(kept)} states")
+    return {"type": "FeatureCollection", "features": kept}
+
+
 def load_connectivity():
     """Curated connectivity context: cable landings, backbone, metro hubs,
     cable corridors, power stations, and rivers."""
@@ -543,15 +602,19 @@ def build_interconnection(download=True):
         L = _path_len_km(r.get("path", []))
         r["length_km"] = round(L)
         r["tier"] = 1 if L >= 1400 else 2
+        # Indicative design capacity (modern DWDM long-haul, illustrative).
+        r["capacity"] = "~100–400 Tbps" if r["tier"] == 1 else "~10–100 Tbps"
     metros = attach_metro_connectivity(conn.get("metros", []), facilities)
     corridors = build_corridors(metros, conn.get("corridor_pairs", []))
     power_stations = conn.get("power_stations", [])
     rivers = conn.get("rivers", [])
+    states = fetch_states_choropleth() if download else None
     submarine_cables = fetch_submarine_cables() if download else []
     # Dimension submarine cables: flag major high-capacity systems.
     for c in submarine_cables:
         nm = c["name"].lower()
         c["major"] = any(k in nm for k in MAJOR_CABLE_KEYWORDS)
+        c["capacity"] = "~100–300+ Tbps" if c["major"] else "up to tens of Tbps"
     counts = {
         "facilities": len(facilities),
         "cable_landings": len(cable_landings),
@@ -576,6 +639,7 @@ def build_interconnection(download=True):
         "corridors": corridors,
         "power_stations": power_stations,
         "rivers": rivers,
+        "states": states,
     }
     os.makedirs(DATA_DIR, exist_ok=True)
     with open(INTERCONNECT_OUTPUT, "w", encoding="utf-8") as f:
