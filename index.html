@@ -289,7 +289,8 @@ const PERMIT = {
   pending:   { color:"#fbbf24", label:"Pending" },
 };
 
-const map = L.map("map", { worldCopyJump:true, zoomControl:true }).setView([39.5, -98.35], 4.4);
+const map = L.map("map", { worldCopyJump:true, zoomControl:false }).setView([39.5, -98.35], 4.4);
+L.control.zoom({ position:"bottomright" }).addTo(map);   // keep zoom clear of the left-side filter panel
 L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19,
@@ -510,6 +511,15 @@ function buildConnectivity(conn) {
       .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Approx. long-haul fiber corridor</div>`)
       .addTo(backboneLayer);
   });
+  // All US-touching submarine cables (TeleGeography).
+  (conn.submarine_cables || []).forEach(c => {
+    (c.paths || []).forEach(path => {
+      if (path && path.length > 1)
+        L.polyline(path, { color:"#22d3ee", weight:1, opacity:0.45, noClip:true })
+          .bindPopup(`<h4>${esc(c.name)}</h4><div class="mini">Submarine cable · TeleGeography</div>`)
+          .addTo(cableLayer);
+    });
+  });
   // Submarine cable landing stations + offshore stubs.
   (conn.cable_landings || []).forEach(c => {
     if (c.offshore) {
@@ -621,7 +631,7 @@ async function init() {
     buildConnectivity(conn);
     document.getElementById("c-cor").textContent = `(${(conn.corridors||[]).length})`;
     document.getElementById("c-ix").textContent = `(${(conn.facilities||[]).length})`;
-    document.getElementById("c-cable").textContent = `(${(conn.cable_landings||[]).length})`;
+    document.getElementById("c-cable").textContent = `(${(conn.submarine_cables||conn.cable_landings||[]).length})`;
     document.getElementById("c-bb").textContent = `(${(conn.backbone||[]).length})`;
     document.getElementById("c-pow").textContent = `(${(conn.power_stations||[]).length})`;
     document.getElementById("c-riv").textContent = `(${(conn.rivers||[]).length})`;

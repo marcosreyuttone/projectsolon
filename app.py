@@ -57,6 +57,11 @@ PEERINGDB_FAC = "https://www.peeringdb.com/api/fac?country=US"
 # interconnection hubs and keep the map legible.
 IX_MIN_NETS = 5
 
+# TeleGeography open submarine cable map (all cables worldwide as GeoJSON).
+SUBMARINE_CABLES_URL = "https://www.submarinecablemap.com/api/v3/cable/cable-geo.json"
+# Keep cables that pass near US coasts (lat, lng window incl. HI).
+US_CABLE_BBOX = (15.0, -162.0, 52.0, -64.0)
+
 # Public Overpass mirrors; tried in order until one responds.
 OVERPASS_ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
@@ -334,6 +339,39 @@ def fetch_peeringdb(timeout=60, min_nets=IX_MIN_NETS):
     return out
 
 
+def fetch_submarine_cables(timeout=45):
+    """Download all submarine cables (TeleGeography) and keep those touching US
+    coasts. Returns a list of {name, paths:[[[lat,lng],...],...]}."""
+    s, w, n, e = US_CABLE_BBOX
+    headers = {"User-Agent": "us-datacenter-map/1.0 (educational visualization)"}
+    try:
+        log("Downloading submarine cables from TeleGeography ...")
+        req = Request(SUBMARINE_CABLES_URL, headers=headers)
+        with urlopen(req, timeout=timeout) as resp:
+            gj = json.loads(resp.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, ValueError) as e:
+        log(f"  ! submarine cables failed: {e}; skipping.")
+        return []
+    out = []
+    for feat in gj.get("features", []):
+        geom = feat.get("geometry") or {}
+        if geom.get("type") != "MultiLineString":
+            continue
+        name = (feat.get("properties") or {}).get("name") or "Submarine cable"
+        paths, touches = [], False
+        for seg in geom.get("coordinates", []):
+            # seg is a list of [lon, lat]; downsample to keep payload small.
+            pts = [[round(c[1], 3), round(c[0], 3)] for c in seg[::3]] or \
+                  [[round(c[1], 3), round(c[0], 3)] for c in seg]
+            if any(s <= p[0] <= n and w <= p[1] <= e for p in pts):
+                touches = True
+            paths.append(pts)
+        if touches:
+            out.append({"name": name, "paths": paths})
+    log(f"  -> kept {len(out)} US-touching submarine cables")
+    return out
+
+
 def load_connectivity():
     """Curated connectivity context: cable landings, backbone, metro hubs,
     cable corridors, power stations, and rivers."""
@@ -358,15 +396,25 @@ def attach_metro_connectivity(metros, facilities):
     return metros
 
 
-def build_corridors(metros, corridor_pairs):
-    """Turn curated metro adjacency pairs into weighted cable corridors."""
+def build_corridors(metros, corridor_pairs, knn=3):
+    """Build weighted cable corridors from curated metro pairs PLUS an automatic
+    k-nearest-neighbour mesh, so the whole connectivity web is shown (not just
+    the main links)."""
     by_id = {m["id"]: m for m in metros}
-    out = []
+    edges = set()
     for a, b in corridor_pairs:
-        ma, mb = by_id.get(a), by_id.get(b)
-        if not ma or not mb:
-            continue
-        # Corridor strength = the weaker of the two endpoints' connectivity.
+        if a in by_id and b in by_id:
+            edges.add(tuple(sorted((a, b))))
+    # k-nearest neighbours by great-circle-ish distance.
+    for m in metros:
+        dists = sorted(
+            ((((m["lat"] - o["lat"]) ** 2 + (m["lng"] - o["lng"]) ** 2), o["id"])
+             for o in metros if o["id"] != m["id"]))
+        for _, oid in dists[:knn]:
+            edges.add(tuple(sorted((m["id"], oid))))
+    out = []
+    for a, b in edges:
+        ma, mb = by_id[a], by_id[b]
         weight = min(ma.get("net_count", 0), mb.get("net_count", 0))
         out.append({
             "from": ma["name"], "to": mb["name"],
@@ -385,9 +433,11 @@ def build_interconnection(download=True):
     corridors = build_corridors(metros, conn.get("corridor_pairs", []))
     power_stations = conn.get("power_stations", [])
     rivers = conn.get("rivers", [])
+    submarine_cables = fetch_submarine_cables() if download else []
     counts = {
         "facilities": len(facilities),
         "cable_landings": len(cable_landings),
+        "submarine_cables": len(submarine_cables),
         "backbone_routes": len(backbone),
         "metros": len(metros),
         "corridors": len(corridors),
@@ -398,10 +448,11 @@ def build_interconnection(download=True):
     }
     dataset = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "sources": (["PeeringDB"] if facilities else []) + ["curated connectivity"],
+        "sources": (["PeeringDB", "TeleGeography"] if facilities else []) + ["curated connectivity"],
         "counts": counts,
         "facilities": facilities,
         "cable_landings": cable_landings,
+        "submarine_cables": submarine_cables,
         "backbone": backbone,
         "metros": metros,
         "corridors": corridors,
@@ -413,8 +464,8 @@ def build_interconnection(download=True):
         json.dump(dataset, f, indent=2)
     log(f"Wrote interconnection layer to {INTERCONNECT_OUTPUT}")
     log(f"  facilities={counts['facilities']}  corridors={counts['corridors']}  "
-        f"power_stations={counts['power_stations']}  rivers={counts['rivers']}  "
-        f"cable_landings={counts['cable_landings']}")
+        f"submarine_cables={counts['submarine_cables']}  power_stations={counts['power_stations']}  "
+        f"rivers={counts['rivers']}")
     return dataset
 
 
