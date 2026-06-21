@@ -1,0 +1,26 @@
+{
+  "_comment": "ISO/RTO interconnection-queue context for the grid-availability layer. queue_gw = approx generation capacity in the interconnection queue (GW, illustrative, LBNL 'Queued Up' order of magnitude); avg_wait_years = typical interconnection timeline; availability = 0-5 how easy it currently is to get large new load/generation connected (higher = more available / faster). Best-effort estimates for visualization, not authoritative.",
+  "iso": {
+    "PJM":   { "name": "PJM Interconnection", "queue_gw": 290, "avg_wait_years": 4.5, "availability": 1, "note": "Largest queue; Northern Virginia transmission-constrained; multi-year waits and rising capacity prices." },
+    "MISO":  { "name": "MISO", "queue_gw": 370, "avg_wait_years": 4.0, "availability": 3, "note": "Large queue but Midwest land/transmission relatively available; queue reform underway." },
+    "SPP":   { "name": "Southwest Power Pool", "queue_gw": 160, "avg_wait_years": 3.0, "availability": 4, "note": "Wind-rich plains, space and headroom; generally faster than PJM/CAISO." },
+    "ERCOT": { "name": "ERCOT (Texas)", "queue_gw": 410, "avg_wait_years": 1.5, "availability": 4, "note": "Connect-and-manage: fastest large-load interconnection; energy-only market, weather/scarcity risk." },
+    "WECC":  { "name": "WECC (non-ISO West)", "queue_gw": 200, "avg_wait_years": 3.5, "availability": 3, "note": "Utility-by-utility (APS, SRP, NV Energy, PacifiCorp); varies; often water-constrained." },
+    "CAISO": { "name": "CAISO (California)", "queue_gw": 520, "avg_wait_years": 5.0, "availability": 2, "note": "Very large queue, expensive power, long interconnection timelines." },
+    "NYISO": { "name": "NYISO (New York)", "queue_gw": 110, "avg_wait_years": 4.0, "availability": 2, "note": "Downstate constrained; cheaper, more available upstate (hydro)." },
+    "ISONE": { "name": "ISO New England", "queue_gw": 50, "avg_wait_years": 4.0, "availability": 2, "note": "Small, constrained, high power prices." },
+    "SERC":  { "name": "Southeast (vertically integrated)", "queue_gw": 130, "avg_wait_years": 3.0, "availability": 3, "note": "Duke/Southern/Dominion-South: bilateral utility deals, moderate availability and active DC recruitment." },
+    "TVA":   { "name": "Tennessee Valley Authority", "queue_gw": 60, "avg_wait_years": 2.5, "availability": 4, "note": "Federal utility, proactive data-center recruitment; relatively available, low rates." }
+  },
+  "state_iso": {
+    "VA": "PJM", "OH": "PJM", "PA": "PJM", "NJ": "PJM", "MD": "PJM", "WV": "PJM", "IL": "PJM",
+    "IN": "MISO", "MI": "MISO", "WI": "MISO", "MN": "MISO", "IA": "MISO", "ND": "MISO", "LA": "MISO", "MS": "MISO",
+    "KS": "SPP", "OK": "SPP", "NE": "SPP", "MO": "SPP",
+    "TX": "ERCOT",
+    "AZ": "WECC", "NV": "WECC", "UT": "WECC", "CO": "WECC", "WY": "WECC", "ID": "WECC", "OR": "WECC", "WA": "WECC", "NM": "WECC",
+    "CA": "CAISO",
+    "NY": "NYISO",
+    "MA": "ISONE",
+    "GA": "SERC", "NC": "SERC", "SC": "SERC", "AL": "TVA", "FL": "SERC", "TN": "TVA", "KY": "SERC"
+  }
+}

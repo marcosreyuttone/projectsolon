@@ -216,6 +216,7 @@
     <label class="row"><input type="checkbox" id="L-states"><span class="swatch" style="background:linear-gradient(90deg,#ef4444,#fbbf24,#34d399)"></span> State choropleth</label>
     <select id="choroFactor" style="margin-top:6px">
       <option value="attractiveness">Site attractiveness (composite)</option>
+      <option value="grid_availability">Grid availability (ISO queue)</option>
       <option value="power_cost">Power cost (¢/kWh)</option>
       <option value="land_index">Land cost index</option>
       <option value="incentives">State incentives</option>
@@ -352,7 +353,8 @@ let CONN = {};
 
 // Factor metadata: domain + whether higher is better (for the colour ramp).
 const CHORO = {
-  attractiveness: { lo:0, hi:100, good:"high", label:"Site attractiveness", fmt:v=>v+"/100" },
+  attractiveness:    { lo:0, hi:100, good:"high", label:"Site attractiveness", fmt:v=>v+"/100" },
+  grid_availability: { lo:0, hi:5,   good:"high", label:"Grid availability (ISO queue)", fmt:v=>v+"/5" },
   power_cost:     { lo:5.5, hi:16, good:"low",  label:"Power cost", fmt:v=>v+"¢/kWh" },
   land_index:     { lo:0, hi:100, good:"low",  label:"Land cost index", fmt:v=>v+"/100" },
   incentives:     { lo:0, hi:5,   good:"high", label:"State incentives", fmt:v=>v+"/5" },
@@ -542,6 +544,10 @@ function openDrawer(dc) {
     ${kv("Voltage", dc.voltage_kv ? fmtKV(dc.voltage_kv) : "")}
     ${kv("Interconnect capacity", dc.interconnection_mw ? fmtMW(dc.interconnection_mw) : "")}
     ${kv("Interconnect status", dc.interconnection_status)}
+    ${(dc.feasibility && dc.feasibility.grid_queue) ? (() => { const g = dc.feasibility.grid_queue; return `
+    ${kv("ISO/RTO queue", `${g.iso} · ~${g.queue_gw} GW waiting`)}
+    ${kv("Typical wait", `~${g.avg_wait_years} yrs · availability ${g.availability}/5`)}
+    ${g.note ? `<div class="mini" style="margin-top:3px;color:var(--muted)">${esc(g.note)}</div>` : ""}`; })() : ""}
     ${(dc.water_source || dc.onsite_power || dc.near_route) ? `<div class="sec">Site context</div>
     ${kv("On-site / dedicated power", dc.onsite_power)}
     ${kv("Water source", dc.water_source)}
@@ -697,8 +703,10 @@ function buildStates(geo) {
       `<div class="kv"><span class="k">Land index</span><span class="v">${p.land_index}/100</span></div>` +
       `<div class="kv"><span class="k">Incentives</span><span class="v">${p.incentives}/5</span></div>` +
       `<div class="kv"><span class="k">Flood / seismic</span><span class="v">${p.flood} / ${p.seismic}</span></div>` +
-      `<div class="kv"><span class="k">Hurricane / water</span><span class="v">${p.hurricane} / ${p.water_stress}</span></div>`,
-      { maxWidth: 230 });
+      `<div class="kv"><span class="k">Hurricane / water</span><span class="v">${p.hurricane} / ${p.water_stress}</span></div>` +
+      (p.iso ? `<div class="kv" style="margin-top:4px"><span class="k">Grid (ISO/RTO)</span><span class="v">${esc(p.iso)} · avail ${p.grid_availability}/5</span></div>` +
+               `<div class="kv"><span class="k">Queue / wait</span><span class="v">~${p.queue_gw} GW · ~${p.avg_wait_years} yr</span></div>` : ""),
+      { maxWidth: 240 });
   });
 }
 function recolorStates() {
