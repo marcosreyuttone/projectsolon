@@ -114,9 +114,9 @@ The stats panel shows how the mapped capacity compares to the whole country:
   grid power — methodologies differ). Edit `us_benchmark` in
   `data/datacenters_curated.json` to adjust.
 
-So the map currently covers **~⅓ of estimated US operational capacity** by the
-notable-operator layer, plus a large announced pipeline. The rest is the long
-tail of smaller/edge facilities (partly captured by the live OpenStreetMap
+So the notable-operator layer covers roughly **half of estimated US operational
+capacity** (~25 GW of ~50 GW), plus a large announced pipeline. The rest is the
+long tail of smaller/edge facilities (partly captured by the live OpenStreetMap
 layer, which adds locations but rarely power figures).
 
 ## Data sources & accuracy
