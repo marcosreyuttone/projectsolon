@@ -409,9 +409,11 @@ def build_dataset(download=True):
     factors = load_factors()
     iso_data = load_iso()
     metros = load_connectivity().get("metros", [])
+    # Score only curated sites: OpenStreetMap points lack the power/grid detail
+    # to score meaningfully, and scoring them all bloats the payload.
     scored = 0
     for r in records:
-        fs = score_feasibility(r, factors, metros, iso_data)
+        fs = score_feasibility(r, factors, metros, iso_data) if r["source"] == "curated" else None
         r["feasibility"] = fs
         if fs:
             scored += 1
