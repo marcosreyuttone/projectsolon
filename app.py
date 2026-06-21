@@ -50,6 +50,7 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "datacenters.json")
 CONNECTIVITY_CURATED = os.path.join(DATA_DIR, "connectivity_curated.json")
 INTERCONNECT_OUTPUT = os.path.join(DATA_DIR, "interconnection.json")
 FACTORS_PATH = os.path.join(DATA_DIR, "factors_curated.json")
+ISO_PATH = os.path.join(DATA_DIR, "iso_curated.json")
 
 # PeeringDB public API: facilities carry lat/lng plus net_count (number of
 # networks present) and ix_count (number of internet exchanges) -- a strong
@@ -296,6 +297,27 @@ def load_factors():
         return None
 
 
+def load_iso():
+    try:
+        with open(ISO_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, ValueError):
+        return None
+
+
+def iso_for_state(state, iso_data):
+    """Return the ISO/RTO queue record for a state, or None."""
+    if not iso_data or not state:
+        return None
+    abbr = iso_data.get("state_iso", {}).get(state)
+    if not abbr:
+        return None
+    rec = dict(iso_data.get("iso", {}).get(abbr, {}))
+    if rec:
+        rec["iso"] = abbr
+    return rec or None
+
+
 def _clamp(v, lo=0.0, hi=100.0):
     return max(lo, min(hi, v))
 
@@ -312,10 +334,10 @@ def nearest_metro_km(lat, lng, metros):
     return best
 
 
-def score_feasibility(rec, factors, metros):
+def score_feasibility(rec, factors, metros, iso_data=None):
     """0-100 data-center site-feasibility score with a component breakdown.
     Uses state factor tables (power/land/incentives/hazards) + connectivity
-    distance + grid interconnection status."""
+    distance + grid interconnection status + ISO/RTO queue availability."""
     if not factors:
         return None
     st = factors["states"].get(rec.get("state"))
@@ -330,11 +352,17 @@ def score_feasibility(rec, factors, metros):
     # Connectivity: closer to a major interconnection metro -> higher.
     dist = nearest_metro_km(rec["lat"], rec["lng"], metros) if metros else 300
     connectivity = _clamp(100 - dist / 6.0)
-    # Grid / power availability: interconnection status + headroom.
+    # Grid / power availability: interconnection status + headroom, blended
+    # with the region's ISO/RTO queue availability (can you actually get power?).
     gmap = {"energized": 90, "approved": 72, "in queue": 45, "": 62}
-    grid = gmap.get(rec.get("interconnection_status", ""), 62)
+    status_score = gmap.get(rec.get("interconnection_status", ""), 62)
     if rec.get("status") == "constructed" and (rec.get("available_mw") or 0) > 0:
-        grid = min(100, grid + 8)
+        status_score = min(100, status_score + 8)
+    iso = iso_for_state(rec.get("state"), iso_data)
+    if iso:
+        grid = 0.6 * status_score + 0.4 * _clamp(iso["availability"] * 20)
+    else:
+        grid = status_score
     # Local / state support.
     incentives = _clamp(st["incentives"] * 20)
     # Complexity: hazards -> lower score is worse.
@@ -351,7 +379,7 @@ def score_feasibility(rec, factors, metros):
         "power": power, "grid": grid, "connectivity": connectivity, "land": land,
         "incentives": incentives, "complexity": complexity, "viability": viability,
     }.items()}
-    return {
+    out = {
         "score": round(score),
         "components": comp,
         "factors": {
@@ -362,6 +390,13 @@ def score_feasibility(rec, factors, metros):
             "estimated": used_default,
         },
     }
+    if iso:
+        out["grid_queue"] = {
+            "iso": iso["iso"], "name": iso.get("name"), "queue_gw": iso.get("queue_gw"),
+            "avg_wait_years": iso.get("avg_wait_years"), "availability": iso.get("availability"),
+            "note": iso.get("note"),
+        }
+    return out
 
 
 def build_dataset(download=True):
@@ -372,10 +407,11 @@ def build_dataset(download=True):
 
     # Attach site-feasibility scores.
     factors = load_factors()
+    iso_data = load_iso()
     metros = load_connectivity().get("metros", [])
     scored = 0
     for r in records:
-        fs = score_feasibility(r, factors, metros)
+        fs = score_feasibility(r, factors, metros, iso_data)
         r["feasibility"] = fs
         if fs:
             scored += 1
@@ -485,6 +521,7 @@ def fetch_states_choropleth(timeout=45):
     factors = load_factors()
     if not factors:
         return None
+    iso_data = load_iso()
     headers = {"User-Agent": "us-datacenter-map/1.0 (educational visualization)"}
     try:
         log("Downloading US states GeoJSON ...")
@@ -508,12 +545,17 @@ def fetch_states_choropleth(timeout=45):
         hazard = st["flood"] + st["seismic"] + st["hurricane"] + st["water_stress"]
         low_haz = _clamp(100 - hazard * 5)
         attractiveness = round(0.35 * power + 0.15 * land + 0.20 * inc + 0.30 * low_haz)
+        iso = iso_for_state(abbr, iso_data)
         feat["properties"] = {
             "name": nm, "st": abbr, "attractiveness": attractiveness,
             "power_cost": st["power_cost"], "land_index": st["land_index"],
             "incentives": st["incentives"], "flood": st["flood"],
             "seismic": st["seismic"], "hurricane": st["hurricane"],
             "water_stress": st["water_stress"],
+            "iso": iso["iso"] if iso else None,
+            "grid_availability": iso["availability"] if iso else None,
+            "queue_gw": iso.get("queue_gw") if iso else None,
+            "avg_wait_years": iso.get("avg_wait_years") if iso else None,
         }
         kept.append(feat)
     log(f"  -> built choropleth for {len(kept)} states")

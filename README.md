@@ -141,6 +141,19 @@ Route popups show **indicative capacity** (Tier-1 fiber ~100–400 Tbps, Tier-2
 ~10–100 Tbps, major subsea ~100–300+ Tbps), and an on-map legend explains that
 line thickness ≈ capacity.
 
+## Interconnection-queue (grid availability)
+
+`data/iso_curated.json` carries per-ISO/RTO queue context (queue GW, typical
+wait years, an availability rating, and a note) plus a state→ISO map. This:
+
+- adds a **"Grid availability (ISO queue)"** choropleth factor — green where
+  power is easier to get (ERCOT, SPP, TVA), red where saturated (PJM
+  mid-Atlantic, CAISO);
+- shows the region's **ISO queue / wait** in each site's drawer; and
+- is **blended into the feasibility score's grid component**, so a site in a
+  saturated queue (e.g. PJM Northern Virginia) scores lower than one in a fast
+  connect-and-manage market (ERCOT).
+
 ## Land & site-factor choropleth
 
 The **State choropleth** layer ("Land & site factors") shades US states by a
