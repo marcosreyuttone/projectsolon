@@ -8,7 +8,25 @@
     "projected_gw_2028": 150,
     "source": "FERC / Utility Dive (≈50 GW online end-2025, 24% CAGR since 2020); Goldman Sachs (~31 GW demand 2025); S&P/451 Research (~62 GW grid power)",
     "year": 2025,
-    "note": "External industry estimates of total US data-center capacity, used as a coverage benchmark. Methodologies differ (operational IT load vs total utility power)."
+    "note": "External industry estimates of total US data-center capacity, used as a coverage benchmark. Methodologies differ (operational IT load vs total utility power).",
+    "market": {
+      "year": 2025,
+      "operational_gw": "41–50",
+      "operational_note": "US operational capacity end-2025: CBRE ~40.7 GW (Americas 43.4 GW, 93.6% US); FERC ~50 GW all-in.",
+      "under_construction_gw": 25,
+      "under_construction_note": "Cushman & Wakefield H2-2025: 25.3 GW under construction, ~89% pre-leased (CBRE 5.9 GW primary colo; JLL >35 GW all-NA).",
+      "planned_gw": 32,
+      "planned_note": "JLL planned pipeline (~31.6 GW, phased 5+ yrs): NoVA 5.9, Phoenix 4.2, DFW 3.9, Las Vegas/Reno 3.5.",
+      "announced_total_gw": 98,
+      "announced_note": "Operational + under construction + planned (~41 + 25 + 32 GW).",
+      "grid_pipeline_gw": 183,
+      "grid_note": "Large-load capacity with signed construction/supply agreements ≈ 22% of 2025 US peak (BloombergNEF); ERCOT large-load queue alone ~226 GW (73% data centers).",
+      "available_pct": 1.4,
+      "available_gw": 0.6,
+      "available_note": "Record-low 1.4% vacancy end-2025 (CBRE/JLL) → ~0.6 GW available; market is supply-constrained.",
+      "demand_outlook": "~106 GW US data-center power demand by 2035 (BloombergNEF); ~80 GW by 2030 (S&P/McKinsey).",
+      "sources": "CBRE, JLL & Cushman & Wakefield H2-2025; BloombergNEF; Grid Strategies; FERC (2025)"
+    }
   },
   "datacenters": [
     {

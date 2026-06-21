@@ -294,6 +294,17 @@
     <div class="barlbl"><span id="cov-pct">—</span><span id="cov-src">—</span></div>
   </div>
 
+  <div id="market" style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px;display:none">
+    <div class="group" style="margin:0 0 6px"><h2 style="margin:0">US market · 2025 (industry)</h2></div>
+    <div class="stat"><span>Operational</span><b id="mk-op">—</b></div>
+    <div class="stat"><span>Under construction</span><b id="mk-uc">—</b></div>
+    <div class="stat"><span>Planned pipeline</span><b id="mk-pl">—</b></div>
+    <div class="stat"><span>Announced total</span><b id="mk-an">—</b></div>
+    <div class="stat"><span>Grid pipeline (signed)</span><b id="mk-grid">—</b></div>
+    <div class="stat"><span>Available (≈1.4% vacancy)</span><b id="mk-av">—</b></div>
+    <p class="legend-note" id="mk-src" style="margin-top:6px">—</p>
+  </div>
+
   <p class="legend-note" id="provenance" style="margin-top:10px">—</p>
   </div>
 </div>
@@ -778,6 +789,19 @@ async function init() {
     document.getElementById("cov-src").textContent = `${bm.source ? bm.source.split("(")[0].trim() : ""} ${bm.year || ""}`.trim();
     document.getElementById("cov-us").title = bm.note || "";
     document.getElementById("cov-src").title = bm.source || "";
+    // US market context (sourced industry figures).
+    const mk = bm.market;
+    if (mk) {
+      const set = (id, txt, tip) => { const el = document.getElementById(id); el.textContent = txt; if (tip) el.title = tip; };
+      set("mk-op", mk.operational_gw + " GW", mk.operational_note);
+      set("mk-uc", "~" + mk.under_construction_gw + " GW", mk.under_construction_note);
+      set("mk-pl", "~" + mk.planned_gw + " GW", mk.planned_note);
+      set("mk-an", "~" + mk.announced_total_gw + " GW", mk.announced_note);
+      set("mk-grid", "~" + mk.grid_pipeline_gw + " GW", mk.grid_note);
+      set("mk-av", mk.available_pct + "% · ~" + mk.available_gw + " GW", mk.available_note);
+      document.getElementById("mk-src").textContent = (mk.demand_outlook ? mk.demand_outlook + " " : "") + "Sources: " + (mk.sources || "");
+      document.getElementById("market").style.display = "";
+    }
   } else {
     document.getElementById("cov-us").textContent = "n/a";
   }
