@@ -54,6 +54,8 @@
     border-radius:9px; padding:8px 10px; font-size:13px; outline:none; }
   select:focus, input[type=search]:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(78,161,255,.15); }
   .legend-note { font-size:10.5px; color:var(--muted-2); margin-top:10px; line-height:1.5; }
+  .subfilter { margin:8px 0 2px; padding:7px 9px; border:1px dashed var(--line); border-radius:9px; background:rgba(255,255,255,.02); }
+  .subfilter .hint { font-size:10px; color:var(--muted-2); margin-top:2px; line-height:1.4; padding-left:23px; }
   .reset { width:100%; margin-top:6px; background:transparent; color:var(--accent); border:1px solid var(--line);
     border-radius:9px; padding:8px; font-size:12.5px; cursor:pointer; }
   .reset:hover { background:rgba(78,161,255,.1); }
@@ -184,11 +186,14 @@
 
   <div class="group">
     <h2>Connectivity layers</h2>
-    <label class="row"><input type="checkbox" id="L-corridors"><span class="swatch" style="background:#38bdf8"></span> Cable corridors <span class="count" id="c-cor"></span></label>
-    <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
+    <label class="row"><input type="checkbox" id="L-backbone"><span class="swatch" style="background:#f59e0b"></span> Fiber backbone <span style="color:var(--muted-2);font-size:10px">physical long-haul</span> <span class="count" id="c-bb"></span></label>
+    <label class="row"><input type="checkbox" id="L-corridors"><span class="swatch" style="background:#38bdf8"></span> Cable corridors <span style="color:var(--muted-2);font-size:10px">interconnect mesh</span> <span class="count" id="c-cor"></span></label>
     <label class="row"><input type="checkbox" id="L-cable"><span class="swatch" style="background:#22d3ee"></span> Submarine cables <span class="count" id="c-cable"></span></label>
-    <label class="row"><input type="checkbox" id="L-backbone"><span class="swatch" style="background:#f59e0b"></span> Fiber backbone <span class="count" id="c-bb"></span></label>
-    <label class="row" style="margin-top:2px"><input type="checkbox" id="L-major"><span style="width:11px"></span> High-capacity only <span style="color:var(--muted-2);font-size:10px">(Tier-1 + major)</span></label>
+    <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
+    <div class="subfilter">
+      <label class="row" style="padding:2px 0"><input type="checkbox" id="L-major"> <span style="font-size:13px">⚡ High-capacity only</span></label>
+      <div class="hint">Tier-1 long-haul fiber, major subsea cables &amp; the busiest corridors</div>
+    </div>
   </div>
 
   <div class="group">
@@ -557,19 +562,6 @@ function buildConnectivity(conn) {
     ).addTo(ixLayer);
   });
   renderCables(false);
-  // Cable corridors — metro-to-metro links, thicker = better connected endpoints.
-  const maxW = Math.max(1, ...(conn.corridors || []).map(c => c.weight || 0));
-  (conn.corridors || []).forEach(c => {
-    const w = 1.2 + 5 * Math.sqrt((c.weight || 0) / maxW);
-    L.polyline(c.path, { color: "#38bdf8", weight: w, opacity: 0.5 })
-      .bindPopup(`<h4>${esc(c.from)} ↔ ${esc(c.to)}</h4><div class="mini">Cable corridor · ~${(c.weight||0).toLocaleString()} peering networks at the weaker hub</div>`)
-      .addTo(corridorLayer);
-  });
-  (conn.metros || []).forEach(m => {
-    L.circleMarker([m.lat, m.lng], { radius: 3.5, color: "#38bdf8", weight: 1, fillColor: "#38bdf8", fillOpacity: 0.7 })
-      .bindPopup(`<h4>${esc(m.name)}</h4><div class="mini" style="color:#38bdf8">${(m.net_count||0).toLocaleString()} peering networks (metro)</div>`)
-      .addTo(corridorLayer);
-  });
   // Power / central stations.
   const FUEL = { nuclear:"#f472b6", hydro:"#38bdf8", fossil:"#fbbf24" };
   (conn.power_stations || []).forEach(p => {
@@ -591,6 +583,23 @@ function buildConnectivity(conn) {
 function renderCables(majorOnly) {
   backboneLayer.clearLayers();
   cableLayer.clearLayers();
+  corridorLayer.clearLayers();
+  // Cable corridors — metro-to-metro interconnection mesh; thicker = busier.
+  const corr = CONN.corridors || [];
+  const maxW = Math.max(1, ...corr.map(c => c.weight || 0));
+  const corrCut = majorOnly ? 0.30 * maxW : -1;   // high-capacity = busiest corridors
+  corr.forEach(c => {
+    if ((c.weight || 0) < corrCut) return;
+    const w = 1.2 + 5 * Math.sqrt((c.weight || 0) / maxW);
+    L.polyline(c.path, { color: "#38bdf8", weight: w, opacity: 0.5 })
+      .bindPopup(`<h4>${esc(c.from)} ↔ ${esc(c.to)}</h4><div class="mini">Interconnect corridor · ~${(c.weight||0).toLocaleString()} peering networks at the weaker hub</div>`)
+      .addTo(corridorLayer);
+  });
+  (CONN.metros || []).forEach(m => {
+    L.circleMarker([m.lat, m.lng], { radius: 3.5, color: "#38bdf8", weight: 1, fillColor: "#38bdf8", fillOpacity: 0.7 })
+      .bindPopup(`<h4>${esc(m.name)}</h4><div class="mini" style="color:#38bdf8">${(m.net_count||0).toLocaleString()} peering networks (metro)</div>`)
+      .addTo(corridorLayer);
+  });
   (CONN.backbone || []).forEach(r => {
     if (majorOnly && r.tier !== 1) return;
     const w = r.tier === 1 ? 3.2 : 1.5;

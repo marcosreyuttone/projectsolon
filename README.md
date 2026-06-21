@@ -125,9 +125,18 @@ state-level estimates for visualization, not site surveys.)*
 
 ## Cable & fiber dimensioning
 
-Terrestrial **fiber backbone** routes are tiered (Tier-1 long-haul drawn thicker
-than Tier-2 regional); **submarine cables** flag major high-capacity systems.
-The **"High-capacity only"** toggle shows just Tier-1 fiber + major cables.
+Two *different* connectivity layers (not tiers of the same thing):
+
+- **Fiber backbone** — real **physical long-haul** fiber routes. These carry an
+  internal tier: **Tier-1** trunk routes are drawn thicker (high capacity),
+  **Tier-2** regional routes thinner.
+- **Cable corridors** — a **logical interconnection mesh** between metros,
+  weighted by PeeringDB peering density (how much markets interconnect, not a
+  physical cable).
+- **Submarine cables** flag major high-capacity systems (drawn thicker).
+
+The **"⚡ High-capacity only"** toggle filters all three to the high-capacity
+set: Tier-1 long-haul fiber, major subsea cables, and the busiest corridors.
 
 ## Coverage vs US total
 
