@@ -234,8 +234,15 @@ def parse_overpass(elements):
             except ValueError:
                 pass
         operator = tags.get("operator") or tags.get("brand") or tags.get("network") or ""
+        name = tags.get("name") or operator
+        # Confidence filter: only keep OSM points that are attributable -- a
+        # named operator AND a real name. This drops the anonymous, data-poor
+        # points (the "no data, far from anything" noise) so the map only shows
+        # facilities we can actually attribute.
+        if not operator or not name:
+            continue
         out.append(normalize({
-            "name": tags.get("name") or operator or "OSM data center",
+            "name": name,
             "operator": operator,
             "owner": tags.get("owner") or tags.get("brand") or "",
             "city": tags.get("addr:city") or "",
