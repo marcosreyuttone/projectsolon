@@ -409,7 +409,10 @@ def score_feasibility(rec, factors, metros, iso_data=None):
 def build_dataset(download=True):
     curated = load_curated()
     log(f"Loaded {len(curated)} curated data centers.")
-    osm = fetch_overpass() if download else []
+    # The map now shows ONLY verified, curated facilities. The OpenStreetMap
+    # layer was dropped because its crowd-sourced points can't be individually
+    # confirmed (the "far from fiber / no data" noise the project flagged).
+    osm = []
     records = dedupe(curated + osm)
 
     # Attach site-feasibility scores.
