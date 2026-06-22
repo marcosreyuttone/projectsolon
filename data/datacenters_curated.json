@@ -4281,17 +4281,17 @@
       "annual_rent_usd": null
     },
     {
-      "name": "Microsoft West Chicago (Illinois)",
+      "name": "Microsoft Chicago (Northlake)",
       "operator": "Microsoft",
       "owner": "Microsoft Corporation",
       "legal_entity": "Microsoft Corporation",
       "tenants": [
         "self (Azure)"
       ],
-      "city": "West Chicago",
+      "city": "Northlake",
       "state": "IL",
-      "lat": 41.91,
-      "lng": -88.23,
+      "lat": 41.9156,
+      "lng": -87.8956,
       "status": "constructed",
       "permit_status": "approved",
       "capacity_mw": 250,

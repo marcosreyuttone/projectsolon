@@ -193,7 +193,6 @@
     <label class="row"><input type="checkbox" class="f-status" value="constructed" checked><span class="swatch" style="background:var(--green)"></span> Constructed <span class="count" data-status="constructed"></span></label>
     <label class="row"><input type="checkbox" class="f-status" value="under_construction" checked><span class="swatch" style="background:var(--amber)"></span> Under construction <span class="count" data-status="under_construction"></span></label>
     <label class="row"><input type="checkbox" class="f-status" value="planned" checked><span class="swatch" style="background:var(--blue)"></span> Planned <span class="count" data-status="planned"></span></label>
-    <label class="row" style="margin-top:5px"><input type="checkbox" id="verifiedOnly"> <span style="font-size:12.5px">Verified only</span> <span style="color:var(--muted-2);font-size:10px">(hide community-mapped)</span></label>
   </div>
 
   <div class="group">
@@ -430,11 +429,9 @@ function render() {
   const permit = document.getElementById("permit").value;
   const minScore = +document.getElementById("minScore").value;
   const colorByFeas = document.getElementById("colorFeas").checked;
-  const verifiedOnly = document.getElementById("verifiedOnly").checked;
   const q = document.getElementById("search").value.trim().toLowerCase();
 
   const shown = ALL.filter(dc => {
-    if (verifiedOnly && dc.source !== "curated") return false;
     if (!statuses.has(dc.status)) return false;
     if (op && dc.operator !== op) return false;
     if (permit && dc.permit_status !== permit) return false;
@@ -452,11 +449,9 @@ function render() {
   shown.slice().sort((a,b) => metricVal(b, metric) - metricVal(a, metric)).forEach(dc => {
     const s = STATUS[dc.status] || STATUS.unknown;
     const col = (colorByFeas && dc.feasibility) ? feasColor(dc.feasibility.score) : s.color;
-    const osm = dc.source === "openstreetmap";   // community-mapped: lighter, hollow
     const m = L.circleMarker([dc.lat, dc.lng], {
-      radius: osm ? Math.min(6, radius(dc, metric, maxVal)) : radius(dc, metric, maxVal),
-      color: col, weight: osm ? 1 : 1.5, fillColor: col,
-      fillOpacity: osm ? 0.12 : 0.42, dashArray: osm ? "2 2" : null,
+      radius: radius(dc, metric, maxVal),
+      color: col, weight: 1.5, fillColor: col, fillOpacity: 0.42,
     });
     m.bindPopup(popupHtml(dc, dc._i), { maxWidth: 260 });
     m.on("click", () => openDrawer(dc));
@@ -824,12 +819,9 @@ async function init() {
   const built = data.generated_at ? new Date(data.generated_at).toLocaleString() : "—";
   const dcSrc = (data.sources || []).join(", ");
   const ixSrc = conn ? (conn.sources || []).join(", ") : "";
-  const nCur = ALL.filter(d => d.source === "curated").length;
-  const nOsm = ALL.length - nCur;
   document.getElementById("provenance").innerHTML =
-    `<b>${nCur}</b> verified facilities (curated, full detail + feasibility) · ` +
-    `<b>${nOsm}</b> community-mapped (OpenStreetMap, operator-attributed, hollow markers — toggle "Verified only" to hide). ` +
-    `<b>Built:</b> ${esc(built)}. <b>Auto-refresh:</b> daily 06:00 UTC. Curated figures are best-effort public estimates.`;
+    `<b>${ALL.length}</b> verified facilities — real operators' documented campuses and publicly-announced projects, each web-checked. ` +
+    `<b>Built:</b> ${esc(built)}. <b>Auto-refresh:</b> daily 06:00 UTC. Capacity / capex / rent figures are best-effort public estimates.`;
 
   // status counts
   const byStatus = {};
@@ -871,7 +863,7 @@ async function init() {
   document.getElementById("controls").style.display = "";
   document.getElementById("stats").style.display = "";
 
-  ["sizeBy","operator","permit","minScore","colorFeas","verifiedOnly"].forEach(id => document.getElementById(id).addEventListener("change", render));
+  ["sizeBy","operator","permit","minScore","colorFeas"].forEach(id => document.getElementById(id).addEventListener("change", render));
   document.getElementById("L-major").addEventListener("change", e => renderCables(e.target.checked));
   document.getElementById("search").addEventListener("input", render);
   document.querySelectorAll(".f-status").forEach(c => c.addEventListener("change", render));
@@ -883,7 +875,6 @@ async function init() {
     document.getElementById("sizeBy").value = "value_usd";
     document.getElementById("minScore").value = "0";
     document.getElementById("colorFeas").checked = false;
-    document.getElementById("verifiedOnly").checked = false;
     render();
   });
   document.getElementById("dclose").addEventListener("click", closeDrawer);
