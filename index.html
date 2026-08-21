@@ -54,6 +54,11 @@
     border-radius:9px; padding:8px 10px; font-size:13px; outline:none; }
   select:focus, input[type=search]:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(78,161,255,.15); }
   .legend-note { font-size:10.5px; color:var(--muted-2); margin-top:10px; line-height:1.5; }
+  .wrow { display:flex; align-items:center; gap:8px; font-size:11.5px; padding:2px 0; }
+  .wrow span { width:74px; color:var(--muted); }
+  .wrow input[type=range] { flex:1; accent-color:var(--accent); height:4px; }
+  .wrow b { width:20px; text-align:right; font-variant-numeric:tabular-nums; font-size:11px; }
+  .wreset { float:right; background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:6px; font-size:10px; padding:1px 7px; cursor:pointer; text-transform:none; letter-spacing:0; }
   .subfilter { margin:8px 0 2px; padding:7px 9px; border:1px dashed var(--line); border-radius:9px; background:rgba(255,255,255,.02); }
   .subfilter .hint { font-size:10px; color:var(--muted-2); margin-top:2px; line-height:1.4; padding-left:23px; }
   .reset { width:100%; margin-top:6px; background:transparent; color:var(--accent); border:1px solid var(--line);
@@ -268,6 +273,18 @@
   </div>
 
   <div class="group">
+    <h2>Feasibility weights <button id="wReset" class="wreset">reset</button></h2>
+    <div class="wrow"><span>Power cost</span><input type="range" class="fw" data-k="power" min="0" max="40" value="22"><b>22</b></div>
+    <div class="wrow"><span>Grid / queue</span><input type="range" class="fw" data-k="grid" min="0" max="40" value="18"><b>18</b></div>
+    <div class="wrow"><span>Connectivity</span><input type="range" class="fw" data-k="connectivity" min="0" max="40" value="20"><b>20</b></div>
+    <div class="wrow"><span>Land cost</span><input type="range" class="fw" data-k="land" min="0" max="40" value="10"><b>10</b></div>
+    <div class="wrow"><span>Incentives</span><input type="range" class="fw" data-k="incentives" min="0" max="40" value="12"><b>12</b></div>
+    <div class="wrow"><span>Low hazard</span><input type="range" class="fw" data-k="complexity" min="0" max="40" value="10"><b>10</b></div>
+    <div class="wrow"><span>LT viability</span><input type="range" class="fw" data-k="viability" min="0" max="40" value="8"><b>8</b></div>
+    <div class="legend-note" style="margin-top:4px">Drag to reweight — feasibility scores, colours &amp; "size by feasibility" recompute live (weights auto-normalised).</div>
+  </div>
+
+  <div class="group">
     <h2>Search</h2>
     <input type="search" id="search" placeholder="name, operator, owner, tenant, utility, city…" />
   </div>
@@ -411,6 +428,21 @@ function radius(dc, metric, maxVal) {
 function feasColor(s) {
   return s >= 80 ? "#34d399" : s >= 70 ? "#a3e635" : s >= 60 ? "#fbbf24"
        : s >= 50 ? "#fb923c" : "#f87171";
+}
+
+const WDEF = { power:22, grid:18, connectivity:20, land:10, incentives:12, complexity:10, viability:8 };
+// Recompute every site's feasibility score from its stored components using the
+// user's weights (auto-normalised), then re-render. Pure client-side.
+function applyWeights() {
+  const w = {}; let sum = 0;
+  document.querySelectorAll(".fw").forEach(s => { w[s.dataset.k] = +s.value; sum += +s.value; s.nextElementSibling.textContent = s.value; });
+  if (sum <= 0) sum = 1;
+  ALL.forEach(d => {
+    const f = d.feasibility; if (!f || !f.components) return;
+    let sc = 0; for (const k in w) sc += (f.components[k] || 0) * (w[k] / sum);
+    f.score = Math.round(sc);
+  });
+  render();
 }
 
 function popupHtml(dc, idx) {
@@ -867,6 +899,11 @@ async function init() {
   document.getElementById("L-major").addEventListener("change", e => renderCables(e.target.checked));
   document.getElementById("search").addEventListener("input", render);
   document.querySelectorAll(".f-status").forEach(c => c.addEventListener("change", render));
+  document.querySelectorAll(".fw").forEach(s => s.addEventListener("input", applyWeights));
+  document.getElementById("wReset").addEventListener("click", () => {
+    document.querySelectorAll(".fw").forEach(s => { s.value = WDEF[s.dataset.k]; });
+    applyWeights();
+  });
   document.getElementById("reset").addEventListener("click", () => {
     document.querySelectorAll(".f-status").forEach(c => c.checked = true);
     document.getElementById("operator").value = "";
