@@ -3,3 +3,5 @@ data/datacenters.json
 data/interconnection.json
 __pycache__/
 *.pyc
+public/
+.vercel/

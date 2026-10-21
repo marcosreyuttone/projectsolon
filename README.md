@@ -51,18 +51,31 @@ automatically falls back to the curated dataset so the map still works.
 
 ## Using the map
 
-- **Top bar** shows live KPIs (sites shown, capacity, grid interconnect, capex)
+The map is a tilted **3D scene** (MapLibre GL basemap + deck.gl layers):
+
+- **Data centers are lit hexagonal columns** — column **height** = the metric
+  chosen in "3D columns" (power capacity, capex, grid interconnect, consumed,
+  available, or feasibility score); an *Exaggeration* slider scales them.
+  The tallest columns carry floating value labels.
+- **States are extruded slabs** coloured and raised by the selected land/site
+  factor (indigo = worse → gold = better, percentile across states); columns
+  stand on top of their state's slab.
+- **Cable corridors are 3D arcs**, and animated traffic pulses run along the
+  fiber backbone and subsea cables.
+- **Camera dock** (bottom-right): zoom, 2D/3D tilt, reset north, cinematic
+  orbit, traffic animation on/off, and reset view. Right-drag (or two-finger
+  drag on touch) tilts and rotates.
+- **Top bar** shows live KPIs (sites shown, operational, pipeline, capex)
   for the current filter.
-- **Color** = status (green constructed, amber under construction, blue planned).
-- **Circle size** = the metric chosen in "Size markers by" (capex, power
-  capacity, grid interconnect, consumed, or available power).
+- **Color** = status (teal constructed, amber under construction, violet planned).
 - **Filters**: status checkboxes, **operator** dropdown, **construction
   approval** dropdown, and free-text **search** across name, operator, owner,
   tenant, utility, city, and state. "Reset filters" clears everything.
 - The bottom-left panel totals capacity / grid interconnection / capex and shows
   a consumed-vs-available power bar for whatever is currently visible.
-- **Click any site** to open the full profile drawer (power, ownership & legal
-  entity, tenants, grid connection, and commercials/rent). `Esc` closes it.
+- **Click any column** to fly to it and open the full profile drawer (power,
+  ownership & legal entity, tenants, grid connection, and commercials/rent).
+  `Esc` closes it. Hover any layer for a quick card (tap on touch screens).
 
 ## Connectivity, power & geography layers
 
@@ -140,6 +153,37 @@ set: Tier-1 long-haul fiber, major subsea cables, and the busiest corridors.
 Route popups show **indicative capacity** (Tier-1 fiber ~100–400 Tbps, Tier-2
 ~10–100 Tbps, major subsea ~100–300+ Tbps), and an on-map legend explains that
 line thickness ≈ capacity.
+
+## Regulatory scrutiny, delays & expected completion
+
+Every curated site carries a **0–100 regulatory-scrutiny / delivery-risk
+indicator** (`delivery` in `data/datacenters.json`, computed by
+`score_delivery_risk` in `app.py`). It is a transparent heuristic, **not a
+forecast**, built from: approvals still pending, grid-interconnection state,
+ISO/RTO queue congestion, on-site fossil generation (air permits) or nuclear
+co-location (FERC review), gigawatt scale, regional water stress, and
+**documented events** attached to the record (`regulatory_events`, each with a
+date, type, severity and source link; resolved events count half).
+
+- Levels: **Low** (<25), **Moderate** (25–44), **Elevated** (45–64),
+  **High** (65+). Each maps to a modelled delay band (0–3, 3–9, 6–15, 12–24
+  months) and a **risk-adjusted completion** range next to the announced target
+  year (`year`; `year_estimated: true` marks targets that weren't disclosed).
+- **Deal tracker** (top bar / filters panel) lists every pipeline project in
+  the current filter with a today→target bar, hatched delay window, scrutiny
+  level and event count; sort by capacity, scrutiny or completion.
+- Columns can be **coloured and/or sized by scrutiny**; the profile drawer shows
+  the score, its drivers, the timeline and the sourced event log.
+
+Add events to a curated record like:
+
+```jsonc
+"regulatory_events": [
+  { "date": "2026-08", "type": "regulatory", "severity": "high",
+    "text": "State PSC revoked completeness of the transmission application.",
+    "source": "https://…", "resolved": false }
+]
+```
 
 ## Interconnection-queue (grid availability)
 
@@ -220,12 +264,22 @@ layer, which adds locations but rarely power figures).
 }
 ```
 
+## Deploying to Vercel
+
+`vercel.json` configures a static deploy: Vercel runs
+`python3 app.py --build-only` (live OSM/PeeringDB/TeleGeography pull with the
+curated fallback), copies `index.html` + the two generated datasets into
+`public/`, and serves that. Link the GitHub repo in Vercel to redeploy on every
+push; trigger a redeploy (or a deploy hook on a schedule) to refresh the live
+layers.
+
 ## Files
 
 | File                               | Purpose                                            |
 |------------------------------------|----------------------------------------------------|
 | `app.py`                           | Downloads + merges data (OSM + PeeringDB), serves the map |
-| `index.html`                       | The interactive Leaflet map UI + profile drawer + layers |
+| `index.html`                       | The 3D map UI (MapLibre GL + deck.gl) + profile drawer + layers |
+| `vercel.json`                      | Vercel build/deploy config (static, built by `app.py`) |
 | `data/datacenters_curated.json`    | Editable curated dataset (schema v2)               |
 | `data/connectivity_curated.json`   | Editable cable landings + fiber backbone           |
 | `data/datacenters.json`            | Generated combined dataset the map reads           |
