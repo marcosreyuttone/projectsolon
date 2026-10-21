@@ -431,6 +431,14 @@
   </div>
 
   <div class="group">
+    <h2>Capex assumption</h2>
+    <div class="wrow"><span style="width:auto;flex:1">Build cost benchmark</span>
+      <input type="number" id="capexMW" min="3" max="60" step="0.5" value="14" style="width:64px;background:rgba(255,255,255,.03);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-family:var(--mono);font-size:11.5px">
+      <span style="width:auto">$M/MW</span></div>
+    <div class="legend-note" style="margin-top:4px">Used when no capex is disclosed, and for pipeline projects whose announced figure is below capacity × benchmark (usually a first phase). Built sites keep reported figures. Excludes servers / GPUs.</div>
+  </div>
+
+  <div class="group">
     <h2>Search</h2>
     <input type="search" id="search" placeholder="name, operator, owner, tenant, utility, city…" />
   </div>
@@ -657,6 +665,25 @@ function feasColor(s) {
        : s >= 50 ? "#fb923c" : "#f87171";
 }
 
+// Headline capex: announced figure vs capacity x $/MW benchmark (mirrors apply_capex in app.py).
+function applyCapex() {
+  const perMW = Math.max(0, +document.getElementById("capexMW").value || 0) * 1e6;
+  ALL.forEach(d => {
+    const reported = d.capex_reported_usd || 0, model = (d.capacity_mw || 0) * perMW;
+    if (model && !reported) { d.value_usd = model; d.capex_basis = "modelled"; }
+    else if (model && reported < model && d.status !== "constructed") { d.value_usd = model; d.capex_basis = "scaled"; }
+    else { d.value_usd = reported; d.capex_basis = reported ? "reported" : "none"; }
+  });
+}
+function capexNote(dc) {
+  const perMW = +document.getElementById("capexMW").value || 0;
+  const mw = dc.capacity_mw ? Number(dc.capacity_mw).toLocaleString() + " MW" : "";
+  const rep = dc.capex_reported_usd, repPerMW = rep && dc.capacity_mw ? ` ($${(rep / dc.capacity_mw / 1e6).toFixed(1)}M/MW)` : "";
+  if (dc.capex_basis === "scaled") return `Est. capex ${fmtUSD(dc.value_usd)} = ${mw} × $${perMW}M/MW. Announced investment: ${fmtUSD(rep)}${repPerMW} — below the benchmark, so it likely covers a first phase or partial scope.`;
+  if (dc.capex_basis === "modelled") return `No capex disclosed — modelled as ${mw} × $${perMW}M/MW.`;
+  if (dc.capex_basis === "reported") return `Est. capex is the announced / reported figure${repPerMW}.`;
+  return "No capex or capacity disclosed.";
+}
 let WEIGHT_V = 0;   // bumps when feasibility weights change, to refresh colour accessors
 const WDEF = { power:22, grid:18, connectivity:20, land:10, incentives:12, complexity:10, viability:8 };
 // Recompute every site's feasibility score from its stored components using the
@@ -1181,8 +1208,9 @@ function openDrawer(dc, fly) {
       <div class="metric"><span>Capacity</span><b style="color:${s.color}">${fmtCap(dc)}</b></div>
       <div class="metric"><span>Consumed</span><b>${fmtMW(dc.consumed_mw)}</b></div>
       <div class="metric"><span>Available</span><b>${fmtMW(dc.available_mw)}</b></div>
-      <div class="metric"><span>Est. capex</span><b style="color:var(--gold)">${fmtUSD(dc.value_usd)}</b></div>
+      <div class="metric"><span>Est. capex${dc.capex_basis === "reported" ? "" : dc.capex_basis === "none" ? "" : " · modelled"}</span><b style="color:var(--gold)">${fmtUSD(dc.value_usd)}</b></div>
     </div>
+    <div class="mini" style="margin-top:6px;line-height:1.45">${esc(capexNote(dc))}</div>
 
     ${dc.notes ? `<div class="note">${esc(dc.notes)}</div>` : ""}
 
@@ -1332,7 +1360,9 @@ function updateMapLegend() {
     html += `<div class="blk"><h3>${esc(c.label)}</h3>
       <div class="grad" style="background:${RAMP_CSS}"></div>
       <div class="ends"><span>${esc(poor)} · worse</span><span>better · ${esc(good)}</span></div>
-      <div class="ends" style="margin-top:2px"><span>percentile across states · taller = better</span></div></div>`;
+      <div class="ends" style="margin-top:2px"><span>percentile across states · taller = better</span></div>
+      ${f === "attractiveness" ? `<div style="color:var(--muted-2);margin-top:4px;line-height:1.4">= 35% power cost · 30% low hazard (flood, seismic, hurricane, water) · 20% incentives · 15% land cost</div>` : ""}
+      <div style="color:var(--muted-2);margin-top:3px">Flat, unshaded states: no factor data</div></div>`;
   }
   if (linesOn) {
     html += `<div class="blk"><h3>Network</h3>
@@ -1399,6 +1429,9 @@ async function init() {
   } catch (e) { /* connectivity layer is optional */ }
   try { await document.fonts.load('600 11px "JetBrains Mono"'); } catch (e) {}
   ALL = (data.datacenters || []).map((d, i) => (d._i = i, d));
+  if (data.capex_benchmark && data.capex_benchmark.usd_per_mw)
+    document.getElementById("capexMW").value = data.capex_benchmark.usd_per_mw / 1e6;
+  applyCapex();
 
   // Coverage vs estimated US total (dataset-wide, not affected by filters).
   const cts = data.counts || {};
@@ -1489,6 +1522,10 @@ async function init() {
 
   ["sizeBy","operator","permit","minScore","colorBy"].forEach(id => document.getElementById(id).addEventListener("change", render));
   document.getElementById("search").addEventListener("input", onSearch);
+  document.getElementById("capexMW").addEventListener("change", () => {
+    applyCapex(); render();
+    if (SELECTED && document.getElementById("drawer").classList.contains("open")) openDrawer(SELECTED, false);
+  });
   ["dealSort", "dealEvents"].forEach(id => document.getElementById(id).addEventListener("change", renderDeals));
   document.getElementById("openDeals").addEventListener("click", openDeals);
   document.getElementById("topDeals").addEventListener("click", openDeals);

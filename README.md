@@ -154,6 +154,22 @@ Route popups show **indicative capacity** (Tier-1 fiber ~100–400 Tbps, Tier-2
 ~10–100 Tbps, major subsea ~100–300+ Tbps), and an on-map legend explains that
 line thickness ≈ capacity.
 
+## Capex: announced vs modelled
+
+Curated `value_usd` holds the **announced / reported investment** from press
+and company releases (kept as `capex_reported_usd`). Those headline numbers
+often cover only a first phase: many AI campuses announce $2–6M/MW. The map's
+**headline capex** therefore uses a build-cost benchmark (`capex_benchmark` in
+`data/datacenters_curated.json`, default **$14M/MW**, covering land, shell,
+power and cooling but not servers or GPUs):
+
+- no capex disclosed → capacity × benchmark (`capex_basis: "modelled"`);
+- pipeline site with an announced figure below capacity × benchmark → capacity ×
+  benchmark (`"scaled"`), with the announced figure still shown;
+- otherwise, and for all built sites → the reported figure (`"reported"`).
+
+The benchmark is adjustable live in the map's "Capex assumption" box.
+
 ## Regulatory scrutiny, delays & expected completion
 
 Every curated site carries a **0–100 regulatory-scrutiny / delivery-risk
