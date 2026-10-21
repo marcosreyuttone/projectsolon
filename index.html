@@ -2,225 +2,309 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>US Data Center Intelligence Map</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Solon · US Data Center Intelligence</title>
+<meta name="description" content="3D intelligence map of US data centers: capacity, grid interconnection, connectivity and site feasibility." />
+<meta name="theme-color" content="#04060a" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" />
 <style>
   :root {
-    --bg:#0b0f14; --panel:#121a24; --panel-2:#0e151d; --line:#223040; --line-soft:#1a2533;
-    --text:#eaf1f8; --muted:#8ea2b8; --muted-2:#5f7388;
-    --accent:#4ea1ff; --accent-2:#7cc4ff;
-    --green:#34d399; --amber:#fbbf24; --blue:#60a5fa; --red:#f87171; --grid:#a78bfa;
+    --bg:#04060a; --panel:rgba(8,12,20,.80); --panel-solid:#0a0f19; --panel-2:rgba(255,255,255,.035);
+    --line:rgba(120,170,255,.14); --line-soft:rgba(120,170,255,.08); --line-hot:rgba(56,225,255,.45);
+    --text:#e8eef8; --muted:#8796ad; --muted-2:#56647a;
+    --accent:#38e1ff; --accent-2:#7cf0ff; --gold:#ffc24a;
+    --st-built:#2ee6a6; --st-uc:#ffb020; --st-plan:#8f7cff;
+    --green:#34d399; --amber:#fbbf24; --red:#f87171; --violet:#a78bfa;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   * { box-sizing:border-box; }
-  html, body { margin:0; height:100%; font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  html, body { margin:0; height:100%; overflow:hidden; font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
-  #map { position:absolute; inset:0; background:#0b0f14; }
+  #map { position:absolute; inset:0; background:var(--bg); }
+  /* cinematic vignette + faint scanlines over the scene */
+  #vignette { position:absolute; inset:0; z-index:5; pointer-events:none;
+    background:
+      radial-gradient(ellipse at 50% 55%, transparent 45%, rgba(2,3,6,.55) 100%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px); }
 
-  /* ---- Top brand bar ---- */
+  /* ---- Top HUD bar ---- */
   #topbar {
-    position:absolute; z-index:1100; top:0; left:0; right:0; height:52px;
+    position:absolute; z-index:1100; top:0; left:0; right:0; height:54px;
     display:flex; align-items:center; gap:14px; padding:0 18px;
-    background:linear-gradient(180deg,rgba(11,15,20,.96),rgba(11,15,20,.78));
-    border-bottom:1px solid var(--line); backdrop-filter:blur(8px);
+    background:linear-gradient(180deg,rgba(4,6,10,.92),rgba(4,6,10,.55) 70%,rgba(4,6,10,0));
   }
-  #topbar .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px; font-size:15px; }
-  #topbar .brand .dot { width:10px; height:10px; border-radius:50%; background:var(--accent);
-    box-shadow:0 0 0 4px rgba(78,161,255,.18); }
-  #topbar .tag { font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:2px 9px; }
+  #topbar .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.3px; font-size:14px; }
+  #topbar .brand .logo { width:22px; height:22px; border-radius:6px; position:relative;
+    background:linear-gradient(135deg,#0b2a3a,#102040); border:1px solid var(--line-hot);
+    box-shadow:0 0 18px rgba(56,225,255,.35), inset 0 0 10px rgba(56,225,255,.25); }
+  #topbar .brand .logo::before, #topbar .brand .logo::after { content:""; position:absolute; left:5px; right:5px; height:2px;
+    background:var(--accent); border-radius:2px; box-shadow:0 0 6px var(--accent); }
+  #topbar .brand .logo::before { top:7px; } #topbar .brand .logo::after { top:12px; opacity:.6; }
+  #topbar .brand .sub { color:var(--muted); font-weight:500; }
+  #topbar .tag { font-family:var(--mono); font-size:10px; color:var(--accent); border:1px solid var(--line-hot);
+    border-radius:999px; padding:3px 9px; display:flex; align-items:center; gap:6px; letter-spacing:.06em; }
+  #topbar .tag .live { width:6px; height:6px; border-radius:50%; background:var(--st-built); box-shadow:0 0 8px var(--st-built);
+    animation:blink 1.8s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity:.25; } }
   #topbar .spacer { flex:1; }
-  #topbar .kpi { display:flex; gap:18px; align-items:center; }
+  #topbar .kpi { display:flex; gap:22px; align-items:center; }
   #topbar .kpi .k { text-align:right; line-height:1.15; }
-  #topbar .kpi .k b { font-size:14px; font-variant-numeric:tabular-nums; display:block; }
-  #topbar .kpi .k span { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  #topbar .kpi .k b { font-family:var(--mono); font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; display:block; }
+  #topbar .kpi .k span { font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.09em; }
+  #topbar .kpi .k.hot b { color:var(--accent); text-shadow:0 0 14px rgba(56,225,255,.45); }
+  #topbar .kpi .k.gold b { color:var(--gold); text-shadow:0 0 14px rgba(255,194,74,.35); }
+  @media (max-width:1100px){ #topbar .kpi .k.opt{ display:none; } }
   @media (max-width:900px){ #topbar .kpi{ display:none; } }
 
-  .panel { position:absolute; z-index:1000; background:rgba(18,26,36,.95); border:1px solid var(--line);
-    border-radius:14px; box-shadow:0 10px 34px rgba(0,0,0,.5); backdrop-filter:blur(8px); }
+  /* ---- Glass panels with HUD corner ticks ---- */
+  .panel { position:absolute; z-index:1000; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%); }
+  .panel::before, .panel::after { content:""; position:absolute; width:10px; height:10px; pointer-events:none;
+    border-color:var(--line-hot); border-style:solid; }
+  .panel::before { top:-1px; left:-1px; border-width:1px 0 0 1px; border-radius:12px 0 0 0; }
+  .panel::after { bottom:-1px; right:-1px; border-width:0 1px 1px 0; border-radius:0 0 12px 0; }
 
-  #controls { top:64px; left:14px; width:300px; max-height:calc(100% - 460px); overflow:auto; padding:16px; }
-  #controls::-webkit-scrollbar{ width:8px; } #controls::-webkit-scrollbar-thumb{ background:var(--line); border-radius:8px; }
+  #controls { top:62px; left:14px; width:296px; max-height:calc(100% - 470px); min-height:180px; overflow:auto; padding:14px 16px; }
+  #controls::-webkit-scrollbar, #stats::-webkit-scrollbar, #drawer::-webkit-scrollbar, #operators::-webkit-scrollbar { width:6px; }
+  #controls::-webkit-scrollbar-thumb, #stats::-webkit-scrollbar-thumb, #drawer::-webkit-scrollbar-thumb, #operators::-webkit-scrollbar-thumb { background:var(--line); border-radius:8px; }
   .group { margin:14px 0; }
-  .group:first-child { margin-top:4px; }
-  .group h2 { font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 8px;
-    display:flex; align-items:center; gap:8px; }
-  .group h2::after { content:""; flex:1; height:1px; background:var(--line-soft); }
-  label.row { display:flex; align-items:center; gap:9px; font-size:13px; padding:4px 0; cursor:pointer; user-select:none; }
-  label.row input { accent-color:var(--accent); width:15px; height:15px; }
-  label.row .count { margin-left:auto; font-size:11px; color:var(--muted-2); font-variant-numeric:tabular-nums; }
-  .swatch { width:11px; height:11px; border-radius:50%; display:inline-block; border:1px solid rgba(255,255,255,.4); }
-  select, input[type=search] { width:100%; background:var(--panel-2); color:var(--text); border:1px solid var(--line);
-    border-radius:9px; padding:8px 10px; font-size:13px; outline:none; }
-  select:focus, input[type=search]:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(78,161,255,.15); }
-  .legend-note { font-size:10.5px; color:var(--muted-2); margin-top:10px; line-height:1.5; }
+  .group:first-child { margin-top:2px; }
+  .group h2 { font-family:var(--mono); font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:.14em; color:var(--accent);
+    opacity:.85; margin:0 0 8px; display:flex; align-items:center; gap:8px; }
+  .group h2::after { content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent); }
+  label.row { display:flex; align-items:center; gap:9px; font-size:12.5px; padding:4px 0; cursor:pointer; user-select:none; }
+  label.row input { accent-color:var(--accent); width:14px; height:14px; }
+  label.row .count { margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--muted-2); font-variant-numeric:tabular-nums; }
+  label.row .hint2 { color:var(--muted-2); font-size:10px; }
+  .swatch { width:10px; height:10px; border-radius:3px; display:inline-block; flex:none; box-shadow:0 0 8px currentColor; }
+  select, input[type=search] { width:100%; background:rgba(255,255,255,.03); color:var(--text); border:1px solid var(--line);
+    border-radius:8px; padding:8px 10px; font-size:12.5px; outline:none; font-family:inherit; }
+  select option { background:var(--panel-solid); }
+  select:focus, input[type=search]:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(56,225,255,.12); }
+  .legend-note { font-size:10.5px; color:var(--muted-2); margin-top:10px; line-height:1.55; }
   .wrow { display:flex; align-items:center; gap:8px; font-size:11.5px; padding:2px 0; }
   .wrow span { width:74px; color:var(--muted); }
   .wrow input[type=range] { flex:1; accent-color:var(--accent); height:4px; }
-  .wrow b { width:20px; text-align:right; font-variant-numeric:tabular-nums; font-size:11px; }
-  .wreset { float:right; background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:6px; font-size:10px; padding:1px 7px; cursor:pointer; text-transform:none; letter-spacing:0; }
-  .subfilter { margin:8px 0 2px; padding:7px 9px; border:1px dashed var(--line); border-radius:9px; background:rgba(255,255,255,.02); }
+  .wrow b { width:26px; text-align:right; font-family:var(--mono); font-weight:500; font-variant-numeric:tabular-nums; font-size:10.5px; }
+  .wreset { margin-left:auto; background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:6px; font-size:9.5px;
+    padding:1px 7px; cursor:pointer; text-transform:none; letter-spacing:0; font-family:var(--mono); }
+  .subfilter { margin:8px 0 2px; padding:7px 9px; border:1px dashed var(--line); border-radius:8px; background:rgba(255,255,255,.015); }
   .subfilter .hint { font-size:10px; color:var(--muted-2); margin-top:2px; line-height:1.4; padding-left:23px; }
-  .reset { width:100%; margin-top:6px; background:transparent; color:var(--accent); border:1px solid var(--line);
-    border-radius:9px; padding:8px; font-size:12.5px; cursor:pointer; }
-  .reset:hover { background:rgba(78,161,255,.1); }
+  .reset { width:100%; margin-top:6px; background:rgba(56,225,255,.04); color:var(--accent); border:1px solid var(--line);
+    border-radius:8px; padding:8px; font-size:12px; cursor:pointer; font-family:inherit; }
+  .reset:hover { background:rgba(56,225,255,.1); border-color:var(--line-hot); }
 
-  /* ---- Stats / legend bottom-left ---- */
-  #stats { bottom:14px; left:14px; width:300px; padding:14px 16px; max-height:430px; overflow:auto; }
+  /* ---- Stats / metrics bottom-left ---- */
+  #stats { bottom:14px; left:14px; width:296px; padding:14px 16px; max-height:392px; overflow:auto; }
   .stats-head { display:none; }
-  .stat { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; padding:4px 0;
+  .stat { display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; padding:4px 0;
     border-bottom:1px dashed var(--line-soft); }
   .stat:last-of-type { border-bottom:0; }
-  .stat b { font-variant-numeric:tabular-nums; }
-  .stat small { color:var(--muted); font-size:11px; }
-  .bar { height:9px; border-radius:5px; background:var(--panel-2); overflow:hidden; margin:8px 0 4px; display:flex; }
+  .stat span { color:#c3cede; }
+  .stat b { font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums; }
+  .bigstats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .bigstats .bs { background:var(--panel-2); border:1px solid var(--line-soft); border-radius:9px; padding:8px 10px; }
+  .bigstats .bs span { font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); display:block; }
+  .bigstats .bs b { font-family:var(--mono); font-size:17px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .bar { height:8px; border-radius:5px; background:rgba(255,255,255,.05); overflow:hidden; margin:8px 0 4px; display:flex; }
   .bar > span { display:block; height:100%; }
-  .barlbl { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); }
+  .barlbl { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); font-family:var(--mono); }
+  /* capacity-by-year stacked bars */
+  #timeline { display:flex; align-items:flex-end; gap:2px; height:64px; margin:8px 0 3px; }
+  #timeline .yb { flex:1; display:flex; flex-direction:column-reverse; height:100%; cursor:default; position:relative; }
+  #timeline .yb span { display:block; width:100%; border-radius:1px; }
+  #timeline .yb:hover { background:rgba(255,255,255,.04); }
+  #timeline .yb.now::after { content:""; position:absolute; left:50%; top:-4px; bottom:0; border-left:1px dashed rgba(255,255,255,.35); }
+  .tl-axis { display:flex; justify-content:space-between; font-family:var(--mono); font-size:9px; color:var(--muted-2); }
+  .tl-key { display:flex; gap:10px; font-size:10px; color:var(--muted); margin-top:5px; }
+  .tl-key i { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:4px; vertical-align:-1px; }
 
   /* ---- Detail drawer ---- */
-  #drawer { position:absolute; z-index:1200; top:64px; right:14px; width:340px; max-height:calc(100% - 78px);
-    overflow:auto; padding:0; transform:translateX(380px); opacity:0; transition:transform .22s ease, opacity .22s ease;
+  #drawer { position:absolute; z-index:1200; top:62px; right:14px; width:352px; max-height:calc(100% - 140px);
+    overflow:auto; padding:0; transform:translateX(390px); opacity:0; transition:transform .28s cubic-bezier(.2,.8,.2,1), opacity .22s ease;
     pointer-events:none; }
   #drawer.open { transform:translateX(0); opacity:1; pointer-events:auto; }
-  #drawer .dh { position:sticky; top:0; background:linear-gradient(180deg,rgba(18,26,36,.99),rgba(18,26,36,.92));
-    padding:16px 18px 12px; border-bottom:1px solid var(--line); border-radius:14px 14px 0 0; }
-  #drawer .dh h3 { margin:0 0 8px; font-size:15.5px; line-height:1.3; padding-right:22px; }
-  #drawer .close { position:absolute; top:12px; right:12px; width:26px; height:26px; border-radius:7px;
-    background:var(--panel-2); border:1px solid var(--line); color:var(--muted); cursor:pointer; font-size:15px; line-height:1; }
-  #drawer .close:hover { color:var(--text); border-color:var(--accent); }
+  #drawer .dh, #operators .dh { position:sticky; top:0; z-index:2; background:linear-gradient(180deg,rgba(8,12,20,.98),rgba(8,12,20,.9));
+    padding:16px 18px 12px; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
+  #drawer .dh h3 { margin:0 0 8px; font-size:15.5px; line-height:1.3; padding-right:24px; }
+  .close { position:absolute; top:12px; right:12px; width:26px; height:26px; border-radius:7px;
+    background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--muted); cursor:pointer; font-size:15px; line-height:1; }
+  .close:hover { color:var(--text); border-color:var(--accent); }
   #drawer .body { padding:14px 18px 20px; }
   .pill { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:600; padding:3px 9px;
     border-radius:999px; margin:0 6px 6px 0; }
-  .pill .swatch { width:8px; height:8px; }
-  .sec { margin:16px 0 6px; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);
-    display:flex; align-items:center; gap:8px; }
-  .sec::after { content:""; flex:1; height:1px; background:var(--line-soft); }
+  .pill .swatch { width:7px; height:7px; border-radius:50%; }
+  .sec { margin:16px 0 6px; font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.14em; color:var(--accent);
+    opacity:.85; display:flex; align-items:center; gap:8px; }
+  .sec::after { content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent); }
   .kv { display:flex; justify-content:space-between; gap:14px; font-size:12.5px; padding:4px 0; line-height:1.4; }
   .kv .k { color:var(--muted); white-space:nowrap; }
   .kv .v { text-align:right; }
+  .mini { color:var(--muted); font-size:11px; }
   .tenants { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
   .tenants .t { font-size:11.5px; background:var(--panel-2); border:1px solid var(--line); border-radius:7px; padding:3px 8px; }
-  .metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; }
-  .metric { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:9px 11px; }
-  .metric span { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; display:block; }
-  .metric b { font-size:15px; font-variant-numeric:tabular-nums; }
+  .metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+  .metric { background:var(--panel-2); border:1px solid var(--line-soft); border-radius:9px; padding:9px 11px; }
+  .metric span { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; display:block; }
+  .metric b { font-family:var(--mono); font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
 
   /* Operators leaderboard panel */
-  #operators { position:absolute; z-index:1200; top:64px; right:14px; width:340px; max-height:calc(100% - 78px);
-    overflow:auto; padding:0; transform:translateX(380px); opacity:0; transition:transform .22s ease, opacity .22s ease;
+  #operators { position:absolute; z-index:1200; top:62px; right:14px; width:352px; max-height:calc(100% - 140px);
+    overflow:auto; padding:0; transform:translateX(390px); opacity:0; transition:transform .28s cubic-bezier(.2,.8,.2,1), opacity .22s ease;
     pointer-events:none; }
   #operators.open { transform:translateX(0); opacity:1; pointer-events:auto; }
-  .op-row { display:grid; grid-template-columns:18px 1fr auto; gap:9px; align-items:center; padding:8px 9px;
-    border-radius:9px; cursor:pointer; border:1px solid transparent; }
+  #operators .dh h3 { margin:0 0 4px; font-size:15px; }
+  .op-row { display:grid; grid-template-columns:20px 1fr auto; gap:9px; align-items:center; padding:8px 9px;
+    border-radius:8px; cursor:pointer; border:1px solid transparent; }
   .op-row:hover { background:var(--panel-2); border-color:var(--line); }
-  .op-row .rk { font-size:11px; color:var(--muted-2); text-align:right; font-variant-numeric:tabular-nums; }
+  .op-row .rk { font-family:var(--mono); font-size:10.5px; color:var(--muted-2); text-align:right; }
   .op-row .nm { font-size:12.5px; line-height:1.25; }
   .op-row .nm .tg { display:inline-block; font-size:9.5px; padding:1px 6px; border-radius:999px; margin-top:3px; }
-  .op-row .gw { text-align:right; font-variant-numeric:tabular-nums; }
-  .op-row .gw b { font-size:13px; } .op-row .gw span { display:block; font-size:10px; color:var(--muted); }
-  .op-bar { height:4px; border-radius:3px; background:#4ea1ff; margin-top:4px; }
+  .op-row .gw { text-align:right; }
+  .op-row .gw b { font-family:var(--mono); font-size:12.5px; font-weight:600; } .op-row .gw span { display:block; font-size:10px; color:var(--muted); }
+  .op-bar { height:3px; border-radius:3px; background:linear-gradient(90deg,var(--accent),var(--st-plan)); margin-top:5px;
+    box-shadow:0 0 8px rgba(56,225,255,.4); }
 
-  #mapLegend { position:absolute; z-index:1000; right:14px; bottom:96px; width:186px; padding:10px 12px; font-size:11px; }
-  #mapLegend h3 { font-size:11px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-  #mapLegend .grad { height:9px; border-radius:5px; margin:3px 0 2px; }
+  /* ---- On-map legend ---- */
+  #mapLegend { position:absolute; z-index:1000; right:14px; bottom:70px; width:214px; padding:11px 13px; font-size:11px; }
+  #mapLegend h3 { font-family:var(--mono); font-size:9.5px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); font-weight:600; }
+  #mapLegend .grad { height:8px; border-radius:5px; margin:3px 0 2px; }
   #mapLegend .ends { display:flex; justify-content:space-between; color:var(--muted); font-size:10px; }
-  #mapLegend .lines { margin-top:8px; border-top:1px solid var(--line-soft); padding-top:7px; line-height:1.7; }
+  #mapLegend .blk + .blk { margin-top:9px; border-top:1px solid var(--line-soft); padding-top:8px; }
   #mapLegend .ln { display:inline-block; width:22px; height:0; vertical-align:middle; margin-right:6px; }
-  @media (max-width:900px){ #mapLegend{ display:none !important; } }
+  #mapLegend .st { display:flex; align-items:center; gap:7px; line-height:1.7; }
+  #mapLegend .col { display:inline-flex; align-items:flex-end; gap:2px; height:16px; margin-right:6px; vertical-align:middle; }
+  #mapLegend .col i { display:block; width:4px; background:var(--accent); border-radius:1px; opacity:.9; }
 
-  #loading { z-index:2000; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; padding:20px 26px; }
+  /* ---- Camera dock ---- */
+  #camdock { position:absolute; z-index:1000; right:14px; bottom:14px; display:flex; gap:4px; padding:5px; border-radius:12px; }
+  #camdock button { width:38px; height:38px; display:grid; place-items:center; border-radius:8px; cursor:pointer;
+    background:transparent; border:1px solid transparent; color:#b7c3d6; font-family:var(--mono); font-size:11px; font-weight:600; }
+  #camdock button:hover { background:rgba(255,255,255,.05); color:var(--text); }
+  #camdock button[aria-pressed="true"] { color:var(--accent); border-color:var(--line-hot); background:rgba(56,225,255,.08);
+    box-shadow:0 0 14px rgba(56,225,255,.18) inset; }
+  #camdock svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  #camdock .sep { width:1px; background:var(--line); margin:6px 2px; }
+  #compass svg { transition:transform .1s linear; }
+
+  #loading { z-index:2000; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; padding:22px 28px;
+    font-family:var(--mono); font-size:12px; color:var(--muted); letter-spacing:.06em; }
+  #loading .bars { display:flex; justify-content:center; gap:4px; height:26px; align-items:flex-end; margin-bottom:12px; }
+  #loading .bars i { width:5px; background:var(--accent); border-radius:1px; box-shadow:0 0 10px var(--accent); animation:eq 1s ease-in-out infinite; }
+  #loading .bars i:nth-child(2){ animation-delay:.12s } #loading .bars i:nth-child(3){ animation-delay:.24s }
+  #loading .bars i:nth-child(4){ animation-delay:.36s } #loading .bars i:nth-child(5){ animation-delay:.48s }
+  @keyframes eq { 0%,100% { height:6px; opacity:.5 } 50% { height:26px; opacity:1 } }
 
   /* Mobile toggle button (hidden on desktop) */
-  #panelToggle { display:none; position:absolute; z-index:1300; top:60px; left:12px;
-    background:rgba(18,26,36,.96); color:var(--text); border:1px solid var(--line);
-    border-radius:10px; padding:8px 12px; font-size:13px; font-weight:600; cursor:pointer;
-    box-shadow:0 6px 20px rgba(0,0,0,.45); }
+  #panelToggle { display:none; position:absolute; z-index:1300; top:54px; left:10px;
+    background:var(--panel); color:var(--text); border:1px solid var(--line);
+    border-radius:10px; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit;
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); box-shadow:0 6px 20px rgba(0,0,0,.45); }
+
+  /* deck.gl hover tooltip + click popups */
+  .deck-tooltip { background:rgba(8,12,20,.94) !important; color:var(--text) !important; border:1px solid var(--line-hot) !important;
+    border-radius:10px !important; padding:9px 11px !important; font-family:"Inter",system-ui,sans-serif !important; font-size:12px !important;
+    line-height:1.45 !important; max-width:280px; box-shadow:0 10px 30px rgba(0,0,0,.55); backdrop-filter:blur(10px); }
+  .tip h4 { margin:0 0 3px; font-size:13px; }
+  .tip .mini { font-size:11px; color:var(--muted); }
+  .tip .num { font-family:var(--mono); }
+  .tip .kv { font-size:11.5px; padding:1px 0; }
+  .maplibregl-popup-content { background:rgba(8,12,20,.95); color:var(--text); border:1px solid var(--line-hot); border-radius:10px;
+    padding:10px 12px; font-size:12px; line-height:1.45; box-shadow:0 10px 30px rgba(0,0,0,.55); }
+  .maplibregl-popup-tip { border-top-color:rgba(8,12,20,.95) !important; border-bottom-color:rgba(8,12,20,.95) !important; }
+  .maplibregl-popup-close-button { color:var(--muted); font-size:16px; right:4px; top:2px; }
+  .maplibregl-ctrl-attrib { background:rgba(4,6,10,.6) !important; color:var(--muted-2) !important; font-size:10px; }
+  .maplibregl-ctrl-attrib a { color:var(--muted) !important; }
+  .maplibregl-ctrl-attrib-button { filter:invert(1); }
 
   /* ---- Mobile / small screens ---- */
   @media (max-width:900px) {
-    #topbar { height:46px; padding:0 12px; }
+    #topbar { height:48px; padding:0 12px; }
     #topbar .brand { font-size:13px; }
-    #topbar .tag { display:none; }
+    #topbar .brand .sub, #topbar .tag { display:none; }
     #panelToggle { display:block; }
-    /* keep the zoom +/- clear of the bottom sheet panels on compact screens */
-    .leaflet-bottom.leaflet-right { top:54px; bottom:auto; }
-    #controls { top:104px; left:8px; right:8px; width:auto; max-height:60%; }
+    #controls { top:96px; left:8px; right:8px; width:auto; max-height:58%; }
     #controls.collapsed { display:none !important; }
-    #stats { left:8px; right:8px; bottom:8px; width:auto; max-height:58%; overflow:auto; padding:0; }
+    #stats { left:8px; right:8px; bottom:8px; width:auto; max-height:56%; overflow:auto; padding:0; }
     .stats-head { display:flex; justify-content:space-between; align-items:center; cursor:pointer;
-      padding:12px 16px; position:sticky; top:0; background:rgba(18,26,36,.97); border-radius:14px 14px 0 0;
-      font-size:13.5px; z-index:1; }
+      padding:12px 16px; position:sticky; top:0; background:rgba(8,12,20,.97); border-radius:12px 12px 0 0;
+      font-size:13px; z-index:1; }
     .stats-head .chev { transition:transform .2s ease; color:var(--muted); }
     .stats-body { padding:0 16px 14px; }
     #stats.collapsed { max-height:none; overflow:visible; }
-    #stats.collapsed .stats-head { border-radius:14px; }
+    #stats.collapsed .stats-head { border-radius:12px; }
     #stats.collapsed .stats-head .chev { transform:rotate(-90deg); }
     #stats.collapsed .stats-body { display:none; }
-    #drawer { top:auto; left:8px; right:8px; bottom:8px; width:auto; max-height:78%;
-      transform:translateY(120%); }
-    #drawer.open { transform:translateY(0); }
-    .metric-grid { grid-template-columns:1fr 1fr; }
+    #drawer, #operators { top:auto; left:8px; right:8px; bottom:8px; width:auto; max-height:78%; transform:translateY(120%); }
+    #drawer.open, #operators.open { transform:translateY(0); }
+    #mapLegend { display:none !important; }
+    #camdock { top:96px; right:8px; bottom:auto; flex-direction:column; }
+    #camdock .sep { width:auto; height:1px; margin:2px 6px; }
+    #camdock button { width:36px; height:36px; }
   }
-
-  /* Leaflet popup (compact hover-style card) */
-  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background:#10171f; color:var(--text); border:1px solid var(--line); }
-  .leaflet-popup-content-wrapper { border-radius:12px; }
-  .leaflet-popup-content { margin:11px 13px; font-size:12.5px; line-height:1.5; min-width:180px; }
-  .leaflet-popup-content h4 { margin:0 0 5px; font-size:13.5px; }
-  .leaflet-popup-content .mini { color:var(--muted); font-size:11px; }
-  .leaflet-popup-content .more { color:var(--accent); font-size:11px; margin-top:6px; cursor:pointer; }
-  .leaflet-container a.leaflet-popup-close-button { color:var(--muted); }
 </style>
 </head>
 <body>
 <div id="map"></div>
+<div id="vignette"></div>
 
 <div id="topbar">
-  <div class="brand"><span class="dot"></span> US Data Center Intelligence</div>
-  <span class="tag">curated + OpenStreetMap</span>
+  <div class="brand"><span class="logo"></span> SOLON <span class="sub">· US Data Center Intelligence</span></div>
+  <span class="tag"><span class="live"></span><span id="builtTag">VERIFIED DATASET</span></span>
   <div class="spacer"></div>
   <div class="kpi">
     <div class="k"><b id="kpi-sites">—</b><span>Sites shown</span></div>
-    <div class="k"><b id="kpi-cap">—</b><span>Operational</span></div>
-    <div class="k"><b id="kpi-grid">—</b><span>Pipeline</span></div>
-    <div class="k"><b id="kpi-val">—</b><span>Capex</span></div>
+    <div class="k hot"><b id="kpi-cap">—</b><span>Operational</span></div>
+    <div class="k gold"><b id="kpi-grid">—</b><span>Pipeline</span></div>
+    <div class="k opt"><b id="kpi-val">—</b><span>Capex</span></div>
   </div>
 </div>
 
 <button id="panelToggle">☰ Filters</button>
 <div id="mapLegend" class="panel" style="display:none"></div>
 
-<div id="loading" class="panel">Loading data center intelligence…</div>
+<div id="loading" class="panel"><div class="bars"><i></i><i></i><i></i><i></i><i></i></div>Loading data center intelligence…</div>
+
+<div id="camdock" class="panel" style="display:none">
+  <button id="zIn" title="Zoom in" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button id="zOut" title="Zoom out" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+  <span class="sep"></span>
+  <button id="b3d" title="Toggle 3D tilt" aria-pressed="true">3D</button>
+  <button id="compass" title="Reset north" aria-label="Reset north"><svg viewBox="0 0 24 24"><path d="M12 3l4 9h-8z" fill="currentColor" stroke="none"/><path d="M12 21l-4-9h8z"/></svg></button>
+  <button id="bOrbit" title="Cinematic orbit" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M20 12a8 4 0 1 1-3-3.1"/><path d="M17 5.5l.2 3.5-3.4.4"/><circle cx="12" cy="12" r="1.6"/></svg></button>
+  <button id="bFlow" title="Animate network traffic" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M3 8c3 0 3 3 6 3s3-3 6-3 3 3 6 3"/><path d="M3 15c3 0 3 3 6 3s3-3 6-3 3 3 6 3" opacity=".5"/></svg></button>
+  <button id="bHome" title="Reset view" aria-label="Reset view"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg></button>
+</div>
 
 <div id="controls" class="panel" style="display:none">
   <div class="group">
     <h2>Status</h2>
-    <label class="row"><input type="checkbox" class="f-status" value="constructed" checked><span class="swatch" style="background:var(--green)"></span> Constructed <span class="count" data-status="constructed"></span></label>
-    <label class="row"><input type="checkbox" class="f-status" value="under_construction" checked><span class="swatch" style="background:var(--amber)"></span> Under construction <span class="count" data-status="under_construction"></span></label>
-    <label class="row"><input type="checkbox" class="f-status" value="planned" checked><span class="swatch" style="background:var(--blue)"></span> Planned <span class="count" data-status="planned"></span></label>
+    <label class="row"><input type="checkbox" class="f-status" value="constructed" checked><span class="swatch" style="background:var(--st-built);color:var(--st-built)"></span> Constructed <span class="count" data-status="constructed"></span></label>
+    <label class="row"><input type="checkbox" class="f-status" value="under_construction" checked><span class="swatch" style="background:var(--st-uc);color:var(--st-uc)"></span> Under construction <span class="count" data-status="under_construction"></span></label>
+    <label class="row"><input type="checkbox" class="f-status" value="planned" checked><span class="swatch" style="background:var(--st-plan);color:var(--st-plan)"></span> Planned <span class="count" data-status="planned"></span></label>
   </div>
 
   <div class="group">
-    <h2>Connectivity layers</h2>
-    <label class="row"><input type="checkbox" id="L-backbone"><span class="swatch" style="background:#f59e0b"></span> Fiber backbone <span style="color:var(--muted-2);font-size:10px">physical long-haul</span> <span class="count" id="c-bb"></span></label>
-    <label class="row"><input type="checkbox" id="L-corridors"><span class="swatch" style="background:#38bdf8"></span> Cable corridors <span style="color:var(--muted-2);font-size:10px">interconnect mesh</span> <span class="count" id="c-cor"></span></label>
-    <label class="row"><input type="checkbox" id="L-cable"><span class="swatch" style="background:#22d3ee"></span> Submarine cables <span class="count" id="c-cable"></span></label>
-    <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
-    <div class="subfilter">
-      <label class="row" style="padding:2px 0"><input type="checkbox" id="L-major"> <span style="font-size:13px">⚡ High-capacity only</span></label>
-      <div class="hint">Tier-1 long-haul fiber, major subsea cables &amp; the busiest corridors</div>
-    </div>
-  </div>
-
-  <div class="group">
-    <h2>Power & geography</h2>
-    <label class="row"><input type="checkbox" id="L-power"><span class="swatch" style="background:#f472b6"></span> Power / central stations <span class="count" id="c-pow"></span></label>
-    <label class="row"><input type="checkbox" id="L-rivers"><span class="swatch" style="background:#2dd4bf"></span> Major rivers <span class="count" id="c-riv"></span></label>
+    <h2>3D columns</h2>
+    <select id="sizeBy">
+      <option value="capacity_mw">Height = power capacity (MW)</option>
+      <option value="value_usd">Height = estimated capex (USD)</option>
+      <option value="interconnection_mw">Height = grid interconnect (MW)</option>
+      <option value="consumed_mw">Height = power consumed (MW)</option>
+      <option value="available_mw">Height = power available (MW)</option>
+      <option value="feasibility">Height = feasibility score</option>
+    </select>
+    <div class="wrow" style="margin-top:8px"><span>Exaggeration</span><input type="range" id="hMul" min="0.3" max="3" step="0.1" value="1"><b id="hMulV">1.0×</b></div>
+    <label class="row"><input type="checkbox" id="L-labels" checked> Value labels on tallest columns</label>
   </div>
 
   <div class="group">
     <h2>Land &amp; site factors</h2>
-    <label class="row"><input type="checkbox" id="L-states"><span class="swatch" style="background:linear-gradient(90deg,#ef4444,#fbbf24,#34d399)"></span> State choropleth</label>
+    <label class="row"><input type="checkbox" id="L-states" checked><span class="swatch" style="background:linear-gradient(90deg,#2a1650,#c2417a,#ffd166);color:#c2417a"></span> Extruded state terrain</label>
     <select id="choroFactor" style="margin-top:6px">
       <option value="attractiveness">Site attractiveness (composite)</option>
       <option value="grid_availability">Grid availability (ISO queue)</option>
@@ -231,6 +315,24 @@
       <option value="flood">Flood risk</option>
       <option value="seismic">Seismic risk</option>
     </select>
+  </div>
+
+  <div class="group">
+    <h2>Connectivity layers</h2>
+    <label class="row"><input type="checkbox" id="L-backbone" checked><span class="swatch" style="background:#ffb020;color:#ffb020"></span> Fiber backbone <span class="hint2">long-haul</span> <span class="count" id="c-bb"></span></label>
+    <label class="row"><input type="checkbox" id="L-corridors" checked><span class="swatch" style="background:#38e1ff;color:#38e1ff"></span> Cable corridors <span class="hint2">3D arcs</span> <span class="count" id="c-cor"></span></label>
+    <label class="row"><input type="checkbox" id="L-cable"><span class="swatch" style="background:#22d3ee;color:#22d3ee"></span> Submarine cables <span class="count" id="c-cable"></span></label>
+    <label class="row"><input type="checkbox" id="L-ix"><span class="swatch" style="background:#a78bfa;color:#a78bfa"></span> Interconnection hubs <span class="count" id="c-ix"></span></label>
+    <div class="subfilter">
+      <label class="row" style="padding:2px 0"><input type="checkbox" id="L-major"> <span style="font-size:12.5px">⚡ High-capacity only</span></label>
+      <div class="hint">Tier-1 long-haul fiber, major subsea cables &amp; the busiest corridors</div>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Power &amp; geography</h2>
+    <label class="row"><input type="checkbox" id="L-power"><span class="swatch" style="background:#f472b6;color:#f472b6"></span> Power stations <span class="hint2">3D spikes</span> <span class="count" id="c-pow"></span></label>
+    <label class="row"><input type="checkbox" id="L-rivers"><span class="swatch" style="background:#2dd4bf;color:#2dd4bf"></span> Major rivers <span class="count" id="c-riv"></span></label>
   </div>
 
   <div class="group">
@@ -250,18 +352,6 @@
   </div>
 
   <div class="group">
-    <h2>Size markers by</h2>
-    <select id="sizeBy">
-      <option value="value_usd">Estimated capex (USD)</option>
-      <option value="capacity_mw">Power capacity (MW)</option>
-      <option value="interconnection_mw">Grid interconnect (MW)</option>
-      <option value="consumed_mw">Power consumed (MW)</option>
-      <option value="available_mw">Power available (MW)</option>
-      <option value="feasibility">Feasibility score</option>
-    </select>
-  </div>
-
-  <div class="group">
     <h2>Site feasibility</h2>
     <select id="minScore">
       <option value="0">Any feasibility</option>
@@ -269,7 +359,7 @@
       <option value="70">Score 70+ (good)</option>
       <option value="80">Score 80+ (excellent)</option>
     </select>
-    <label class="row" style="margin-top:6px"><input type="checkbox" id="colorFeas"><span style="width:11px"></span> Color markers by feasibility</label>
+    <label class="row" style="margin-top:6px"><input type="checkbox" id="colorFeas"> Color columns by feasibility</label>
   </div>
 
   <div class="group">
@@ -281,7 +371,7 @@
     <div class="wrow"><span>Incentives</span><input type="range" class="fw" data-k="incentives" min="0" max="40" value="12"><b>12</b></div>
     <div class="wrow"><span>Low hazard</span><input type="range" class="fw" data-k="complexity" min="0" max="40" value="10"><b>10</b></div>
     <div class="wrow"><span>LT viability</span><input type="range" class="fw" data-k="viability" min="0" max="40" value="8"><b>8</b></div>
-    <div class="legend-note" style="margin-top:4px">Drag to reweight — feasibility scores, colours &amp; "size by feasibility" recompute live (weights auto-normalised).</div>
+    <div class="legend-note" style="margin-top:4px">Drag to reweight — feasibility scores, colours &amp; "height = feasibility" recompute live (weights auto-normalised).</div>
   </div>
 
   <div class="group">
@@ -290,31 +380,39 @@
   </div>
 
   <button class="reset" id="reset">Reset filters</button>
-  <p class="legend-note">Circle color = status, size = the selected metric. <b style="color:#a78bfa">Interconnection hubs</b> (PeeringDB) are sized by the number of networks present — the bigger the dot, the better-connected the location. <b style="color:#22d3ee">Submarine cable</b> landings and <b style="color:#f59e0b">fiber backbone</b> corridors are approximate. All figures are best-effort estimates for visualization, <b>not</b> authoritative.</p>
+  <p class="legend-note">Column color = status, height = the selected metric. Drag to pan, <b>right-drag</b> (or two-finger drag) to tilt &amp; rotate. Click a column for its full profile. <b style="color:#a78bfa">Interconnection hubs</b> (PeeringDB) are sized by networks present. Subsea landings and fiber corridors are approximate. All figures are best-effort estimates for visualization, <b>not</b> authoritative.</p>
 </div>
 
 <div id="stats" class="panel" style="display:none">
   <div class="stats-head" id="statsHead"><b>Metrics &amp; coverage</b><span class="chev">▾</span></div>
   <div class="stats-body">
+  <div class="bigstats">
+    <div class="bs"><span>Operational</span><b id="s-cap" style="color:var(--st-built)">0</b></div>
+    <div class="bs"><span>Pipeline</span><b id="s-grid" style="color:var(--gold)">0</b></div>
+  </div>
   <div class="stat"><span>Data centers shown</span><b id="s-count">0</b></div>
   <div class="stat"><span>Operators</span><b id="s-ops">0</b></div>
-  <div class="stat"><span>Operational capacity</span><b id="s-cap">0</b></div>
-  <div class="stat"><span>Pipeline (UC + planned)</span><b id="s-grid">0</b></div>
-  <div class="barlbl" style="margin-top:7px"><span>operational capacity split</span></div>
+  <div class="stat"><span>Total estimated capex</span><b id="s-val">0</b></div>
+
+  <div class="group" style="margin:12px 0 0"><h2 style="margin:0">Capacity by online year</h2></div>
+  <div id="timeline"></div>
+  <div class="tl-axis"><span id="tl-a0">—</span><span id="tl-a1">—</span><span id="tl-a2">—</span></div>
+  <div class="tl-key"><span><i style="background:var(--st-built)"></i>built</span><span><i style="background:var(--st-uc)"></i>under constr.</span><span><i style="background:var(--st-plan)"></i>planned</span></div>
+
+  <div class="barlbl" style="margin-top:12px"><span>operational capacity split</span></div>
   <div class="bar" id="powerbar"></div>
   <div class="barlbl"><span id="bl-con">load</span><span id="bl-avail">headroom</span></div>
-  <div class="stat" style="margin-top:8px"><span>Total estimated capex</span><b id="s-val">0</b></div>
 
-  <div style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px">
+  <div style="margin-top:12px;border-top:1px solid var(--line-soft);padding-top:10px">
     <div class="group" style="margin:0 0 6px"><h2 style="margin:0">Coverage vs US total</h2></div>
     <div class="stat"><span>In map — operational</span><b id="cov-op">—</b></div>
     <div class="stat"><span>In map — pipeline (UC+planned)</span><b id="cov-pipe">—</b></div>
     <div class="stat"><span>Est. US operational total</span><b id="cov-us">—</b></div>
-    <div class="bar" id="covbar"><span style="background:#34d399"></span></div>
+    <div class="bar" id="covbar"><span style="background:linear-gradient(90deg,var(--accent),var(--st-built))"></span></div>
     <div class="barlbl"><span id="cov-pct">—</span><span id="cov-src">—</span></div>
   </div>
 
-  <div id="market" style="margin-top:10px;border-top:1px solid var(--line);padding-top:8px;display:none">
+  <div id="market" style="margin-top:12px;border-top:1px solid var(--line-soft);padding-top:10px;display:none">
     <div class="group" style="margin:0 0 6px"><h2 style="margin:0">US market · 2025 (industry)</h2></div>
     <div class="stat"><span>Operational</span><b id="mk-op">—</b></div>
     <div class="stat"><span>Under construction</span><b id="mk-uc">—</b></div>
@@ -332,8 +430,8 @@
 <div id="operators" class="panel">
   <div class="dh">
     <button class="close" id="opsClose">×</button>
-    <h3 style="margin-bottom:4px">Operators by capacity</h3>
-    <div class="mini" style="font-size:11px;color:var(--muted)">Click a row to filter the map. GW &amp; counts cover curated + mapped sites.</div>
+    <h3>Operators by capacity</h3>
+    <div class="mini">Click a row to filter the map. GW &amp; counts cover curated + mapped sites.</div>
   </div>
   <div class="body" id="op-list" style="padding:8px 10px 16px"></div>
 </div>
@@ -347,13 +445,13 @@
   <div class="body" id="d-body"></div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/deck.gl@9.2.11/dist.min.js"></script>
 <script>
 const STATUS = {
-  constructed:        { color:"#34d399", label:"Constructed" },
-  under_construction: { color:"#fbbf24", label:"Under construction" },
-  planned:            { color:"#60a5fa", label:"Planned" },
+  constructed:        { color:"#2ee6a6", label:"Constructed" },
+  under_construction: { color:"#ffb020", label:"Under construction" },
+  planned:            { color:"#8f7cff", label:"Planned" },
   unknown:            { color:"#8aa0b6", label:"Unknown" },
 };
 const PERMIT = {
@@ -361,26 +459,61 @@ const PERMIT = {
   permitted: { color:"#7cc4ff", label:"Permitted" },
   pending:   { color:"#fbbf24", label:"Pending" },
 };
+const hexRGB = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+Object.values(STATUS).forEach(s => s.rgb = hexRGB(s.color));
 
-const map = L.map("map", { worldCopyJump:true, zoomControl:false }).setView([39.5, -98.35], 4.4);
-L.control.zoom({ position:"bottomright" }).addTo(map);   // keep zoom clear of the left-side filter panel
-L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-  attribution: '&copy; OpenStreetMap &copy; CARTO',
-  maxZoom: 19,
-}).addTo(map);
+const IS_MOBILE = window.matchMedia("(max-width:900px)").matches;
+const HOME = { center: IS_MOBILE ? [-94.5, 37.8] : [-96.2, 37.4], zoom: IS_MOBILE ? 2.75 : 4.1, pitch:54, bearing:-14,
+  padding: IS_MOBILE ? { top:60, bottom:60, left:0, right:0 } : { top:40, bottom:0, left:300, right:0 } };
+const Z0 = HOME.zoom + 0.2;   // zoom at which 3D heights are authored; scaled so columns keep a constant on-screen size
 
-const layer = L.layerGroup().addTo(map);
-const ixLayer = L.layerGroup();
-const cableLayer = L.layerGroup();
-const backboneLayer = L.layerGroup();
-const corridorLayer = L.layerGroup();
-const powerLayer = L.layerGroup();
-const riverLayer = L.layerGroup();
-map.createPane("choro");
-map.getPane("choro").style.zIndex = 250;          // states under lines/markers
-const statesLayer = L.geoJSON(null, { pane: "choro" });
+const map = new maplibregl.Map({
+  container: "map",
+  style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+  center: [-97, 39], zoom: HOME.zoom - 0.8, pitch: 0, bearing: 0,
+  maxPitch: 75, attributionControl: { compact: true }, fadeDuration: 0,
+});
+
+// Darken the basemap and tint borders so the 3D data reads as the hero.
+map.on("style.load", () => {
+  const set = (id, prop, v) => { try { if (map.getLayer(id)) map.setPaintProperty(id, prop, v); } catch (e) {} };
+  set("background", "background-color", "#05070c");
+  set("water", "fill-color", "#070c17");
+  set("landcover", "fill-opacity", 0.25);
+  set("boundary_state", "line-color", "rgba(110,150,255,0.28)");
+  set("boundary_country_inner", "line-color", "rgba(110,150,255,0.35)");
+  set("boundary_country_outline", "line-color", "rgba(110,150,255,0.35)");
+  try {
+    map.setSky({ "sky-color":"#04060d", "horizon-color":"#1a1640", "fog-color":"#05070c",
+      "sky-horizon-blend":0.7, "horizon-fog-blend":0.6, "fog-ground-blend":0.15, "atmosphere-blend":0.6 });
+  } catch (e) {}
+});
+
+const lighting = new deck.LightingEffect({
+  ambient: new deck.AmbientLight({ color:[255,255,255], intensity:1.05 }),
+  key:     new deck.DirectionalLight({ color:[255,255,255], intensity:1.6, direction:[-3,-9,-2] }),
+  rim:     new deck.DirectionalLight({ color:[110,200,255], intensity:0.9, direction:[4,6,-1] }),
+});
+const MATERIAL = { ambient:0.5, diffuse:0.65, shininess:48, specularColor:[90,220,255] };
+const OVERLAY_PARAMS = { depthCompare:"always", depthWriteEnabled:false };   // flat layers draw over extruded states
+
+const overlay = new deck.MapboxOverlay({
+  interleaved: false,
+  effects: [lighting],
+  layers: [],
+  getTooltip: info => tooltipFor(info),
+  onClick: info => clickFor(info),
+  pickingRadius: 4,
+});
+map.addControl(overlay);
+
 let ALL = [];
+let SHOWN = [];
 let CONN = {};
+let STATES = null;
+let SELECTED = null;
+let MAXV = 1;
+const UI = { flow: true, orbit: false };
 
 // Factor metadata: domain + whether higher is better (for the colour ramp).
 const CHORO = {
@@ -393,21 +526,31 @@ const CHORO = {
   flood:          { lo:0, hi:5,   good:"low",  label:"Flood risk", fmt:v=>v+"/5" },
   seismic:        { lo:0, hi:5,   good:"low",  label:"Seismic risk", fmt:v=>v+"/5" },
 };
-function lerpColor(a, b, t) {
-  const h = x => [parseInt(x.slice(1,3),16), parseInt(x.slice(3,5),16), parseInt(x.slice(5,7),16)];
-  const [r1,g1,b1]=h(a), [r2,g2,b2]=h(b);
-  const r=Math.round(r1+(r2-r1)*t), g=Math.round(g1+(g2-g1)*t), bl=Math.round(b1+(b2-b1)*t);
-  return `rgb(${r},${g},${bl})`;
+// Indigo (worse) -> magenta -> amber -> gold (better).
+const RAMP = [[0,"#22134a"],[0.3,"#5b2a86"],[0.55,"#c2417a"],[0.8,"#f28c28"],[1,"#ffd166"]].map(([t,c]) => [t, hexRGB(c)]);
+const RAMP_CSS = "linear-gradient(90deg,#22134a,#5b2a86 30%,#c2417a 55%,#f28c28 80%,#ffd166)";
+function rampRGB(t) {
+  for (let i = 1; i < RAMP.length; i++) {
+    if (t <= RAMP[i][0]) {
+      const [t0,a] = RAMP[i-1], [t1,b] = RAMP[i], k = (t - t0) / (t1 - t0);
+      return a.map((x, j) => Math.round(x + (b[j] - x) * k));
+    }
+  }
+  return RAMP[RAMP.length-1][1];
 }
-function rampColor(t) { // t in [0,1]; 0 = poor (red) -> 1 = good (green)
-  return t < 0.5 ? lerpColor("#ef4444", "#fbbf24", t/0.5) : lerpColor("#fbbf24", "#34d399", (t-0.5)/0.5);
-}
+// Observed per-factor range + sorted values across the mapped states: the ramp is
+// rank-based (percentile) so neighbouring states separate even when values cluster.
+const CHORO_RANGE = {};
 function choroT(factor, v) {
-  const c = CHORO[factor]; let t = (v - c.lo) / (c.hi - c.lo);
+  const c = CHORO[factor], r = CHORO_RANGE[factor];
+  let t;
+  if (r && r.sorted.length > 1) {
+    const a = r.sorted, lo = a.indexOf(v), hi = a.lastIndexOf(v);
+    t = lo < 0 ? (v - r.lo) / ((r.hi - r.lo) || 1) : (lo + hi) / 2 / (a.length - 1);
+  } else t = (v - c.lo) / (c.hi - c.lo);
   if (c.good === "low") t = 1 - t;
   return Math.max(0, Math.min(1, t));
 }
-function choroColor(factor, v) { return rampColor(choroT(factor, v)); }
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtUSD = v => v >= 1e9 ? "$" + (v/1e9).toFixed(1) + "B"
@@ -415,15 +558,17 @@ const fmtUSD = v => v >= 1e9 ? "$" + (v/1e9).toFixed(1) + "B"
                   : v ? "$" + Number(v).toLocaleString() : "n/a";
 const fmtMW  = v => v ? Number(v).toLocaleString() + " MW" : "n/a";
 const fmtKV  = v => v ? Number(v).toLocaleString() + " kV" : "n/a";
+const fmtPow = v => v >= 1000 ? (v/1000).toFixed(1) + " GW" : Math.round(v) + " MW";
+const LL = p => [p[1], p[0]];   // dataset [lat,lng] -> deck [lng,lat]
 
 function metricVal(dc, metric) {
   if (metric === "feasibility") return dc.feasibility ? dc.feasibility.score : 0;
   return dc[metric] || 0;
 }
-function radius(dc, metric, maxVal) {
-  const v = metricVal(dc, metric);
-  if (maxVal <= 0) return 6;
-  return 5 + 26 * Math.sqrt(v / maxVal); // sqrt scaling so area ~ value
+function fmtMetric(metric, v) {
+  if (metric === "value_usd") return fmtUSD(v);
+  if (metric === "feasibility") return v + "/100";
+  return fmtPow(v);
 }
 function feasColor(s) {
   return s >= 80 ? "#34d399" : s >= 70 ? "#a3e635" : s >= 60 ? "#fbbf24"
@@ -445,25 +590,316 @@ function applyWeights() {
   render();
 }
 
-function popupHtml(dc, idx) {
-  const s = STATUS[dc.status] || STATUS.unknown;
-  const loc = [dc.city, dc.state].filter(Boolean).join(", ");
-  return `<h4>${esc(dc.name)}</h4>
-    <div class="mini">${esc(dc.operator || "operator n/a")}${loc ? " · " + esc(loc) : ""}</div>
-    <div class="mini" style="margin-top:4px;color:${s.color}">${s.label} · ${fmtMW(dc.capacity_mw)}</div>
-    <div class="more" data-idx="${idx}">View full profile →</div>`;
+/* ------------------------------------------------------------------ */
+/* 3D scene                                                           */
+/* ------------------------------------------------------------------ */
+const on = id => document.getElementById(id).checked;
+const zScale = () => Math.pow(2, Z0 - map.getZoom());
+const STATE_H = 42000;   // metres of extrusion for a top-scoring state at Z0
+const COL_H = 520000;    // metres for the tallest data-center column at Z0
+
+function stateHeight(f, factor) { return (0.12 + 0.88 * choroT(factor, f.properties[factor])) * STATE_H; }
+let STATE_BY_ST = {};
+function siteBase(dc) {
+  if (!STATES || !on("L-states")) return 0;
+  const f = STATE_BY_ST[dc.state];
+  return f ? stateHeight(f, document.getElementById("choroFactor").value) * zScale() : 0;
+}
+function colNorm(dc, metric) {
+  const v = metricVal(dc, metric);
+  return 0.035 + 0.965 * Math.sqrt(Math.max(0, v) / (MAXV || 1));
+}
+function colColor(dc) {
+  if (on("colorFeas") && dc.feasibility) return hexRGB(feasColor(dc.feasibility.score));
+  return (STATUS[dc.status] || STATUS.unknown).rgb;
 }
 
+// Animated "traffic" pulses along the fiber backbone / subsea cables.
+let FLOW_KEY = "", FLOW_DATA = [], FLOW_LOOP = 60;
+function flowData() {
+  const major = on("L-major"), bb = on("L-backbone"), cb = on("L-cable");
+  const key = `${major}|${bb}|${cb}`;
+  if (key === FLOW_KEY) return FLOW_DATA;
+  FLOW_KEY = key;
+  const paths = [];
+  if (bb) (CONN.backbone || []).forEach(r => { if (!major || r.tier === 1) paths.push({ path: r.path.map(LL), color:[255,196,90], w: r.tier === 1 ? 3 : 2 }); });
+  if (cb) (CONN.submarine_cables || []).forEach(c => { if (c.major || !major) (c.paths || []).forEach(p => { if (p && p.length > 1) paths.push({ path: p.map(LL), color:[120,240,255], w: 2 }); }); });
+  let maxLen = 0;
+  paths.forEach(p => {
+    let acc = 0; p.ts = [0];
+    for (let i = 1; i < p.path.length; i++) {
+      const [x0,y0] = p.path[i-1], [x1,y1] = p.path[i];
+      acc += Math.hypot((x1 - x0) * Math.cos((y0 + y1) * Math.PI / 360), y1 - y0);
+      p.ts.push(acc);
+    }
+    maxLen = Math.max(maxLen, acc);
+  });
+  FLOW_LOOP = Math.max(40, maxLen + 12);
+  paths.forEach((p, i) => {
+    const len = p.ts[p.ts.length - 1];
+    const off = ((i * 7919) % 1000) / 1000 * Math.max(0, FLOW_LOOP - len - 8);
+    p.ts = p.ts.map(t => t + off);
+  });
+  FLOW_DATA = paths;
+  return paths;
+}
+
+let frameT = 0;
+function buildLayers() {
+  const zs = zScale();
+  const metric = document.getElementById("sizeBy").value;
+  const factor = document.getElementById("choroFactor").value;
+  const hMul = +document.getElementById("hMul").value;
+  const statesOn = on("L-states") && STATES;
+  const major = on("L-major");
+  const L = [];
+
+  if (statesOn) {
+    L.push(new deck.GeoJsonLayer({
+      id: "states", data: STATES, extruded: true, wireframe: true, pickable: true,
+      getElevation: f => stateHeight(f, factor), elevationScale: zs,
+      getFillColor: f => [...rampRGB(choroT(factor, f.properties[factor])), 200],
+      getLineColor: [255, 230, 170, 60], material: MATERIAL,
+      updateTriggers: { getElevation: factor, getFillColor: factor },
+      transitions: { getElevation: 600, getFillColor: 600 },
+    }));
+  }
+  if (on("L-rivers")) {
+    L.push(new deck.PathLayer({
+      id: "rivers", data: CONN.rivers || [], getPath: r => r.path.map(LL), pickable: true,
+      getColor: [45, 212, 191, 150], getWidth: 2.2, widthUnits: "pixels", jointRounded: true, capRounded: true, parameters: OVERLAY_PARAMS,
+    }));
+  }
+  if (on("L-backbone")) {
+    const bb = (CONN.backbone || []).filter(r => !major || r.tier === 1);
+    L.push(new deck.PathLayer({
+      id: "bbglow", data: bb, getPath: r => r.path.map(LL), getColor: r => [255, 176, 32, r.tier === 1 ? 32 : 14],
+      getWidth: r => r.tier === 1 ? 9 : 5, widthUnits: "pixels", jointRounded: true, capRounded: true, parameters: OVERLAY_PARAMS,
+    }));
+    L.push(new deck.PathLayer({
+      id: "backbone", data: bb, getPath: r => r.path.map(LL), pickable: true,
+      getColor: r => [255, 186, 60, r.tier === 1 ? 170 : 90], getWidth: r => r.tier === 1 ? 2.4 : 1.2,
+      widthUnits: "pixels", jointRounded: true, capRounded: true, parameters: OVERLAY_PARAMS,
+    }));
+  }
+  if (on("L-cable")) {
+    const cables = [];
+    (CONN.submarine_cables || []).forEach(c => { if (!major || c.major) (c.paths || []).forEach(p => { if (p && p.length > 1) cables.push({ c, path: p.map(LL) }); }); });
+    L.push(new deck.PathLayer({
+      id: "cables", data: cables, getPath: d => d.path, pickable: true,
+      getColor: d => [34, 211, 238, d.c.major ? 170 : 70], getWidth: d => d.c.major ? 1.8 : 0.9, widthUnits: "pixels", parameters: OVERLAY_PARAMS,
+    }));
+    const landings = CONN.cable_landings || [];
+    L.push(new deck.PathLayer({
+      id: "landstub", data: landings.filter(c => c.offshore), getPath: c => [[c.lng, c.lat], LL(c.offshore)],
+      getColor: [34, 211, 238, 150], getWidth: 1.6, widthUnits: "pixels", parameters: OVERLAY_PARAMS,
+    }));
+    L.push(new deck.ScatterplotLayer({
+      id: "landings", data: landings, getPosition: c => [c.lng, c.lat], pickable: true, stroked: true, filled: true,
+      getRadius: 5, radiusUnits: "pixels", getFillColor: [6, 12, 20, 255], getLineColor: [34, 211, 238, 230], lineWidthMinPixels: 1.5, parameters: OVERLAY_PARAMS,
+    }));
+  }
+  if (UI.flow && (on("L-backbone") || on("L-cable"))) {
+    L.push(new deck.TripsLayer({
+      id: "flow", data: flowData(), getPath: d => d.path, getTimestamps: d => d.ts, getColor: d => d.color,
+      getWidth: d => d.w, widthUnits: "pixels", widthMinPixels: 2, trailLength: 7, fadeTrail: true, capRounded: true, jointRounded: true,
+      currentTime: (frameT * 0.012) % FLOW_LOOP, parameters: OVERLAY_PARAMS,
+    }));
+  }
+  if (on("L-corridors")) {
+    const corr = CONN.corridors || [];
+    const maxW = Math.max(1, ...corr.map(c => c.weight || 0));
+    const cut = major ? 0.30 * maxW : -1;   // high-capacity = busiest corridors
+    L.push(new deck.ArcLayer({
+      id: "corridors", data: corr.filter(c => (c.weight || 0) >= cut), pickable: true,
+      getSourcePosition: c => LL(c.path[0]), getTargetPosition: c => LL(c.path[c.path.length - 1]),
+      getSourceColor: c => [56, 225, 255, 70 + 150 * Math.sqrt((c.weight || 0) / maxW)],
+      getTargetColor: c => [167, 139, 250, 70 + 150 * Math.sqrt((c.weight || 0) / maxW)],
+      getWidth: c => 0.8 + 3.2 * Math.sqrt((c.weight || 0) / maxW), widthUnits: "pixels", getHeight: 0.45, greatCircle: false,
+    }));
+    L.push(new deck.ScatterplotLayer({
+      id: "metros", data: CONN.metros || [], getPosition: m => [m.lng, m.lat], pickable: true,
+      getRadius: 3.5, radiusUnits: "pixels", getFillColor: [124, 240, 255, 220], parameters: OVERLAY_PARAMS,
+    }));
+  }
+  if (on("L-ix")) {
+    const fac = CONN.facilities || [];
+    const r = n => 3 + 9 * Math.sqrt(Math.min(n, 520) / 520);
+    L.push(new deck.ScatterplotLayer({
+      id: "ixhalo", data: fac.filter(f => f.net_count >= 100), getPosition: f => [f.lng, f.lat],
+      getRadius: f => r(f.net_count) * 2.4, radiusUnits: "pixels", getFillColor: [167, 139, 250, 28], parameters: OVERLAY_PARAMS,
+    }));
+    L.push(new deck.ScatterplotLayer({
+      id: "ix", data: fac, getPosition: f => [f.lng, f.lat], pickable: true, stroked: true,
+      getRadius: f => r(f.net_count), radiusUnits: "pixels", getFillColor: f => [167, 139, 250, f.net_count >= 100 ? 150 : 80],
+      getLineColor: [196, 181, 253, 200], lineWidthMinPixels: 0.8, parameters: OVERLAY_PARAMS,
+    }));
+  }
+
+  // Data centers: glowing footprint + lit hexagonal columns.
+  const posTrig = [statesOn, factor, Math.round(zs * 1000)];
+  L.push(new deck.ScatterplotLayer({
+    id: "dcglow", data: SHOWN, getPosition: d => [d.lng, d.lat], radiusUnits: "pixels",
+    getRadius: d => 7 + 16 * Math.sqrt(colNorm(d, metric)), getFillColor: d => [...colColor(d), 30], parameters: OVERLAY_PARAMS,
+    updateTriggers: { getRadius: [metric, MAXV], getFillColor: [on("colorFeas"), SHOWN] },
+  }));
+  if (on("L-power")) {
+    const ps = CONN.power_stations || [];
+    const maxMW = Math.max(1, ...ps.map(p => p.mw || 0));
+    const FUEL = { nuclear:[244,114,182], hydro:[56,189,248], fossil:[251,191,36] };
+    L.push(new deck.ColumnLayer({
+      id: "power", data: ps, getPosition: p => [p.lng, p.lat], diskResolution: 8, radius: 4200 * zs, extruded: true, pickable: true,
+      getElevation: p => 0.15 + 0.85 * (p.mw || 0) / maxMW, elevationScale: 260000 * zs * hMul,
+      getFillColor: p => [...(FUEL[p.type] || FUEL.nuclear), 235], material: MATERIAL,
+    }));
+  }
+  L.push(new deck.ColumnLayer({
+    id: "dc", data: SHOWN, diskResolution: 6, radius: 13500 * zs, angle: 0, extruded: true, pickable: true,
+    getPosition: d => [d.lng, d.lat, siteBase(d)],
+    getElevation: d => colNorm(d, metric), elevationScale: COL_H * zs * hMul,
+    getFillColor: d => [...colColor(d), 245], material: MATERIAL,
+    autoHighlight: true, highlightColor: [255, 255, 255, 90],
+    updateTriggers: { getPosition: posTrig, getElevation: [metric, MAXV, SHOWN.length], getFillColor: [on("colorFeas"), SHOWN] },
+    transitions: { getElevation: { duration: 650, type: "spring", stiffness: 0.08, damping: 0.4 } },
+  }));
+  // Pulsing selection ring at the selected site's base.
+  if (SELECTED) {
+    const ph = (frameT / 1600) % 1;
+    L.push(new deck.ScatterplotLayer({
+      id: "sel", data: [SELECTED], getPosition: d => [d.lng, d.lat, siteBase(d)], radiusUnits: "pixels",
+      getRadius: 12 + 34 * ph, stroked: true, filled: false, lineWidthMinPixels: 2,
+      getLineColor: [255, 255, 255, Math.round(230 * (1 - ph))], parameters: OVERLAY_PARAMS,
+      updateTriggers: { getPosition: posTrig },
+    }));
+  }
+  // Value labels on top of the tallest columns.
+  if (on("L-labels") && SHOWN.length) {
+    const labelText = d => `${fmtMetric(metric, metricVal(d, metric))} · ${d.city || d.state || ""}`;
+    const ranked = SHOWN.filter(d => metricVal(d, metric) > 0).sort((a, b) => metricVal(b, metric) - metricVal(a, metric));
+    if (SELECTED && SHOWN.includes(SELECTED)) ranked.unshift(SELECTED);
+    // Greedy screen-space de-cluttering: keep a label only if its box clears the ones already placed.
+    const boxes = [], top = [];
+    const W = map.getCanvas().clientWidth, H = map.getCanvas().clientHeight;
+    const topZ = d => siteBase(d) + colNorm(d, metric) * COL_H * zs * hMul + 4000 * zs;
+    let vp = null;
+    try { vp = overlay._deck && overlay._deck.getViewports()[0]; } catch (e) {}
+    const proj = d => {
+      if (vp) { const [x, y] = vp.project([d.lng, d.lat, topZ(d)]); return { x, y }; }
+      return map.project([d.lng, d.lat]);
+    };
+    for (const d of ranked) {
+      if (top.length >= (IS_MOBILE ? 7 : 14)) break;
+      if (top.includes(d)) continue;
+      const pt = proj(d);
+      if (pt.x < 0 || pt.y < 0 || pt.x > W || pt.y > H) continue;
+      const w = labelText(d).length * 7 + 14, b = { x0: pt.x - w / 2, x1: pt.x + w / 2, y0: pt.y - 26, y1: pt.y };
+      if (boxes.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0)) continue;
+      boxes.push(b); top.push(d);
+    }
+    L.push(new deck.TextLayer({
+      id: "labels", data: top,
+      getPosition: d => [d.lng, d.lat, topZ(d)],
+      getText: labelText,
+      getColor: d => colColor(d), getSize: 11, fontFamily: '"JetBrains Mono", monospace', fontWeight: 600,
+      characterSet: "auto", background: true, getBackgroundColor: [6, 10, 18, 215], backgroundPadding: [6, 3, 6, 3],
+      getBorderColor: d => [...colColor(d), 160], getBorderWidth: 1,
+      getTextAnchor: "middle", getAlignmentBaseline: "bottom", getPixelOffset: [0, -4], billboard: true,
+      parameters: OVERLAY_PARAMS,
+      updateTriggers: { getPosition: [...posTrig, metric, MAXV, hMul], getText: [metric, top.map(d => d._i).join()], getColor: [on("colorFeas")], getBorderColor: [on("colorFeas")] },
+    }));
+  }
+  return L;
+}
+
+let pending = false;
+function pushLayers() { overlay.setProps({ layers: buildLayers() }); }
+function schedule() {
+  if (pending || animOn) return;
+  pending = true;
+  requestAnimationFrame(() => { pending = false; pushLayers(); });
+}
+
+let animOn = false;
+const needsAnim = () => (UI.flow && (on("L-backbone") || on("L-cable"))) || UI.orbit || !!SELECTED;
+function tick(t) {
+  frameT = t;
+  if (UI.orbit) map.setBearing(map.getBearing() + 0.045);
+  pushLayers();
+  if (needsAnim()) requestAnimationFrame(tick); else { animOn = false; }
+}
+function ensureAnim() { if (!animOn && needsAnim()) { animOn = true; requestAnimationFrame(tick); } else schedule(); }
+
+/* ------------------------------------------------------------------ */
+/* Tooltips + click                                                    */
+/* ------------------------------------------------------------------ */
+function tipHtml(id, o) {
+  switch (id) {
+    case "dc": {
+      const s = STATUS[o.status] || STATUS.unknown, loc = [o.city, o.state].filter(Boolean).join(", ");
+      return `<h4>${esc(o.name)}</h4><div class="mini">${esc(o.operator || "operator n/a")}${loc ? " · " + esc(loc) : ""}</div>
+        <div class="mini num" style="margin-top:4px;color:${s.color}">${s.label} · ${fmtMW(o.capacity_mw)} · ${fmtUSD(o.value_usd)}</div>
+        ${o.feasibility ? `<div class="mini num">Feasibility <b style="color:${feasColor(o.feasibility.score)}">${o.feasibility.score}</b>/100</div>` : ""}
+        <div class="mini" style="color:var(--accent);margin-top:4px">Click for full profile →</div>`;
+    }
+    case "states": {
+      const p = o.properties;
+      return `<h4>${esc(p.name)}</h4>
+        <div class="kv"><span class="k">Attractiveness</span><span class="v num">${p.attractiveness}/100</span></div>
+        <div class="kv"><span class="k">Power cost</span><span class="v num">${p.power_cost}¢/kWh</span></div>
+        <div class="kv"><span class="k">Land index</span><span class="v num">${p.land_index}/100</span></div>
+        <div class="kv"><span class="k">Incentives</span><span class="v num">${p.incentives}/5</span></div>
+        <div class="kv"><span class="k">Flood / seismic</span><span class="v num">${p.flood} / ${p.seismic}</span></div>
+        <div class="kv"><span class="k">Hurricane / water</span><span class="v num">${p.hurricane} / ${p.water_stress}</span></div>
+        ${p.iso ? `<div class="kv"><span class="k">Grid (ISO/RTO)</span><span class="v">${esc(p.iso)} · avail ${p.grid_availability}/5</span></div>
+        <div class="kv"><span class="k">Queue / wait</span><span class="v num">~${p.queue_gw} GW · ~${p.avg_wait_years} yr</span></div>` : ""}`;
+    }
+    case "ix":
+      return `<h4>${esc(o.name)}</h4><div class="mini">${esc([o.city,o.state].filter(Boolean).join(", "))}</div>
+        <div class="mini num" style="margin-top:4px;color:#a78bfa"><b>${o.net_count}</b> networks · <b>${o.ix_count}</b> exchanges</div><div class="mini">Source: PeeringDB</div>`;
+    case "corridors":
+      return `<h4>${esc(o.from)} ↔ ${esc(o.to)}</h4><div class="mini">Interconnect corridor · ~${(o.weight||0).toLocaleString()} peering networks at the weaker hub</div>`;
+    case "metros":
+      return `<h4>${esc(o.name)}</h4><div class="mini num" style="color:var(--accent)">${(o.net_count||0).toLocaleString()} peering networks (metro)</div>`;
+    case "backbone":
+      return `<h4>${esc(o.name)}</h4><div class="mini">Physical long-haul fiber · Tier ${o.tier} · ~${(o.length_km||0).toLocaleString()} km</div><div class="mini" style="color:#ffb020">Indicative capacity: ${esc(o.capacity||"")}</div>`;
+    case "cables":
+      return `<h4>${esc(o.c.name)}</h4><div class="mini">Submarine cable${o.c.major ? " · major / high-capacity" : ""} · TeleGeography</div><div class="mini" style="color:#22d3ee">Indicative capacity: ${esc(o.c.capacity||"")}</div>`;
+    case "landings":
+      return `<h4>${esc(o.name)}</h4><div class="mini">Submarine cable landing</div><div class="mini" style="margin-top:4px;color:#22d3ee">${esc((o.cables||[]).join(" · "))}</div>`;
+    case "power":
+      return `<h4>${esc(o.name)}</h4><div class="mini num" style="color:#f472b6">${esc(o.fuel||o.type)} · ${(o.mw||0).toLocaleString()} MW</div>${o.note ? `<div class="mini" style="margin-top:4px">${esc(o.note)}</div>` : ""}`;
+    case "rivers":
+      return `<h4>${esc(o.name)}</h4><div class="mini">Major river (cooling water context)</div>`;
+  }
+  return null;
+}
+function tooltipFor(info) {
+  if (!info.object || !info.layer) return null;
+  const h = tipHtml(info.layer.id, info.object);
+  return h ? { html: `<div class="tip">${h}</div>` } : null;
+}
+let popup = null;
+function clickFor(info) {
+  if (popup) { popup.remove(); popup = null; }
+  if (!info.object || !info.layer) return;
+  if (info.layer.id === "dc") { openDrawer(info.object, true); return; }
+  // Touch devices get no hover, so show the same card as a popup on tap.
+  const h = tipHtml(info.layer.id, info.object);
+  if (h && info.coordinate) popup = new maplibregl.Popup({ maxWidth:"280px", offset:8 }).setLngLat(info.coordinate).setHTML(`<div class="tip">${h}</div>`).addTo(map);
+}
+
+/* ------------------------------------------------------------------ */
+/* Filtering, stats, drawer                                            */
+/* ------------------------------------------------------------------ */
 function render() {
   const metric = document.getElementById("sizeBy").value;
   const statuses = new Set([...document.querySelectorAll(".f-status:checked")].map(c => c.value));
   const op = document.getElementById("operator").value;
   const permit = document.getElementById("permit").value;
   const minScore = +document.getElementById("minScore").value;
-  const colorByFeas = document.getElementById("colorFeas").checked;
   const q = document.getElementById("search").value.trim().toLowerCase();
 
-  const shown = ALL.filter(dc => {
+  SHOWN = ALL.filter(dc => {
     if (!statuses.has(dc.status)) return false;
     if (op && dc.operator !== op) return false;
     if (permit && dc.permit_status !== permit) return false;
@@ -474,26 +910,14 @@ function render() {
     }
     return true;
   });
+  MAXV = SHOWN.reduce((m, dc) => Math.max(m, metricVal(dc, metric)), 0) || 1;
 
-  const maxVal = shown.reduce((m, dc) => Math.max(m, metricVal(dc, metric)), 0);
-  layer.clearLayers();
-
-  shown.slice().sort((a,b) => metricVal(b, metric) - metricVal(a, metric)).forEach(dc => {
-    const s = STATUS[dc.status] || STATUS.unknown;
-    const col = (colorByFeas && dc.feasibility) ? feasColor(dc.feasibility.score) : s.color;
-    const m = L.circleMarker([dc.lat, dc.lng], {
-      radius: radius(dc, metric, maxVal),
-      color: col, weight: 1.5, fillColor: col, fillOpacity: 0.42,
-    });
-    m.bindPopup(popupHtml(dc, dc._i), { maxWidth: 260 });
-    m.on("click", () => openDrawer(dc));
-    m.addTo(layer);
-  });
-
-  updateStats(shown, metric);
+  updateStats(SHOWN);
+  updateMapLegend();
+  ensureAnim();
 }
 
-function updateStats(shown, metric) {
+function updateStats(shown) {
   const sum = k => shown.reduce((a, d) => a + (d[k] || 0), 0);
   const sumIf = (k, ok) => shown.reduce((a, d) => a + (ok(d) ? (d[k] || 0) : 0), 0);
   const opCap = sumIf("capacity_mw", d => d.status === "constructed");      // operational
@@ -506,15 +930,15 @@ function updateStats(shown, metric) {
 
   document.getElementById("s-count").textContent = shown.length.toLocaleString();
   document.getElementById("s-ops").textContent   = ops.toLocaleString();
-  document.getElementById("s-cap").textContent   = mw(opCap);
-  document.getElementById("s-grid").textContent  = mw(pipeCap);
+  document.getElementById("s-cap").textContent   = (opCap/1000).toFixed(1) + " GW";
+  document.getElementById("s-grid").textContent  = (pipeCap/1000).toFixed(1) + " GW";
   document.getElementById("s-val").textContent   = fmtUSD(val);
 
   // Operational capacity split into consumed load vs headroom (con + head = opCap).
   const total = con + head || 1;
   document.getElementById("powerbar").innerHTML =
-    `<span style="width:${100*con/total}%;background:#f87171" title="consumed ${mw(con)}"></span>` +
-    `<span style="width:${100*head/total}%;background:#34d399" title="headroom ${mw(head)}"></span>`;
+    `<span style="width:${100*con/total}%;background:linear-gradient(90deg,#f87171,#fb923c)" title="consumed ${mw(con)}"></span>` +
+    `<span style="width:${100*head/total}%;background:var(--st-built)" title="headroom ${mw(head)}"></span>`;
   document.getElementById("bl-con").textContent = `load ${mw(con)}`;
   document.getElementById("bl-avail").textContent = `headroom ${mw(head)}`;
 
@@ -523,6 +947,31 @@ function updateStats(shown, metric) {
   document.getElementById("kpi-cap").textContent   = (opCap/1000).toFixed(1) + " GW";
   document.getElementById("kpi-grid").textContent  = (pipeCap/1000).toFixed(1) + " GW";
   document.getElementById("kpi-val").textContent   = fmtUSD(val);
+
+  updateTimeline(shown);
+}
+
+// Stacked capacity (MW) by online / target year, split by status.
+function updateTimeline(shown) {
+  const Y0 = 2012, Y1 = 2030, nowY = new Date().getFullYear();
+  const buckets = [];
+  for (let y = Y0; y <= Y1; y++) buckets.push({ y, constructed:0, under_construction:0, planned:0 });
+  shown.forEach(d => {
+    if (!d.year || !d.capacity_mw) return;
+    const y = Math.max(Y0, Math.min(Y1, d.year));
+    const b = buckets[y - Y0];
+    if (d.status in b) b[d.status] += d.capacity_mw;
+  });
+  const tot = b => b.constructed + b.under_construction + b.planned;
+  const max = Math.max(1, ...buckets.map(tot));
+  document.getElementById("timeline").innerHTML = buckets.map(b => {
+    const lbl = (b.y === Y0 ? "≤" : "") + b.y;
+    const seg = k => b[k] ? `<span style="height:${100 * b[k] / max}%;background:${STATUS[k].color};box-shadow:0 0 6px ${STATUS[k].color}55"></span>` : "";
+    return `<div class="yb${b.y === nowY ? " now" : ""}" title="${lbl}: ${fmtPow(tot(b))} (built ${fmtPow(b.constructed)}, UC ${fmtPow(b.under_construction)}, planned ${fmtPow(b.planned)})">${seg("constructed")}${seg("under_construction")}${seg("planned")}</div>`;
+  }).join("");
+  document.getElementById("tl-a0").textContent = "≤" + Y0;
+  document.getElementById("tl-a1").textContent = String(nowY);
+  document.getElementById("tl-a2").textContent = Y1 + "+";
 }
 
 function kv(k, v) { return v ? `<div class="kv"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>` : ""; }
@@ -533,12 +982,12 @@ function feasHtml(dc) {
   const c = feasColor(f.score), cm = f.components, fa = f.factors;
   const bar = (label, val) => `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
     <span style="width:96px;font-size:11px;color:var(--muted)">${label}</span>
-    <span style="flex:1;height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden"><span style="display:block;height:100%;width:${val}%;background:${feasColor(val)}"></span></span>
-    <b style="width:22px;text-align:right;font-size:11px">${val}</b></div>`;
-  const dots = n => `<span style="letter-spacing:1px">${"●".repeat(n)}<span style="color:var(--line)">${"○".repeat(5-n)}</span></span>`;
+    <span style="flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden"><span style="display:block;height:100%;width:${val}%;background:${feasColor(val)};box-shadow:0 0 6px ${feasColor(val)}"></span></span>
+    <b style="width:22px;text-align:right;font-size:11px;font-family:var(--mono);font-weight:500">${val}</b></div>`;
+  const dots = n => `<span style="letter-spacing:1px">${"●".repeat(n)}<span style="color:var(--muted-2)">${"○".repeat(5-n)}</span></span>`;
   return `<div class="sec">Site feasibility</div>
     <div style="display:flex;align-items:center;gap:12px;margin:4px 0 8px">
-      <div style="font-size:30px;font-weight:700;color:${c};line-height:1">${f.score}</div>
+      <div style="font-family:var(--mono);font-size:32px;font-weight:700;color:${c};line-height:1;text-shadow:0 0 18px ${c}66">${f.score}</div>
       <div><div style="color:${c};font-weight:600">${feasLabel(f.score)}</div><div class="mini">0–100 composite${fa.estimated?" · state estimate":""}</div></div>
     </div>
     ${bar("Power cost", cm.power)}${bar("Power / grid", cm.grid)}${bar("Connectivity", cm.connectivity)}${bar("Land cost", cm.land)}${bar("Incentives", cm.incentives)}${bar("Low hazard", cm.complexity)}${bar("LT viability", cm.viability)}
@@ -550,14 +999,15 @@ function feasHtml(dc) {
     ${fa.nearest_metro_km!=null?`<div class="kv"><span class="k">Nearest fiber metro</span><span class="v">~${fa.nearest_metro_km} km</span></div>`:""}`;
 }
 
-function openDrawer(dc) {
+function openDrawer(dc, fly) {
   const s = STATUS[dc.status] || STATUS.unknown;
   const p = PERMIT[dc.permit_status];
   const loc = [dc.city, dc.state].filter(Boolean).join(", ");
 
+  document.getElementById("operators").classList.remove("open");
   document.getElementById("d-name").textContent = dc.name;
   document.getElementById("d-pills").innerHTML =
-    `<span class="pill" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55"><span class="swatch" style="background:${s.color}"></span>${s.label}</span>` +
+    `<span class="pill" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55"><span class="swatch" style="background:${s.color};color:${s.color}"></span>${s.label}</span>` +
     (p ? `<span class="pill" style="background:${p.color}1f;color:${p.color};border:1px solid ${p.color}55">Construction: ${p.label}</span>` : "") +
     (dc.lease_type ? `<span class="pill" style="background:#ffffff10;color:var(--muted);border:1px solid var(--line)">${esc(dc.lease_type)}</span>` : "");
 
@@ -574,10 +1024,10 @@ function openDrawer(dc) {
     ${dc.year ? kv("Online / target", dc.year) : ""}
 
     <div class="metric-grid">
-      <div class="metric"><span>Capacity</span><b>${fmtMW(dc.capacity_mw)}</b></div>
+      <div class="metric"><span>Capacity</span><b style="color:${s.color}">${fmtMW(dc.capacity_mw)}</b></div>
       <div class="metric"><span>Consumed</span><b>${fmtMW(dc.consumed_mw)}</b></div>
       <div class="metric"><span>Available</span><b>${fmtMW(dc.available_mw)}</b></div>
-      <div class="metric"><span>Est. capex</span><b>${fmtUSD(dc.value_usd)}</b></div>
+      <div class="metric"><span>Est. capex</span><b style="color:var(--gold)">${fmtUSD(dc.value_usd)}</b></div>
     </div>
 
     ${feasHtml(dc)}
@@ -599,7 +1049,7 @@ function openDrawer(dc) {
     ${(dc.feasibility && dc.feasibility.grid_queue) ? (() => { const g = dc.feasibility.grid_queue; return `
     ${kv("ISO/RTO queue", `${g.iso} · ~${g.queue_gw} GW waiting`)}
     ${kv("Typical wait", `~${g.avg_wait_years} yrs · availability ${g.availability}/5`)}
-    ${g.note ? `<div class="mini" style="margin-top:3px;color:var(--muted)">${esc(g.note)}</div>` : ""}`; })() : ""}
+    ${g.note ? `<div class="mini" style="margin-top:3px">${esc(g.note)}</div>` : ""}`; })() : ""}
     ${(dc.water_source || dc.onsite_power || dc.near_route) ? `<div class="sec">Site context</div>
     ${kv("On-site / dedicated power", dc.onsite_power)}
     ${kv("Water source", dc.water_source)}
@@ -614,9 +1064,24 @@ function openDrawer(dc) {
     <p class="legend-note" style="margin-top:8px">Figures are illustrative public estimates compiled for visualization — verify against primary sources before relying on them.</p>
   `;
   document.getElementById("drawer").classList.add("open");
+  document.getElementById("drawer").scrollTop = 0;
+  SELECTED = dc;
+  if (fly) {
+    stopOrbit();
+    map.easeTo({ center:[dc.lng, dc.lat], zoom: Math.max(map.getZoom(), IS_MOBILE ? 5.6 : 6.4), pitch: 60,
+      bearing: map.getBearing() - 18, duration: 1600, essential: true,
+      padding: IS_MOBILE ? { top:0, left:0, right:0, bottom: window.innerHeight * 0.45 } : { top:40, bottom:0, left:300, right:360 } });
+  }
+  ensureAnim();
 }
 
-function closeDrawer(){ document.getElementById("drawer").classList.remove("open"); }
+function closeDrawer() {
+  const wasOpen = document.getElementById("drawer").classList.contains("open");
+  document.getElementById("drawer").classList.remove("open");
+  SELECTED = null;
+  if (wasOpen) map.easeTo({ padding: HOME.padding, duration: 600 });
+  ensureAnim();
+}
 
 function buildOperators() {
   const m = {};
@@ -632,15 +1097,15 @@ function buildOperators() {
   const tagFor = o => {
     const owner = o.lease["owner-occupied"] || 0;
     const leased = (o.lease["wholesale"] || 0) + (o.lease["colocation"] || 0);
-    if (owner && owner >= leased) return { t:"Self-operated", c:"#34d399" };
-    if (leased) return { t:"Leased / multi-tenant", c:"#4ea1ff" };
-    return { t:"—", c:"#5f7388" };
+    if (owner && owner >= leased) return { t:"Self-operated", c:"#2ee6a6" };
+    if (leased) return { t:"Leased / multi-tenant", c:"#38e1ff" };
+    return { t:"—", c:"#56647a" };
   };
   document.getElementById("op-list").innerHTML = rows.map((o, i) => {
     const tg = tagFor(o);
     const gw = (o.cap/1000);
     return `<div class="op-row" data-op="${esc(o.op)}">
-      <div class="rk">${i+1}</div>
+      <div class="rk">${String(i+1).padStart(2,"0")}</div>
       <div class="nm">${esc(o.op)}
         <span class="tg" style="background:${tg.c}1f;color:${tg.c};border:1px solid ${tg.c}55">${tg.t}</span>
         <div class="op-bar" style="width:${Math.max(4,100*o.cap/maxCap)}%"></div>
@@ -656,145 +1121,72 @@ function buildOperators() {
   }));
 }
 
-function ixRadius(nets) { return 3 + 9 * Math.sqrt(Math.min(nets, 520) / 520); }
-
-function buildConnectivity(conn) {
-  // Interconnection hubs (PeeringDB) — bigger/brighter = more networks present.
-  (conn.facilities || []).forEach(f => {
-    const big = f.net_count >= 100;
-    L.circleMarker([f.lat, f.lng], {
-      radius: ixRadius(f.net_count), color: "#a78bfa", weight: big ? 1.5 : 0.8,
-      fillColor: "#a78bfa", fillOpacity: big ? 0.55 : 0.35,
-    }).bindPopup(
-      `<h4>${esc(f.name)}</h4><div class="mini">${esc([f.city,f.state].filter(Boolean).join(", "))}</div>` +
-      `<div class="mini" style="margin-top:4px;color:#a78bfa"><b>${f.net_count}</b> networks · <b>${f.ix_count}</b> exchanges</div>` +
-      `<div class="mini">Source: PeeringDB</div>`, { maxWidth: 240 }
-    ).addTo(ixLayer);
-  });
-  renderCables(false);
-  // Power / central stations.
-  const FUEL = { nuclear:"#f472b6", hydro:"#38bdf8", fossil:"#fbbf24" };
-  (conn.power_stations || []).forEach(p => {
-    const col = FUEL[p.type] || "#f472b6";
-    L.marker([p.lat, p.lng], { icon: L.divIcon({ className:"", html:`<div style="font-size:15px;line-height:1;filter:drop-shadow(0 0 2px #000)">⚡</div>`, iconSize:[16,16], iconAnchor:[8,8] }) })
-      .bindPopup(`<h4>${esc(p.name)}</h4><div class="mini" style="color:${col}">${esc(p.fuel||p.type)} · ${(p.mw||0).toLocaleString()} MW</div>${p.note?`<div class="mini" style="margin-top:4px">${esc(p.note)}</div>`:""}`, { maxWidth: 250 })
-      .addTo(powerLayer);
-  });
-  // Major rivers.
-  (conn.rivers || []).forEach(r => {
-    L.polyline(r.path, { color: "#2dd4bf", weight: 2.5, opacity: 0.55 })
-      .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Major river (cooling water context)</div>`)
-      .addTo(riverLayer);
-  });
-}
-
-// (Re)draw the dimensioned fiber backbone + submarine cables. Tier-1 routes and
-// major (high-capacity) cables are drawn thicker; majorOnly hides the rest.
-function renderCables(majorOnly) {
-  backboneLayer.clearLayers();
-  cableLayer.clearLayers();
-  corridorLayer.clearLayers();
-  // Cable corridors — metro-to-metro interconnection mesh; thicker = busier.
-  const corr = CONN.corridors || [];
-  const maxW = Math.max(1, ...corr.map(c => c.weight || 0));
-  const corrCut = majorOnly ? 0.30 * maxW : -1;   // high-capacity = busiest corridors
-  corr.forEach(c => {
-    if ((c.weight || 0) < corrCut) return;
-    const w = 1.2 + 5 * Math.sqrt((c.weight || 0) / maxW);
-    L.polyline(c.path, { color: "#38bdf8", weight: w, opacity: 0.5 })
-      .bindPopup(`<h4>${esc(c.from)} ↔ ${esc(c.to)}</h4><div class="mini">Interconnect corridor · ~${(c.weight||0).toLocaleString()} peering networks at the weaker hub</div>`)
-      .addTo(corridorLayer);
-  });
-  (CONN.metros || []).forEach(m => {
-    L.circleMarker([m.lat, m.lng], { radius: 3.5, color: "#38bdf8", weight: 1, fillColor: "#38bdf8", fillOpacity: 0.7 })
-      .bindPopup(`<h4>${esc(m.name)}</h4><div class="mini" style="color:#38bdf8">${(m.net_count||0).toLocaleString()} peering networks (metro)</div>`)
-      .addTo(corridorLayer);
-  });
-  (CONN.backbone || []).forEach(r => {
-    if (majorOnly && r.tier !== 1) return;
-    const w = r.tier === 1 ? 3.2 : 1.5;
-    const op = r.tier === 1 ? 0.7 : 0.4;
-    L.polyline(r.path, { color: "#f59e0b", weight: w, opacity: op })
-      .bindPopup(`<h4>${esc(r.name)}</h4><div class="mini">Physical long-haul fiber · Tier ${r.tier} · ~${(r.length_km||0).toLocaleString()} km</div><div class="mini" style="color:#f59e0b">Indicative capacity: ${esc(r.capacity||"")}</div>`)
-      .addTo(backboneLayer);
-  });
-  (CONN.submarine_cables || []).forEach(c => {
-    if (majorOnly && !c.major) return;
-    const w = c.major ? 1.8 : 0.8, op = c.major ? 0.65 : 0.3;
-    (c.paths || []).forEach(path => {
-      if (path && path.length > 1)
-        L.polyline(path, { color:"#22d3ee", weight:w, opacity:op, noClip:true })
-          .bindPopup(`<h4>${esc(c.name)}</h4><div class="mini">Submarine cable${c.major ? " · major / high-capacity" : ""} · TeleGeography</div><div class="mini" style="color:#22d3ee">Indicative capacity: ${esc(c.capacity||"")}</div>`)
-          .addTo(cableLayer);
-    });
-  });
-  (CONN.cable_landings || []).forEach(c => {
-    if (c.offshore)
-      L.polyline([[c.lat, c.lng], c.offshore], { color: "#22d3ee", weight: 1.6, opacity: 0.6 }).addTo(cableLayer);
-    L.circleMarker([c.lat, c.lng], { radius: 5, color: "#22d3ee", weight: 1.5, fillColor: "#0e151d", fillOpacity: 1 })
-      .bindPopup(`<h4>${esc(c.name)}</h4><div class="mini">Submarine cable landing</div><div class="mini" style="margin-top:4px;color:#22d3ee">${esc((c.cables||[]).join(" · "))}</div>`, { maxWidth: 240 })
-      .addTo(cableLayer);
-  });
-}
-
-function styleState(factor, feat) {
-  const v = feat.properties[factor];
-  return { fillColor: choroColor(factor, v), fillOpacity: 0.55, weight: 1, color: "#0b0f14", opacity: 0.6 };
-}
-function buildStates(geo) {
-  if (!geo) return;
-  const factor = document.getElementById("choroFactor").value;
-  statesLayer.addData(geo);
-  statesLayer.setStyle(f => styleState(factor, f));
-  statesLayer.eachLayer(l => {
-    const p = l.feature.properties;
-    l.bindPopup(
-      `<h4>${esc(p.name)}</h4>` +
-      `<div class="kv"><span class="k">Attractiveness</span><span class="v">${p.attractiveness}/100</span></div>` +
-      `<div class="kv"><span class="k">Power cost</span><span class="v">${p.power_cost}¢/kWh</span></div>` +
-      `<div class="kv"><span class="k">Land index</span><span class="v">${p.land_index}/100</span></div>` +
-      `<div class="kv"><span class="k">Incentives</span><span class="v">${p.incentives}/5</span></div>` +
-      `<div class="kv"><span class="k">Flood / seismic</span><span class="v">${p.flood} / ${p.seismic}</span></div>` +
-      `<div class="kv"><span class="k">Hurricane / water</span><span class="v">${p.hurricane} / ${p.water_stress}</span></div>` +
-      (p.iso ? `<div class="kv" style="margin-top:4px"><span class="k">Grid (ISO/RTO)</span><span class="v">${esc(p.iso)} · avail ${p.grid_availability}/5</span></div>` +
-               `<div class="kv"><span class="k">Queue / wait</span><span class="v">~${p.queue_gw} GW · ~${p.avg_wait_years} yr</span></div>` : ""),
-      { maxWidth: 240 });
-  });
-}
-function recolorStates() {
-  const factor = document.getElementById("choroFactor").value;
-  statesLayer.setStyle(f => styleState(factor, f));
-  updateMapLegend();
-}
 function updateMapLegend() {
   const el = document.getElementById("mapLegend");
-  const statesOn = map.hasLayer(statesLayer);
-  const linesOn = map.hasLayer(backboneLayer) || map.hasLayer(cableLayer) || map.hasLayer(corridorLayer);
-  if (!statesOn && !linesOn) { el.style.display = "none"; return; }
-  let html = "";
+  const metric = document.getElementById("sizeBy");
+  const statesOn = on("L-states") && STATES;
+  const linesOn = on("L-backbone") || on("L-cable") || on("L-corridors");
+  let html = `<div class="blk"><h3>Data center columns</h3>
+    <div><span class="col"><i style="height:5px"></i><i style="height:10px"></i><i style="height:16px"></i></span>height = ${esc(metric.options[metric.selectedIndex].text.replace(/^Height = /, ""))}</div>
+    ${on("colorFeas")
+      ? `<div class="grad" style="margin-top:6px;background:linear-gradient(90deg,#f87171,#fb923c,#fbbf24,#a3e635,#34d399)"></div><div class="ends"><span>feasibility low</span><span>high</span></div>`
+      : ["constructed","under_construction","planned"].map(k => `<div class="st"><span class="swatch" style="background:${STATUS[k].color};color:${STATUS[k].color}"></span>${STATUS[k].label}</div>`).join("")}
+  </div>`;
   if (statesOn) {
-    const f = document.getElementById("choroFactor").value, c = CHORO[f];
-    const poor = c.good === "low" ? c.fmt(c.hi) : c.fmt(c.lo);
-    const good = c.good === "low" ? c.fmt(c.lo) : c.fmt(c.hi);
-    html += `<h3>${esc(c.label)}</h3>
-      <div class="grad" style="background:linear-gradient(90deg,#ef4444,#fbbf24,#34d399)"></div>
-      <div class="ends"><span>${esc(poor)} · worse</span><span>better · ${esc(good)}</span></div>`;
+    const f = document.getElementById("choroFactor").value, c = CHORO[f], r = CHORO_RANGE[f] || c;
+    const poor = c.good === "low" ? c.fmt(r.hi) : c.fmt(r.lo);
+    const good = c.good === "low" ? c.fmt(r.lo) : c.fmt(r.hi);
+    html += `<div class="blk"><h3>${esc(c.label)}</h3>
+      <div class="grad" style="background:${RAMP_CSS}"></div>
+      <div class="ends"><span>${esc(poor)} · worse</span><span>better · ${esc(good)}</span></div>
+      <div class="ends" style="margin-top:2px"><span>percentile across states · taller = better</span></div></div>`;
   }
   if (linesOn) {
-    html += `<div class="lines">
-      <div><span class="ln" style="border-top:3px solid #f59e0b"></span>Tier-1 fiber (~100–400 Tbps)</div>
-      <div><span class="ln" style="border-top:1px solid #f59e0b"></span>Tier-2 fiber (~10–100 Tbps)</div>
-      <div><span class="ln" style="border-top:2px solid #22d3ee"></span>Major subsea cable</div>
+    html += `<div class="blk"><h3>Network</h3>
+      ${on("L-backbone") ? `<div><span class="ln" style="border-top:3px solid #ffb020"></span>Tier-1 fiber (~100–400 Tbps)</div>
+      <div><span class="ln" style="border-top:1px solid #ffb020"></span>Tier-2 fiber (~10–100 Tbps)</div>` : ""}
+      ${on("L-corridors") ? `<div><span class="ln" style="border-top:2px solid;border-image:linear-gradient(90deg,#38e1ff,#a78bfa) 1"></span>Interconnect arc</div>` : ""}
+      ${on("L-cable") ? `<div><span class="ln" style="border-top:2px solid #22d3ee"></span>Major subsea cable</div>` : ""}
       <div style="color:var(--muted-2);margin-top:3px">thickness ≈ capacity</div></div>`;
   }
   el.innerHTML = html; el.style.display = "";
 }
 
-function wireLayerToggle(id, lyr) {
-  document.getElementById(id).addEventListener("change", e => {
-    if (e.target.checked) lyr.addTo(map); else map.removeLayer(lyr);
-    updateMapLegend();
-  });
+/* ------------------------------------------------------------------ */
+/* Camera controls                                                     */
+/* ------------------------------------------------------------------ */
+function stopOrbit() { if (UI.orbit) { UI.orbit = false; document.getElementById("bOrbit").setAttribute("aria-pressed", "false"); } }
+function wireCamera() {
+  const b3d = document.getElementById("b3d");
+  document.getElementById("zIn").onclick = () => map.zoomIn();
+  document.getElementById("zOut").onclick = () => map.zoomOut();
+  document.getElementById("compass").onclick = () => map.easeTo({ bearing: 0, duration: 600 });
+  document.getElementById("bHome").onclick = () => { stopOrbit(); map.flyTo({ ...HOME, duration: 1800, essential: true }); };
+  b3d.onclick = () => {
+    const flat = map.getPitch() > 5;
+    map.easeTo({ pitch: flat ? 0 : HOME.pitch, bearing: flat ? 0 : HOME.bearing, duration: 900 });
+  };
+  document.getElementById("bOrbit").onclick = e => {
+    UI.orbit = !UI.orbit; e.currentTarget.setAttribute("aria-pressed", String(UI.orbit));
+    if (UI.orbit && map.getPitch() < 30) map.easeTo({ pitch: HOME.pitch, duration: 800 });
+    ensureAnim();
+  };
+  document.getElementById("bFlow").onclick = e => {
+    UI.flow = !UI.flow; e.currentTarget.setAttribute("aria-pressed", String(UI.flow)); ensureAnim();
+  };
+  const compassSvg = document.querySelector("#compass svg");
+  map.on("rotate", () => { compassSvg.style.transform = `rotate(${-map.getBearing()}deg)`; });
+  map.on("pitch", () => b3d.setAttribute("aria-pressed", String(map.getPitch() > 5)));
+  map.on("zoom", schedule);
+  // Any direct manipulation stops the cinematic orbit.
+  ["mousedown", "touchstart", "wheel"].forEach(ev => map.getCanvasContainer().addEventListener(ev, stopOrbit, { passive: true }));
+}
+
+/* ------------------------------------------------------------------ */
+/* Boot                                                                */
+/* ------------------------------------------------------------------ */
+function wireLayerToggle(id) {
+  document.getElementById(id).addEventListener("change", () => { updateMapLegend(); ensureAnim(); });
 }
 
 async function init() {
@@ -812,6 +1204,7 @@ async function init() {
     const r2 = await fetch("data/interconnection.json?_=" + Date.now());
     if (r2.ok) conn = await r2.json();
   } catch (e) { /* connectivity layer is optional */ }
+  try { await document.fonts.load('600 11px "JetBrains Mono"'); } catch (e) {}
   ALL = (data.datacenters || []).map((d, i) => (d._i = i, d));
 
   // Coverage vs estimated US total (dataset-wide, not affected by filters).
@@ -849,16 +1242,16 @@ async function init() {
 
   // Data provenance + refresh cadence note.
   const built = data.generated_at ? new Date(data.generated_at).toLocaleString() : "—";
-  const dcSrc = (data.sources || []).join(", ");
-  const ixSrc = conn ? (conn.sources || []).join(", ") : "";
+  if (data.generated_at) document.getElementById("builtTag").textContent =
+    "BUILT " + new Date(data.generated_at).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" }).toUpperCase();
   document.getElementById("provenance").innerHTML =
     `<b>${ALL.length}</b> verified facilities — real operators' documented campuses and publicly-announced projects, each web-checked. ` +
-    `<b>Built:</b> ${esc(built)}. <b>Auto-refresh:</b> daily 06:00 UTC. Capacity / capex / rent figures are best-effort public estimates.`;
+    `<b>Built:</b> ${esc(built)}. Capacity / capex / rent figures are best-effort public estimates.`;
 
   // status counts
   const byStatus = {};
   ALL.forEach(d => byStatus[d.status] = (byStatus[d.status]||0)+1);
-  document.querySelectorAll(".count").forEach(el => {
+  document.querySelectorAll(".count[data-status]").forEach(el => {
     el.textContent = byStatus[el.dataset.status] ? `(${byStatus[el.dataset.status]})` : "(0)";
   });
 
@@ -869,10 +1262,19 @@ async function init() {
   buildOperators();
 
   // Connectivity layers (optional)
+  const LAYER_IDS = ["L-corridors","L-ix","L-cable","L-backbone","L-power","L-rivers","L-states"];
   if (conn) {
     CONN = conn;
-    buildConnectivity(conn);
-    if (conn.states) buildStates(conn.states); else document.getElementById("L-states").disabled = true;
+    if (conn.states) {
+      STATES = conn.states;
+      STATES.features.forEach(f => { STATE_BY_ST[f.properties.st] = f; });
+      Object.keys(CHORO).forEach(k => {
+        const vals = STATES.features.map(f => f.properties[k]).filter(v => typeof v === "number");
+        if (vals.length) CHORO_RANGE[k] = { lo: Math.min(...vals), hi: Math.max(...vals), sorted: vals.slice().sort((a, b) => a - b) };
+      });
+    } else {
+      const s = document.getElementById("L-states"); s.checked = false; s.disabled = true;
+    }
     document.getElementById("c-cor").textContent = `(${(conn.corridors||[]).length})`;
     document.getElementById("c-ix").textContent = `(${(conn.facilities||[]).length})`;
     document.getElementById("c-cable").textContent = `(${(conn.submarine_cables||conn.cable_landings||[]).length})`;
@@ -880,23 +1282,19 @@ async function init() {
     document.getElementById("c-pow").textContent = `(${(conn.power_stations||[]).length})`;
     document.getElementById("c-riv").textContent = `(${(conn.rivers||[]).length})`;
   } else {
-    ["L-corridors","L-ix","L-cable","L-backbone","L-power","L-rivers","L-states"].forEach(id => document.getElementById(id).disabled = true);
+    LAYER_IDS.forEach(id => { const el = document.getElementById(id); el.checked = false; el.disabled = true; });
   }
-  wireLayerToggle("L-corridors", corridorLayer);
-  wireLayerToggle("L-ix", ixLayer);
-  wireLayerToggle("L-cable", cableLayer);
-  wireLayerToggle("L-backbone", backboneLayer);
-  wireLayerToggle("L-power", powerLayer);
-  wireLayerToggle("L-rivers", riverLayer);
-  wireLayerToggle("L-states", statesLayer);
-  document.getElementById("choroFactor").addEventListener("change", recolorStates);
+  LAYER_IDS.forEach(wireLayerToggle);
+  ["L-labels", "L-major"].forEach(wireLayerToggle);
+  document.getElementById("choroFactor").addEventListener("change", () => { updateMapLegend(); ensureAnim(); });
+  document.getElementById("hMul").addEventListener("input", e => {
+    document.getElementById("hMulV").textContent = (+e.target.value).toFixed(1) + "×"; schedule();
+  });
 
   document.getElementById("loading").style.display = "none";
-  document.getElementById("controls").style.display = "";
-  document.getElementById("stats").style.display = "";
+  ["controls", "stats", "camdock"].forEach(id => document.getElementById(id).style.display = "");
 
   ["sizeBy","operator","permit","minScore","colorFeas"].forEach(id => document.getElementById(id).addEventListener("change", render));
-  document.getElementById("L-major").addEventListener("change", e => renderCables(e.target.checked));
   document.getElementById("search").addEventListener("input", render);
   document.querySelectorAll(".f-status").forEach(c => c.addEventListener("change", render));
   document.querySelectorAll(".fw").forEach(s => s.addEventListener("input", applyWeights));
@@ -909,7 +1307,7 @@ async function init() {
     document.getElementById("operator").value = "";
     document.getElementById("permit").value = "";
     document.getElementById("search").value = "";
-    document.getElementById("sizeBy").value = "value_usd";
+    document.getElementById("sizeBy").value = "capacity_mw";
     document.getElementById("minScore").value = "0";
     document.getElementById("colorFeas").checked = false;
     render();
@@ -923,20 +1321,17 @@ async function init() {
   const panelToggle = document.getElementById("panelToggle");
   const controlsEl = document.getElementById("controls");
   const statsEl = document.getElementById("stats");
-  if (window.matchMedia("(max-width:900px)").matches) {
+  if (IS_MOBILE) {
     controlsEl.classList.add("collapsed");
     statsEl.classList.add("collapsed");
   }
   panelToggle.addEventListener("click", () => controlsEl.classList.toggle("collapsed"));
   document.getElementById("statsHead").addEventListener("click", () => statsEl.classList.toggle("collapsed"));
 
-  // "View full profile" link inside popups
-  map.on("popupopen", e => {
-    const link = e.popup.getElement().querySelector(".more");
-    if (link) link.addEventListener("click", () => { openDrawer(ALL[+link.dataset.idx]); map.closePopup(); });
-  });
-
+  wireCamera();
   render();
+  // Cinematic intro: sweep from a flat overview into the tilted 3D view.
+  map.flyTo({ ...HOME, duration: 2600, curve: 1.2, essential: true });
 }
 
 init();

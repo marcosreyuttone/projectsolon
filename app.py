@@ -5,7 +5,7 @@ US Data Center Map
 
 Downloads information about data centers across the United States, enriches it
 with a curated dataset of power-capacity / power-consumption / investment-value
-figures, and serves an interactive Leaflet map in your browser.
+figures, and serves an interactive 3D map (MapLibre GL + deck.gl) in your browser.
 
 Data sources
 ------------
