@@ -28,6 +28,10 @@
       "sources": "CBRE, JLL & Cushman & Wakefield H2-2025; BloombergNEF; Grid Strategies; FERC (2025)"
     }
   },
+  "capex_benchmark": {
+    "usd_per_mw": 14000000,
+    "note": "Build-cost benchmark (land, shell, power & cooling; excludes servers/GPUs). Used when no capex is disclosed, and for pipeline projects whose announced figure is below capacity x benchmark (typically a first phase or partial scope). Adjustable in the map UI."
+  },
   "datacenters": [
     {
       "name": "Amazon AWS US-East-1 (Ashburn)",

@@ -129,6 +129,38 @@ def load_benchmark():
         return None
 
 
+DEFAULT_CAPEX_PER_MW = 14_000_000
+
+
+def load_capex_benchmark():
+    """$/MW build-cost benchmark used to model capex (see apply_capex)."""
+    try:
+        with open(CURATED_PATH, "r", encoding="utf-8") as f:
+            bm = json.load(f).get("capex_benchmark") or {}
+    except (FileNotFoundError, ValueError):
+        bm = {}
+    return {"usd_per_mw": float(bm.get("usd_per_mw") or DEFAULT_CAPEX_PER_MW), "note": bm.get("note", "")}
+
+
+def apply_capex(rec, usd_per_mw):
+    """Headline capex (value_usd) from the announced figure vs capacity x $/MW.
+
+    - nothing announced          -> modelled (capacity x benchmark)
+    - pipeline site announced
+      below capacity x benchmark -> modelled; the announcement usually covers a
+                                    first phase or partial scope
+    - otherwise                  -> the announced / reported figure
+    Constructed sites keep their reported figure: older builds cost less per MW."""
+    reported = rec.get("capex_reported_usd") or 0
+    model = (rec.get("capacity_mw") or 0) * usd_per_mw
+    if model and not reported:
+        rec["value_usd"], rec["capex_basis"] = model, "modelled"
+    elif model and reported < model and rec.get("status") != "constructed":
+        rec["value_usd"], rec["capex_basis"] = model, "scaled"
+    else:
+        rec["value_usd"], rec["capex_basis"] = reported, "reported" if reported else "none"
+
+
 def normalize(d, source):
     """Coerce a record into the common schema used by the map."""
     capacity = float(d.get("capacity_mw") or 0)
@@ -160,6 +192,9 @@ def normalize(d, source):
         "consumed_mw": round(consumed, 1),
         "available_mw": round(available, 1),
         "value_usd": float(d.get("value_usd") or 0),
+        # Announced / reported investment as curated; value_usd becomes the
+        # headline estimate after apply_capex().
+        "capex_reported_usd": float(d.get("value_usd") or 0),
         "year": d.get("year") or None,
         # Grid connection
         "utility": d.get("utility") or "",
@@ -498,6 +533,10 @@ def build_dataset(download=True):
             scored += 1
     log(f"Scored feasibility + delivery risk for {scored} sites.")
 
+    capex_bm = load_capex_benchmark()
+    for r in records:
+        apply_capex(r, capex_bm["usd_per_mw"])
+
     totals = summarize(records)
     dataset = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -505,6 +544,7 @@ def build_dataset(download=True):
         if osm else ["curated dataset"],
         "counts": totals,
         "us_benchmark": load_benchmark(),
+        "capex_benchmark": capex_bm,
         "datacenters": records,
     }
     os.makedirs(DATA_DIR, exist_ok=True)
