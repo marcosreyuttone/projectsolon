@@ -128,7 +128,7 @@
     overflow:auto; padding:0; transform:translateX(390px); opacity:0; transition:transform .28s cubic-bezier(.2,.8,.2,1), opacity .22s ease;
     pointer-events:none; }
   #drawer.open { transform:translateX(0); opacity:1; pointer-events:auto; }
-  #drawer .dh, #operators .dh { position:sticky; top:0; z-index:2; background:linear-gradient(180deg,rgba(8,12,20,.98),rgba(8,12,20,.9));
+  #drawer .dh, #operators .dh { position:sticky; top:0; z-index:2; background:linear-gradient(180deg,#080c14,#0a0f19);
     padding:16px 18px 12px; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
   #drawer .dh h3 { margin:0 0 8px; font-size:15.5px; line-height:1.3; padding-right:24px; }
   .close { position:absolute; top:12px; right:12px; width:26px; height:26px; border-radius:7px;
@@ -168,6 +168,54 @@
   .op-row .gw b { font-family:var(--mono); font-size:12.5px; font-weight:600; } .op-row .gw span { display:block; font-size:10px; color:var(--muted); }
   .op-bar { height:3px; border-radius:3px; background:linear-gradient(90deg,var(--accent),var(--st-plan)); margin-top:5px;
     box-shadow:0 0 8px rgba(56,225,255,.4); }
+
+  /* ---- Regulatory / delivery (drawer + deal tracker) ---- */
+  .lvl { display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:10px; font-weight:600;
+    padding:2px 7px; border-radius:999px; letter-spacing:.04em; white-space:nowrap; }
+  .meter { position:relative; height:8px; border-radius:5px; margin:8px 0 3px;
+    background:linear-gradient(90deg,#2ee6a6 0%,#ffd166 35%,#ff8c42 60%,#ff4d6d 100%); opacity:.9; }
+  .meter i { position:absolute; top:-4px; width:3px; height:16px; margin-left:-1.5px; background:#fff; border-radius:2px;
+    box-shadow:0 0 10px #fff; }
+  .meter-ends { display:flex; justify-content:space-between; font-family:var(--mono); font-size:9px; color:var(--muted-2); }
+  .gantt { position:relative; height:14px; background:rgba(255,255,255,.04); border-radius:4px; overflow:hidden; }
+  .gantt .run { position:absolute; top:3px; bottom:3px; border-radius:3px; }
+  .gantt .slip { position:absolute; top:3px; bottom:3px; border-radius:0 3px 3px 0;
+    background:repeating-linear-gradient(135deg, rgba(255,77,109,.75) 0 3px, rgba(255,77,109,.2) 3px 6px); }
+  .gantt .now { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.55); }
+  .gantt-axis { display:flex; justify-content:space-between; font-family:var(--mono); font-size:9px; color:var(--muted-2); margin-top:3px; }
+  .drv { display:flex; justify-content:space-between; gap:10px; font-size:11.5px; padding:2px 0; color:#c3cede; }
+  .drv b { font-family:var(--mono); font-weight:500; color:var(--muted); font-size:10.5px; }
+  .evt { position:relative; padding:0 0 10px 16px; font-size:11.5px; line-height:1.45; }
+  .evt::before { content:""; position:absolute; left:4px; top:5px; width:7px; height:7px; border-radius:50%; background:var(--c, var(--muted)); box-shadow:0 0 8px var(--c, transparent); }
+  .evt::after { content:""; position:absolute; left:7px; top:14px; bottom:0; width:1px; background:var(--line); }
+  .evt:last-child::after { display:none; }
+  .evt .meta { font-family:var(--mono); font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .evt a { color:var(--accent); text-decoration:none; font-size:10.5px; }
+  .evt a:hover { text-decoration:underline; }
+  .note { font-size:11.5px; color:#c3cede; background:rgba(56,225,255,.05); border:1px solid var(--line-soft); border-radius:8px; padding:7px 9px; margin:8px 0 2px; line-height:1.45; }
+  #backDeals { display:none; margin:0 0 8px; background:none; border:0; color:var(--accent); font-size:11px; cursor:pointer; padding:0; font-family:var(--mono); }
+  #deals { position:absolute; z-index:1200; top:62px; right:14px; width:440px; max-height:calc(100% - 140px);
+    overflow:auto; padding:0; transform:translateX(480px); opacity:0; transition:transform .28s cubic-bezier(.2,.8,.2,1), opacity .22s ease;
+    pointer-events:none; }
+  #deals.open { transform:translateX(0); opacity:1; pointer-events:auto; }
+  #deals .dh { position:sticky; top:0; z-index:2; background:linear-gradient(180deg,#080c14,#0a0f19);
+    padding:16px 18px 10px; border-bottom:1px solid var(--line); border-radius:12px 12px 0 0; }
+  #deals .dh h3 { margin:0 0 4px; font-size:15px; }
+  #deals .tools { display:flex; gap:8px; align-items:center; margin-top:9px; }
+  #deals .tools select { width:auto; flex:1; padding:6px 8px; font-size:11.5px; }
+  #deals .tools label { font-size:11px; color:var(--muted); display:flex; gap:5px; align-items:center; white-space:nowrap; cursor:pointer; }
+  .deal { padding:9px 10px; border-radius:9px; cursor:pointer; border:1px solid transparent; }
+  .deal:hover { background:var(--panel-2); border-color:var(--line); }
+  .deal .top { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+  .deal .nm { font-size:12.5px; line-height:1.25; }
+  .deal .nm small { display:block; color:var(--muted); font-size:10.5px; margin-top:1px; }
+  .deal .cap { font-family:var(--mono); font-size:12px; font-weight:600; white-space:nowrap; text-align:right; }
+  .deal .row2 { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin-top:6px; }
+  .deal .when { font-family:var(--mono); font-size:9.5px; color:var(--muted); margin-top:3px; display:flex; justify-content:space-between; }
+  #deal-axis { display:flex; justify-content:space-between; font-family:var(--mono); font-size:9px; color:var(--muted-2); padding:6px 10px 0 10px; }
+  #topDeals { font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:var(--gold); background:rgba(255,194,74,.08);
+    border:1px solid rgba(255,194,74,.4); border-radius:999px; padding:4px 10px; cursor:pointer; white-space:nowrap; }
+  #topDeals:hover { background:rgba(255,194,74,.16); }
 
   /* ---- On-map legend ---- */
   #mapLegend { position:absolute; z-index:1000; right:14px; bottom:70px; width:214px; padding:11px 13px; font-size:11px; }
@@ -239,8 +287,9 @@
     #stats.collapsed .stats-head { border-radius:12px; }
     #stats.collapsed .stats-head .chev { transform:rotate(-90deg); }
     #stats.collapsed .stats-body { display:none; }
-    #drawer, #operators { top:auto; left:8px; right:8px; bottom:8px; width:auto; max-height:78%; transform:translateY(120%); }
-    #drawer.open, #operators.open { transform:translateY(0); }
+    #drawer, #operators, #deals { top:auto; left:8px; right:8px; bottom:8px; width:auto; max-height:78%; transform:translateY(120%); }
+    #drawer.open, #operators.open, #deals.open { transform:translateY(0); }
+    #topDeals { padding:4px 8px; }
     #mapLegend { display:none !important; }
     #camdock { top:96px; right:8px; bottom:auto; flex-direction:column; }
     #camdock .sep { width:auto; height:1px; margin:2px 6px; }
@@ -256,6 +305,7 @@
   <div class="brand"><span class="logo"></span> SOLON <span class="sub">· US Data Center Intelligence</span></div>
   <span class="tag"><span class="live"></span><span id="builtTag">VERIFIED DATASET</span></span>
   <div class="spacer"></div>
+  <button id="topDeals" title="Pipeline deals: regulatory scrutiny, delays &amp; completion">▦ DEAL TRACKER</button>
   <div class="kpi">
     <div class="k"><b id="kpi-sites">—</b><span>Sites shown</span></div>
     <div class="k hot"><b id="kpi-cap">—</b><span>Operational</span></div>
@@ -297,6 +347,12 @@
       <option value="consumed_mw">Height = power consumed (MW)</option>
       <option value="available_mw">Height = power available (MW)</option>
       <option value="feasibility">Height = feasibility score</option>
+      <option value="regulatory">Height = regulatory scrutiny</option>
+    </select>
+    <select id="colorBy" style="margin-top:6px">
+      <option value="status">Color = status</option>
+      <option value="regulatory">Color = regulatory scrutiny</option>
+      <option value="feasibility">Color = feasibility score</option>
     </select>
     <div class="wrow" style="margin-top:8px"><span>Exaggeration</span><input type="range" id="hMul" min="0.3" max="3" step="0.1" value="1"><b id="hMulV">1.0×</b></div>
     <label class="row"><input type="checkbox" id="L-labels" checked> Value labels on tallest columns</label>
@@ -339,6 +395,7 @@
     <h2>Operator</h2>
     <select id="operator"><option value="">All operators</option></select>
     <button class="reset" id="openOps" style="margin-top:8px">▤ Rank operators by GW</button>
+    <button class="reset" id="openDeals" style="margin-top:6px">▦ Deal tracker — scrutiny, delays &amp; completion</button>
   </div>
 
   <div class="group">
@@ -359,7 +416,6 @@
       <option value="70">Score 70+ (good)</option>
       <option value="80">Score 80+ (excellent)</option>
     </select>
-    <label class="row" style="margin-top:6px"><input type="checkbox" id="colorFeas"> Color columns by feasibility</label>
   </div>
 
   <div class="group">
@@ -436,9 +492,28 @@
   <div class="body" id="op-list" style="padding:8px 10px 16px"></div>
 </div>
 
+<div id="deals" class="panel">
+  <div class="dh">
+    <button class="close" id="dealsClose">×</button>
+    <h3>Deal tracker</h3>
+    <div class="mini">Pipeline projects (under construction + planned) in the current filter. Bar = today → announced target; hatched = modelled delay risk.</div>
+    <div class="tools">
+      <select id="dealSort">
+        <option value="capacity">Sort: capacity</option>
+        <option value="scrutiny">Sort: regulatory scrutiny</option>
+        <option value="completion">Sort: expected completion</option>
+      </select>
+      <label><input type="checkbox" id="dealEvents"> documented events only</label>
+    </div>
+  </div>
+  <div id="deal-axis"></div>
+  <div class="body" id="deal-list" style="padding:4px 8px 16px"></div>
+</div>
+
 <div id="drawer" class="panel">
   <div class="dh">
     <button class="close" id="dclose">×</button>
+    <button id="backDeals">← Deal tracker</button>
     <h3 id="d-name">—</h3>
     <div id="d-pills"></div>
   </div>
@@ -557,17 +632,24 @@ const fmtUSD = v => v >= 1e9 ? "$" + (v/1e9).toFixed(1) + "B"
                   : v >= 1e6 ? "$" + (v/1e6).toFixed(0) + "M"
                   : v ? "$" + Number(v).toLocaleString() : "n/a";
 const fmtMW  = v => v ? Number(v).toLocaleString() + " MW" : "n/a";
+const fmtCap = dc => dc.capacity_disclosed === false && !dc.capacity_mw ? "Undisclosed" : fmtMW(dc.capacity_mw);
+const LEVEL_COLOR = { Low:"#2ee6a6", Moderate:"#ffd166", Elevated:"#ff8c42", High:"#ff4d6d" };
+const scrutinyColor = v => v < 25 ? LEVEL_COLOR.Low : v < 45 ? LEVEL_COLOR.Moderate : v < 65 ? LEVEL_COLOR.Elevated : LEVEL_COLOR.High;
+const lvlPill = d => d ? `<span class="lvl" style="background:${LEVEL_COLOR[d.level]}1f;color:${LEVEL_COLOR[d.level]};border:1px solid ${LEVEL_COLOR[d.level]}55">${d.level.toUpperCase()} · ${d.score}</span>` : "";
+const colorMode = () => document.getElementById("colorBy").value;
 const fmtKV  = v => v ? Number(v).toLocaleString() + " kV" : "n/a";
 const fmtPow = v => v >= 1000 ? (v/1000).toFixed(1) + " GW" : Math.round(v) + " MW";
 const LL = p => [p[1], p[0]];   // dataset [lat,lng] -> deck [lng,lat]
 
 function metricVal(dc, metric) {
   if (metric === "feasibility") return dc.feasibility ? dc.feasibility.score : 0;
+  if (metric === "regulatory") return dc.delivery ? dc.delivery.score : 0;
   return dc[metric] || 0;
 }
 function fmtMetric(metric, v) {
   if (metric === "value_usd") return fmtUSD(v);
   if (metric === "feasibility") return v + "/100";
+  if (metric === "regulatory") return "scrutiny " + v;
   return fmtPow(v);
 }
 function feasColor(s) {
@@ -575,6 +657,7 @@ function feasColor(s) {
        : s >= 50 ? "#fb923c" : "#f87171";
 }
 
+let WEIGHT_V = 0;   // bumps when feasibility weights change, to refresh colour accessors
 const WDEF = { power:22, grid:18, connectivity:20, land:10, incentives:12, complexity:10, viability:8 };
 // Recompute every site's feasibility score from its stored components using the
 // user's weights (auto-normalised), then re-render. Pure client-side.
@@ -587,6 +670,7 @@ function applyWeights() {
     let sc = 0; for (const k in w) sc += (f.components[k] || 0) * (w[k] / sum);
     f.score = Math.round(sc);
   });
+  WEIGHT_V++;
   render();
 }
 
@@ -610,7 +694,9 @@ function colNorm(dc, metric) {
   return 0.035 + 0.965 * Math.sqrt(Math.max(0, v) / (MAXV || 1));
 }
 function colColor(dc) {
-  if (on("colorFeas") && dc.feasibility) return hexRGB(feasColor(dc.feasibility.score));
+  const mode = colorMode();
+  if (mode === "feasibility" && dc.feasibility) return hexRGB(feasColor(dc.feasibility.score));
+  if (mode === "regulatory" && dc.delivery) return hexRGB(scrutinyColor(dc.delivery.score));
   return (STATUS[dc.status] || STATUS.unknown).rgb;
 }
 
@@ -741,7 +827,7 @@ function buildLayers() {
   L.push(new deck.ScatterplotLayer({
     id: "dcglow", data: SHOWN, getPosition: d => [d.lng, d.lat], radiusUnits: "pixels",
     getRadius: d => 7 + 16 * Math.sqrt(colNorm(d, metric)), getFillColor: d => [...colColor(d), 30], parameters: OVERLAY_PARAMS,
-    updateTriggers: { getRadius: [metric, MAXV], getFillColor: [on("colorFeas"), SHOWN] },
+    updateTriggers: { getRadius: [metric, MAXV], getFillColor: [colorMode(), SHOWN, WEIGHT_V] },
   }));
   if (on("L-power")) {
     const ps = CONN.power_stations || [];
@@ -759,7 +845,7 @@ function buildLayers() {
     getElevation: d => colNorm(d, metric), elevationScale: COL_H * zs * hMul,
     getFillColor: d => [...colColor(d), 245], material: MATERIAL,
     autoHighlight: true, highlightColor: [255, 255, 255, 90],
-    updateTriggers: { getPosition: posTrig, getElevation: [metric, MAXV, SHOWN.length], getFillColor: [on("colorFeas"), SHOWN] },
+    updateTriggers: { getPosition: posTrig, getElevation: [metric, MAXV, SHOWN.length], getFillColor: [colorMode(), SHOWN, WEIGHT_V] },
     transitions: { getElevation: { duration: 650, type: "spring", stiffness: 0.08, damping: 0.4 } },
   }));
   // Pulsing selection ring at the selected site's base.
@@ -774,8 +860,10 @@ function buildLayers() {
   }
   // Value labels on top of the tallest columns.
   if (on("L-labels") && SHOWN.length) {
-    const labelText = d => `${fmtMetric(metric, metricVal(d, metric))} · ${d.city || d.state || ""}`;
+    const labelText = d => `${fmtMetric(metric, metricVal(d, metric))} · ${(d.city || d.state || "").replace(/\s*\(.*\)/, "")}`;
     const ranked = SHOWN.filter(d => metricVal(d, metric) > 0).sort((a, b) => metricVal(b, metric) - metricVal(a, metric));
+    const searching = !!document.getElementById("search").value.trim() && SHOWN.length <= 25;
+    if (searching) ranked.unshift(...SHOWN.filter(d => !ranked.includes(d)));
     if (SELECTED && SHOWN.includes(SELECTED)) ranked.unshift(SELECTED);
     // Greedy screen-space de-cluttering: keep a label only if its box clears the ones already placed.
     const boxes = [], top = [];
@@ -788,12 +876,12 @@ function buildLayers() {
       return map.project([d.lng, d.lat]);
     };
     for (const d of ranked) {
-      if (top.length >= (IS_MOBILE ? 7 : 14)) break;
+      if (top.length >= (searching ? 25 : IS_MOBILE ? 7 : 16)) break;
       if (top.includes(d)) continue;
       const pt = proj(d);
       if (pt.x < 0 || pt.y < 0 || pt.x > W || pt.y > H) continue;
       const w = labelText(d).length * 7 + 14, b = { x0: pt.x - w / 2, x1: pt.x + w / 2, y0: pt.y - 26, y1: pt.y };
-      if (boxes.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0)) continue;
+      if (d !== SELECTED && boxes.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0)) continue;
       boxes.push(b); top.push(d);
     }
     L.push(new deck.TextLayer({
@@ -805,7 +893,7 @@ function buildLayers() {
       getBorderColor: d => [...colColor(d), 160], getBorderWidth: 1,
       getTextAnchor: "middle", getAlignmentBaseline: "bottom", getPixelOffset: [0, -4], billboard: true,
       parameters: OVERLAY_PARAMS,
-      updateTriggers: { getPosition: [...posTrig, metric, MAXV, hMul], getText: [metric, top.map(d => d._i).join()], getColor: [on("colorFeas")], getBorderColor: [on("colorFeas")] },
+      updateTriggers: { getPosition: [...posTrig, metric, MAXV, hMul], getText: [metric, top.map(d => d._i).join()], getColor: [colorMode(), WEIGHT_V], getBorderColor: [colorMode(), WEIGHT_V] },
     }));
   }
   return L;
@@ -837,7 +925,8 @@ function tipHtml(id, o) {
     case "dc": {
       const s = STATUS[o.status] || STATUS.unknown, loc = [o.city, o.state].filter(Boolean).join(", ");
       return `<h4>${esc(o.name)}</h4><div class="mini">${esc(o.operator || "operator n/a")}${loc ? " · " + esc(loc) : ""}</div>
-        <div class="mini num" style="margin-top:4px;color:${s.color}">${s.label} · ${fmtMW(o.capacity_mw)} · ${fmtUSD(o.value_usd)}</div>
+        <div class="mini num" style="margin-top:4px;color:${s.color}">${s.label} · ${fmtCap(o)} · ${fmtUSD(o.value_usd)}</div>
+        ${o.delivery && o.status !== "constructed" ? `<div class="mini num" style="margin-top:2px">Scrutiny <b style="color:${LEVEL_COLOR[o.delivery.level]}">${o.delivery.level} ${o.delivery.score}</b>${o.delivery.completion_range ? ` · done ${o.delivery.completion_range[0]}${o.delivery.completion_range[1] > o.delivery.completion_range[0] ? "–" + o.delivery.completion_range[1] : ""}` : ""}</div>` : ""}
         ${o.feasibility ? `<div class="mini num">Feasibility <b style="color:${feasColor(o.feasibility.score)}">${o.feasibility.score}</b>/100</div>` : ""}
         <div class="mini" style="color:var(--accent);margin-top:4px">Click for full profile →</div>`;
     }
@@ -914,7 +1003,25 @@ function render() {
 
   updateStats(SHOWN);
   updateMapLegend();
+  if (document.getElementById("deals").classList.contains("open")) renderDeals();
   ensureAnim();
+}
+
+// Searching flies the camera to the matching sites (and opens a single hit).
+let searchTimer = null;
+function onSearch() {
+  render();
+  clearTimeout(searchTimer);
+  const q = document.getElementById("search").value.trim();
+  if (!q || !SHOWN.length || SHOWN.length > 25) return;
+  searchTimer = setTimeout(() => {
+    if (SHOWN.length === 1) { openDrawer(SHOWN[0], true); return; }
+    const b = new maplibregl.LngLatBounds();
+    SHOWN.forEach(d => b.extend([d.lng, d.lat]));
+    stopOrbit();
+    map.fitBounds(b, { padding: IS_MOBILE ? { top:120, bottom:120, left:40, right:60 } : { top:120, bottom:120, left:360, right:260 },
+      maxZoom: 7.5, pitch: HOME.pitch, duration: 1400 });
+  }, 600);
 }
 
 function updateStats(shown) {
@@ -999,12 +1106,59 @@ function feasHtml(dc) {
     ${fa.nearest_metro_km!=null?`<div class="kv"><span class="k">Nearest fiber metro</span><span class="v">~${fa.nearest_metro_km} km</span></div>`:""}`;
 }
 
+const NOW_Y = new Date().getFullYear() + new Date().getMonth() / 12;
+const GANTT = [2025, 2033];
+const gx = y => Math.max(0, Math.min(100, 100 * (y - GANTT[0]) / (GANTT[1] - GANTT[0])));
+// Today -> announced target (solid) + modelled delay window (hatched).
+function ganttHtml(dc) {
+  const d = dc.delivery, s = STATUS[dc.status] || STATUS.unknown;
+  if (!d || !d.completion_range) return "";
+  const [y0, y1] = d.completion_range, start = Math.min(NOW_Y, y0);
+  const late = y0 + d.delay_months[1] / 12;
+  return `<div class="gantt">
+    <span class="run" style="left:${gx(start)}%;width:${Math.max(1.5, gx(y0 + 0.5) - gx(start))}%;background:${s.color};box-shadow:0 0 8px ${s.color}88"></span>
+    ${late > y0 + 0.5 ? `<span class="slip" style="left:${gx(y0 + 0.5)}%;width:${gx(late + 0.5) - gx(y0 + 0.5)}%"></span>` : ""}
+    <span class="now" style="left:${gx(NOW_Y)}%"></span></div>`;
+}
+const ganttAxis = () => `<span>${GANTT[0]}</span><span>${Math.round((GANTT[0] + GANTT[1]) / 2)}</span><span>${GANTT[1]}</span>`;
+const EVT_COLOR = { high:"#ff4d6d", medium:"#ff8c42", low:"#ffd166", none:"#2ee6a6" };
+function deliveryHtml(dc) {
+  const d = dc.delivery; if (!d) return "";
+  const built = dc.status === "constructed";
+  const evs = (dc.regulatory_events || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const fmtDate = x => { const [y, m] = String(x).split("-"); return m ? new Date(+y, +m - 1).toLocaleDateString(undefined, { month:"short", year:"numeric" }) : y; };
+  const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return "source"; } };
+  return `<div class="sec">Regulatory scrutiny &amp; delivery</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;color:var(--muted)">${built ? "Operational — residual scrutiny" : "Scrutiny / delivery risk"}</div>${lvlPill(d)}
+    </div>
+    <div class="meter"><i style="left:${d.score}%"></i></div>
+    <div class="meter-ends"><span>low</span><span>moderate</span><span>elevated</span><span>high</span></div>
+    ${d.completion_range ? `
+      <div class="metric-grid" style="margin-top:10px">
+        <div class="metric"><span>Announced target</span><b>${d.target_year}${d.target_estimated ? "<small style='font-size:10px;color:var(--muted)'> est.</small>" : ""}</b></div>
+        <div class="metric"><span>Risk-adjusted completion</span><b style="color:${LEVEL_COLOR[d.level]}">${d.completion_range[0]}${d.completion_range[1] > d.completion_range[0] ? "–" + d.completion_range[1] : ""}</b></div>
+      </div>
+      <div class="kv"><span class="k">Modelled delay risk</span><span class="v">+${d.delay_months[0]}–${d.delay_months[1]} months</span></div>
+      <div style="margin-top:6px">${ganttHtml(dc)}</div><div class="gantt-axis">${ganttAxis()}</div>` : (!built ? `<div class="kv"><span class="k">Expected completion</span><span class="v">Not disclosed</span></div>` : "")}
+    ${d.drivers.length ? `<div style="margin-top:8px">${d.drivers.map(x => `<div class="drv"><span>${esc(x.why)}</span><b>+${x.points}</b></div>`).join("")}</div>` : ""}
+    ${evs.length ? `<div class="sec" style="margin-top:12px">Documented events</div>
+      ${evs.map(e => `<div class="evt" style="--c:${EVT_COLOR[e.severity] || "#8796ad"}">
+        <div class="meta">${esc(fmtDate(e.date))} · ${esc(e.type)}${e.resolved ? " · resolved" : ""}</div>
+        <div>${esc(e.text)}</div>
+        ${e.source ? `<a href="${esc(e.source)}" target="_blank" rel="noopener noreferrer">${esc(host(e.source))} ↗</a>` : ""}</div>`).join("")}` : ""}
+    <p class="legend-note" style="margin-top:4px">Scrutiny is a modelled indicator (approvals, grid queue, on-site generation, scale, water, documented events) — not a forecast. Delay bands map to the score level.</p>`;
+}
+
 function openDrawer(dc, fly) {
   const s = STATUS[dc.status] || STATUS.unknown;
   const p = PERMIT[dc.permit_status];
   const loc = [dc.city, dc.state].filter(Boolean).join(", ");
 
   document.getElementById("operators").classList.remove("open");
+  const fromDeals = document.getElementById("deals").classList.contains("open");
+  document.getElementById("deals").classList.remove("open");
+  document.getElementById("backDeals").style.display = fromDeals ? "block" : "none";
   document.getElementById("d-name").textContent = dc.name;
   document.getElementById("d-pills").innerHTML =
     `<span class="pill" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55"><span class="swatch" style="background:${s.color};color:${s.color}"></span>${s.label}</span>` +
@@ -1024,11 +1178,15 @@ function openDrawer(dc, fly) {
     ${dc.year ? kv("Online / target", dc.year) : ""}
 
     <div class="metric-grid">
-      <div class="metric"><span>Capacity</span><b style="color:${s.color}">${fmtMW(dc.capacity_mw)}</b></div>
+      <div class="metric"><span>Capacity</span><b style="color:${s.color}">${fmtCap(dc)}</b></div>
       <div class="metric"><span>Consumed</span><b>${fmtMW(dc.consumed_mw)}</b></div>
       <div class="metric"><span>Available</span><b>${fmtMW(dc.available_mw)}</b></div>
       <div class="metric"><span>Est. capex</span><b style="color:var(--gold)">${fmtUSD(dc.value_usd)}</b></div>
     </div>
+
+    ${dc.notes ? `<div class="note">${esc(dc.notes)}</div>` : ""}
+
+    ${deliveryHtml(dc)}
 
     ${feasHtml(dc)}
 
@@ -1065,6 +1223,7 @@ function openDrawer(dc, fly) {
   `;
   document.getElementById("drawer").classList.add("open");
   document.getElementById("drawer").scrollTop = 0;
+  if (IS_MOBILE) document.getElementById("controls").classList.add("collapsed");
   SELECTED = dc;
   if (fly) {
     stopOrbit();
@@ -1081,6 +1240,38 @@ function closeDrawer() {
   SELECTED = null;
   if (wasOpen) map.easeTo({ padding: HOME.padding, duration: 600 });
   ensureAnim();
+}
+
+function renderDeals() {
+  const sort = document.getElementById("dealSort").value;
+  const evOnly = document.getElementById("dealEvents").checked;
+  const rows = SHOWN.filter(d => d.status !== "constructed" && d.delivery && (!evOnly || (d.regulatory_events || []).some(e => e.severity !== "none")));
+  const cmp = {
+    capacity: (a, b) => (b.capacity_mw || 0) - (a.capacity_mw || 0),
+    scrutiny: (a, b) => b.delivery.score - a.delivery.score || (b.capacity_mw || 0) - (a.capacity_mw || 0),
+    completion: (a, b) => ((a.delivery.completion_range || [9999])[0] - (b.delivery.completion_range || [9999])[0]) || b.delivery.score - a.delivery.score,
+  }[sort];
+  rows.sort(cmp);
+  document.getElementById("deal-axis").innerHTML = ganttAxis();
+  document.getElementById("deal-list").innerHTML = rows.length ? rows.map(d => {
+    const s = STATUS[d.status] || STATUS.unknown, r = d.delivery.completion_range;
+    const nEv = (d.regulatory_events || []).filter(e => e.severity !== "none").length;
+    return `<div class="deal" data-i="${d._i}">
+      <div class="top"><div class="nm">${esc(d.name)}<small>${esc(d.operator)} · ${esc([d.city, d.state].filter(Boolean).join(", "))}</small></div>
+        <div class="cap" style="color:${s.color}">${d.capacity_mw ? fmtPow(d.capacity_mw) : "undiscl."}</div></div>
+      <div class="row2"><div>${ganttHtml(d) || `<div class="gantt"></div>`}</div>${lvlPill(d.delivery)}</div>
+      <div class="when"><span>${s.label}${r ? ` · target ${d.delivery.target_year}${d.delivery.target_estimated ? " (est.)" : ""}` : " · timeline n/d"}</span>
+        <span>${r ? `risk-adj. ${r[0]}${r[1] > r[0] ? "–" + r[1] : ""}` : ""}${nEv ? ` · ⚑ ${nEv} event${nEv > 1 ? "s" : ""}` : ""}</span></div>
+    </div>`;
+  }).join("") : `<div class="mini" style="padding:12px">No pipeline projects match the current filters.</div>`;
+  document.querySelectorAll("#deal-list .deal").forEach(el => el.addEventListener("click", () => openDrawer(ALL[+el.dataset.i], true)));
+}
+function openDeals() {
+  document.getElementById("operators").classList.remove("open");
+  closeDrawer();
+  renderDeals();
+  document.getElementById("deals").classList.add("open");
+  if (IS_MOBILE) document.getElementById("controls").classList.add("collapsed");
 }
 
 function buildOperators() {
@@ -1128,8 +1319,10 @@ function updateMapLegend() {
   const linesOn = on("L-backbone") || on("L-cable") || on("L-corridors");
   let html = `<div class="blk"><h3>Data center columns</h3>
     <div><span class="col"><i style="height:5px"></i><i style="height:10px"></i><i style="height:16px"></i></span>height = ${esc(metric.options[metric.selectedIndex].text.replace(/^Height = /, ""))}</div>
-    ${on("colorFeas")
+    ${colorMode() === "feasibility"
       ? `<div class="grad" style="margin-top:6px;background:linear-gradient(90deg,#f87171,#fb923c,#fbbf24,#a3e635,#34d399)"></div><div class="ends"><span>feasibility low</span><span>high</span></div>`
+      : colorMode() === "regulatory"
+      ? Object.entries(LEVEL_COLOR).map(([k, c]) => `<div class="st"><span class="swatch" style="background:${c};color:${c}"></span>${k} scrutiny</div>`).join("")
       : ["constructed","under_construction","planned"].map(k => `<div class="st"><span class="swatch" style="background:${STATUS[k].color};color:${STATUS[k].color}"></span>${STATUS[k].label}</div>`).join("")}
   </div>`;
   if (statesOn) {
@@ -1294,8 +1487,13 @@ async function init() {
   document.getElementById("loading").style.display = "none";
   ["controls", "stats", "camdock"].forEach(id => document.getElementById(id).style.display = "");
 
-  ["sizeBy","operator","permit","minScore","colorFeas"].forEach(id => document.getElementById(id).addEventListener("change", render));
-  document.getElementById("search").addEventListener("input", render);
+  ["sizeBy","operator","permit","minScore","colorBy"].forEach(id => document.getElementById(id).addEventListener("change", render));
+  document.getElementById("search").addEventListener("input", onSearch);
+  ["dealSort", "dealEvents"].forEach(id => document.getElementById(id).addEventListener("change", renderDeals));
+  document.getElementById("openDeals").addEventListener("click", openDeals);
+  document.getElementById("topDeals").addEventListener("click", openDeals);
+  document.getElementById("dealsClose").addEventListener("click", () => document.getElementById("deals").classList.remove("open"));
+  document.getElementById("backDeals").addEventListener("click", () => { closeDrawer(); openDeals(); });
   document.querySelectorAll(".f-status").forEach(c => c.addEventListener("change", render));
   document.querySelectorAll(".fw").forEach(s => s.addEventListener("input", applyWeights));
   document.getElementById("wReset").addEventListener("click", () => {
@@ -1309,13 +1507,16 @@ async function init() {
     document.getElementById("search").value = "";
     document.getElementById("sizeBy").value = "capacity_mw";
     document.getElementById("minScore").value = "0";
-    document.getElementById("colorFeas").checked = false;
+    document.getElementById("colorBy").value = "status";
     render();
   });
   document.getElementById("dclose").addEventListener("click", closeDrawer);
-  document.getElementById("openOps").addEventListener("click", () => document.getElementById("operators").classList.add("open"));
+  document.getElementById("openOps").addEventListener("click", () => {
+    document.getElementById("deals").classList.remove("open");
+    document.getElementById("operators").classList.add("open");
+  });
   document.getElementById("opsClose").addEventListener("click", () => document.getElementById("operators").classList.remove("open"));
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); document.getElementById("operators").classList.remove("open"); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); ["operators", "deals"].forEach(id => document.getElementById(id).classList.remove("open")); } });
 
   // Mobile: collapse the filters and metrics panels so the map stays usable.
   const panelToggle = document.getElementById("panelToggle");

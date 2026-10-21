@@ -892,7 +892,25 @@
       "interconnection_status": "in queue",
       "lease_type": "owner-occupied",
       "rent_per_kw_month": null,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "regulatory_events": [
+        {
+          "date": "2025",
+          "type": "regulatory",
+          "severity": "medium",
+          "text": "Louisiana PSC approved three Entergy gas plants to serve the campus; advocates appealed the decision as 'arbitrary and capricious'.",
+          "source": "https://www.ucs.org/about/news/advocates-appeal-lpscs-arbitrary-and-capricious-decision-let-meta-hook-its-data-center"
+        },
+        {
+          "date": "2026",
+          "type": "regulatory",
+          "severity": "high",
+          "text": "Entergy docket U-37882 seeks seven more gas plants for Hyperion; contested over no competitive bid and ratepayer risk (staff settlement reported).",
+          "source": "https://bizneworleans.com/meta-plan-for-7-more-power-plants-draws-scrutiny/"
+        }
+      ],
+      "onsite_power": "Entergy-built gas plants (3 approved; 7 more proposed, LPSC docket U-37882)",
+      "iso_rto": "MISO"
     },
     {
       "name": "Microsoft / OpenAI Mount Pleasant (Fairwater)",
@@ -1381,7 +1399,7 @@
       "annual_rent_usd": null
     },
     {
-      "name": "Aligned Shippingport (Pennsylvania)",
+      "name": "Aligned Shippingport — Project Phoenix (Pennsylvania)",
       "operator": "Aligned Data Centers",
       "owner": "Macquarie Asset Management",
       "legal_entity": "Aligned Data Centers, LLC",
@@ -1394,22 +1412,40 @@
       "lng": -80.42,
       "status": "under_construction",
       "permit_status": "approved",
-      "capacity_mw": 1000,
+      "capacity_mw": 2000,
       "consumed_mw": 0,
-      "value_usd": 20000000000,
-      "year": 2027,
-      "utility": "Penn Power (FirstEnergy)",
+      "value_usd": 10000000000,
+      "year": 2028,
+      "utility": "Behind-the-meter (Shippingport Industrial Park power)",
       "iso_rto": "PJM",
-      "substation": "Shippingport",
-      "voltage_kv": 500,
-      "interconnection_mw": 1100,
-      "interconnection_status": "approved",
+      "substation": "Shippingport Industrial Park (former Bruce Mansfield site)",
+      "voltage_kv": null,
+      "interconnection_mw": null,
+      "interconnection_status": "behind-the-meter",
       "water_source": "Ohio River",
-      "onsite_power": "Power-adjacent to Beaver Valley nuclear (~1.8 GW)",
+      "onsite_power": "Behind-the-meter gas: park offers up to 3.6 GW; early phases fed via a separate National Fuel Gas line",
       "near_route": "PA-168 / I-376 corridor; Ohio River barge",
       "lease_type": "wholesale",
       "rent_per_kw_month": 138,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "year_estimated": true,
+      "notes": "Groundbreaking Sept 2026 on a 2 GW, three-facility campus (~$10B). Completion year not disclosed; 2028 is an estimate for first capacity.",
+      "regulatory_events": [
+        {
+          "date": "2026-09",
+          "type": "milestone",
+          "severity": "none",
+          "text": "Groundbreaking on 2 GW 'Project Phoenix' campus (three facilities).",
+          "source": "https://www.datacenterdynamics.com/en/news/aligned-breaks-ground-on-gigawatt-scale-data-center-campus-in-pennsylvania/"
+        },
+        {
+          "date": "2026",
+          "type": "local",
+          "severity": "low",
+          "text": "Borough council supports the project; residents have voiced opposition at public meetings.",
+          "source": "https://www.datacenterdynamics.com/en/news/shippingport-industrial-park/"
+        }
+      ]
     },
     {
       "name": "Aligned Cardinal (Ohio)",
@@ -1683,7 +1719,17 @@
       "interconnection_status": "energized",
       "lease_type": "owner-occupied",
       "rent_per_kw_month": null,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "regulatory_events": [
+        {
+          "date": "2025",
+          "type": "permit",
+          "severity": "medium",
+          "text": "After a Clean Air Act notice of intent to sue, xAI removed unpermitted turbines and obtained permits for its remaining 15.",
+          "source": "https://earthjustice.org/case/xai-illegal-gas-power-plant-data-center-colossus",
+          "resolved": true
+        }
+      ]
     },
     {
       "name": "xAI Colossus 2 (Memphis / Mississippi)",
@@ -1710,7 +1756,24 @@
       "interconnection_status": "approved",
       "lease_type": "owner-occupied",
       "rent_per_kw_month": null,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "regulatory_events": [
+        {
+          "date": "2026-04",
+          "type": "litigation",
+          "severity": "high",
+          "text": "NAACP (Earthjustice/SELC) sued xAI under the Clean Air Act over 27 gas turbines run without air permits in Southaven, MS.",
+          "source": "https://news.bloomberglaw.com/environment-and-energy/naacp-launches-clean-air-lawsuit-over-xai-colossus-data-center"
+        },
+        {
+          "date": "2026",
+          "type": "permit",
+          "severity": "medium",
+          "text": "xAI applied for a permit for 41 permanent gas turbines in Southaven; MDEQ had treated the temporary units as exempt.",
+          "source": "https://earthjustice.org/case/xai-illegal-gas-power-plant-data-center-colossus"
+        }
+      ],
+      "onsite_power": "Gas turbines across the state line in Southaven, MS (permanent units in permitting)"
     },
     {
       "name": "CoreWeave / Core Scientific (Denton)",
@@ -2169,7 +2232,32 @@
       "interconnection_status": "approved",
       "lease_type": "owner-occupied",
       "rent_per_kw_month": null,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "regulatory_events": [
+        {
+          "date": "2024-11",
+          "type": "regulatory",
+          "severity": "high",
+          "text": "FERC rejected the amended PJM/PPL/Talen interconnection agreement that would raise co-located load from 300 to 480 MW.",
+          "source": "https://www.renewableenergyworld.com/news/ferc-rejects-amended-interconnection-agreement-for-amazon-data-center-at-susquehanna-nuclear-plant/"
+        },
+        {
+          "date": "2025-04",
+          "type": "regulatory",
+          "severity": "high",
+          "text": "FERC denied rehearing (2–1); early phases proceed on the existing 300 MW co-location allowance.",
+          "source": "https://www.ans.org/news/2025-04-16/article-6937"
+        },
+        {
+          "date": "2025-12",
+          "type": "regulatory",
+          "severity": "medium",
+          "text": "FERC ordered PJM to write new co-location / large-load tariff rules (compliance filings due Jan–Feb 2026).",
+          "source": "https://www.mintz.com/insights-center/viewpoints/2151/2026-02-02-ferc-directs-pjm-issue-new-rules-co-location-power"
+        }
+      ],
+      "onsite_power": "Co-located with Talen's Susquehanna nuclear plant",
+      "iso_rto": "PJM"
     },
     {
       "name": "Microsoft West Des Moines",
@@ -2663,7 +2751,30 @@
       "near_route": "US-119 / Interstate 99 corridor",
       "lease_type": "wholesale",
       "rent_per_kw_month": 132,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "regulatory_events": [
+        {
+          "date": "2025-11",
+          "type": "permit",
+          "severity": "none",
+          "text": "PA DEP issued the air-quality permit in 157 days (vs. 285 projected).",
+          "source": "https://technical.ly/civics/homer-city-indiana-county-pennsylvania-data-center-permit-approval.md"
+        },
+        {
+          "date": "2025-12",
+          "type": "litigation",
+          "severity": "medium",
+          "text": "Clean Air Council, PennFuture and Sierra Club appealed the air permit.",
+          "source": "https://www.fractracker.org/2026/05/homer-city-ai-campus-gas-power-construction/"
+        },
+        {
+          "date": "2026-04",
+          "type": "milestone",
+          "severity": "none",
+          "text": "'First steel' — vertical construction started.",
+          "source": "https://www.fractracker.org/2026/05/homer-city-ai-campus-gas-power-construction/"
+        }
+      ]
     },
     {
       "name": "Meta Prometheus (New Albany)",
@@ -2818,7 +2929,23 @@
       "near_route": "I-43 corridor",
       "lease_type": "wholesale",
       "rent_per_kw_month": 130,
-      "annual_rent_usd": null
+      "annual_rent_usd": null,
+      "regulatory_events": [
+        {
+          "date": "2026-08",
+          "type": "regulatory",
+          "severity": "high",
+          "text": "Wisconsin PSC unanimously revoked completeness of ATC's transmission application for the campus; ATC must restart.",
+          "source": "https://wtmj.com/news/2026/08/07/state-regulators-deliver-massive-setback-to-port-washington-data-center-power-lines/"
+        },
+        {
+          "date": "2025-11",
+          "type": "local",
+          "severity": "medium",
+          "text": "City approvals passed, but ~66% of voters backed a referendum requiring voter approval for incentives over $10M; protests at the site.",
+          "source": "https://www.washingtonexaminer.com/policy/energy-and-environment/4520622/port-washington-wisconsin-restrict-data-centers/"
+        }
+      ]
     },
     {
       "name": "Tract Storey County (Master Plan)",
@@ -4807,6 +4934,259 @@
       "lease_type": "wholesale",
       "rent_per_kw_month": 145,
       "annual_rent_usd": null
+    },
+    {
+      "name": "Stargate Michigan (Saline Township)",
+      "operator": "OpenAI / Oracle / Related Digital",
+      "owner": "Related Digital",
+      "legal_entity": "",
+      "tenants": [
+        "OpenAI (Stargate)",
+        "Oracle"
+      ],
+      "city": "Saline Township",
+      "state": "MI",
+      "lat": 42.15,
+      "lng": -83.84,
+      "status": "planned",
+      "permit_status": "permitted",
+      "capacity_mw": 1400,
+      "consumed_mw": 0,
+      "value_usd": 7000000000,
+      "year": 2028,
+      "year_estimated": true,
+      "utility": "DTE Electric",
+      "iso_rto": "MISO",
+      "interconnection_mw": 1400,
+      "interconnection_status": "pending approval",
+      "lease_type": "owner-occupied",
+      "onsite_power": "Grid (DTE existing resources) + project-funded battery storage",
+      "notes": "Announced Oct 2025: three 550k sq ft buildings on ~250 acres; DTE to supply 1.4 GW. Construction slated for 2026.",
+      "regulatory_events": [
+        {
+          "date": "2025",
+          "type": "local",
+          "severity": "medium",
+          "text": "Township board rejected rezoning; Related Digital sued for exclusionary zoning and the suit was settled.",
+          "source": "https://www.michiganpublic.org/economy/2025-10-30/massive-data-center-project-announced-for-michigan",
+          "resolved": true
+        },
+        {
+          "date": "2025-10",
+          "type": "regulatory",
+          "severity": "medium",
+          "text": "Michigan PSC must sign off on DTE's 1.4 GW supply contract.",
+          "source": "https://bridgemi.com/michigan-environment-watch/dte-consumers-advance-plans-for-power-hungry-data-centers-in-michigan/"
+        }
+      ]
+    },
+    {
+      "name": "Crusoe / Tallgrass Cheyenne (Wyoming)",
+      "operator": "Crusoe Energy",
+      "owner": "Crusoe Energy / Tallgrass",
+      "legal_entity": "",
+      "tenants": [
+        "undisclosed"
+      ],
+      "city": "Cheyenne",
+      "state": "WY",
+      "lat": 41.03,
+      "lng": -104.76,
+      "status": "planned",
+      "permit_status": "pending",
+      "capacity_mw": 1800,
+      "consumed_mw": 0,
+      "value_usd": null,
+      "year": 2028,
+      "year_estimated": true,
+      "utility": "Dedicated generation",
+      "iso_rto": "None (WECC)",
+      "interconnection_status": "behind-the-meter",
+      "lease_type": "wholesale",
+      "onsite_power": "Dedicated natural-gas + renewable plants; near Tallgrass CO2 sequestration hub",
+      "notes": "Announced Jul 2025 at 1.8 GW, expandable to 10 GW; tenant not disclosed. Location approx. (south of Cheyenne off US-85).",
+      "regulatory_events": [
+        {
+          "date": "2025-07",
+          "type": "local",
+          "severity": "low",
+          "text": "Experts flagged possible regional power-price impacts; city leadership supportive.",
+          "source": "https://www.datacenterdynamics.com/en/news/crusoe-plans-18gw-data-center-campus-in-wyoming/"
+        }
+      ]
+    },
+    {
+      "name": "Google Haskell County (2 campuses, Texas)",
+      "operator": "Google",
+      "owner": "Alphabet Inc.",
+      "legal_entity": "",
+      "tenants": [
+        "self (Google)"
+      ],
+      "city": "Haskell County",
+      "state": "TX",
+      "lat": 33.16,
+      "lng": -99.73,
+      "status": "planned",
+      "permit_status": "",
+      "capacity_mw": null,
+      "capacity_disclosed": false,
+      "consumed_mw": 0,
+      "value_usd": null,
+      "year": 2027,
+      "utility": "",
+      "iso_rto": "ERCOT",
+      "interconnection_status": "",
+      "lease_type": "owner-occupied",
+      "onsite_power": "One campus co-located with a new solar + battery plant",
+      "notes": "Part of Google's $40B Texas investment through 2027 (Nov 2025); capacity not disclosed.",
+      "regulatory_events": [
+        {
+          "date": "2025-11",
+          "type": "milestone",
+          "severity": "none",
+          "text": "Announced as part of $40B Texas plan (3 new data centers + Midlothian/Dallas expansion).",
+          "source": "https://www.bloomberg.com/news/articles/2025-11-14/google-to-invest-40-billion-in-new-data-centers-in-texas"
+        }
+      ]
+    },
+    {
+      "name": "Google Armstrong County (Texas Panhandle)",
+      "operator": "Google",
+      "owner": "Alphabet Inc.",
+      "legal_entity": "",
+      "tenants": [
+        "self (Google)"
+      ],
+      "city": "Armstrong County",
+      "state": "TX",
+      "lat": 35.0,
+      "lng": -101.36,
+      "status": "planned",
+      "permit_status": "",
+      "capacity_mw": null,
+      "capacity_disclosed": false,
+      "consumed_mw": 0,
+      "value_usd": null,
+      "year": 2027,
+      "utility": "",
+      "iso_rto": "",
+      "interconnection_status": "",
+      "lease_type": "owner-occupied",
+      "notes": "Part of Google's $40B Texas investment through 2027 (Nov 2025); capacity not disclosed.",
+      "regulatory_events": [
+        {
+          "date": "2025-11",
+          "type": "milestone",
+          "severity": "none",
+          "text": "Announced as part of $40B Texas plan.",
+          "source": "https://www.ksat.com/news/texas/2025/11/15/google-to-build-three-new-data-centers-in-texas-in-40-billion-investment/"
+        }
+      ]
+    },
+    {
+      "name": "Amazon AWS Richmond County (Hamlet, NC)",
+      "operator": "Amazon Web Services",
+      "owner": "Amazon.com, Inc.",
+      "legal_entity": "",
+      "tenants": [
+        "self (AWS)"
+      ],
+      "city": "Hamlet",
+      "state": "NC",
+      "lat": 34.88,
+      "lng": -79.7,
+      "status": "planned",
+      "permit_status": "",
+      "capacity_mw": null,
+      "capacity_disclosed": false,
+      "consumed_mw": 0,
+      "value_usd": 10000000000,
+      "year": null,
+      "utility": "Duke Energy (adjacent to Smith Energy Complex)",
+      "iso_rto": "None (SERC)",
+      "interconnection_status": "",
+      "lease_type": "owner-occupied",
+      "notes": "Announced Jun 2025: $10B cloud/AI campus, 20+ buildings planned; county incentive package approved. Timeline not disclosed.",
+      "regulatory_events": [
+        {
+          "date": "2025-06",
+          "type": "milestone",
+          "severity": "none",
+          "text": "Richmond County approved a 20-year incentive (property-tax grant) package.",
+          "source": "https://abc11.com/16658676"
+        }
+      ]
+    },
+    {
+      "name": "Meta Lebanon (Indiana)",
+      "operator": "Meta",
+      "owner": "Meta Platforms, Inc.",
+      "legal_entity": "",
+      "tenants": [
+        "self (Meta)"
+      ],
+      "city": "Lebanon",
+      "state": "IN",
+      "lat": 40.05,
+      "lng": -86.47,
+      "status": "under_construction",
+      "permit_status": "approved",
+      "capacity_mw": 1000,
+      "consumed_mw": 0,
+      "value_usd": 10000000000,
+      "year": 2028,
+      "year_estimated": true,
+      "utility": "Boone REMC area",
+      "iso_rto": "MISO",
+      "interconnection_status": "approved",
+      "lease_type": "owner-occupied",
+      "water_source": "Closed-loop (Meta funding $120M+ in Lebanon water infrastructure)",
+      "notes": "Broke ground Feb 2026: 1 GW, $10B+; Meta pays full energy cost and funds a Boone REMC bill-assistance fund.",
+      "regulatory_events": [
+        {
+          "date": "2026-02",
+          "type": "milestone",
+          "severity": "none",
+          "text": "Groundbreaking announced; ~4,000 peak construction jobs.",
+          "source": "https://about.fb.com/news/2026/02/metas-new-data-center-lebanon-indiana/"
+        }
+      ]
+    },
+    {
+      "name": "Poolside Project Horizon (West Texas)",
+      "operator": "Poolside",
+      "owner": "Poolside",
+      "legal_entity": "",
+      "tenants": [
+        "Poolside (anchor partner being re-sought)"
+      ],
+      "city": "Pecos County (Longfellow Ranch)",
+      "state": "TX",
+      "lat": 30.6,
+      "lng": -102.7,
+      "status": "planned",
+      "permit_status": "pending",
+      "capacity_mw": 2000,
+      "consumed_mw": 0,
+      "value_usd": null,
+      "year": 2027,
+      "year_estimated": true,
+      "utility": "Self-generation",
+      "iso_rto": "ERCOT",
+      "interconnection_status": "behind-the-meter",
+      "lease_type": "owner-occupied",
+      "onsite_power": "On-site generation from Permian Basin natural gas",
+      "notes": "568-acre campus; 250 MW first phase planned. Location approximate.",
+      "regulatory_events": [
+        {
+          "date": "2026",
+          "type": "commercial",
+          "severity": "high",
+          "text": "CoreWeave anchor-tenant deal fell apart; Poolside is seeking new cloud partners (incl. Google).",
+          "source": "https://www.datacenterdynamics.com/en/news/poolside-seeks-partners-for-data-center-in-texas-after-coreweave-deal-falls-apart/"
+        }
+      ]
     }
   ]
 }

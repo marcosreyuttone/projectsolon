@@ -176,6 +176,12 @@ def normalize(d, source):
         "lease_type": (d.get("lease_type") or "").lower(),
         "rent_per_kw_month": float(rent) if rent not in (None, "") else None,
         "annual_rent_usd": float(d["annual_rent_usd"]) if d.get("annual_rent_usd") else None,
+        # Delivery context: documented regulatory/legal events (with sources),
+        # whether capacity / target year are disclosed or estimated.
+        "regulatory_events": d.get("regulatory_events") or [],
+        "capacity_disclosed": d.get("capacity_disclosed", True) is not False,
+        "year_estimated": bool(d.get("year_estimated")),
+        "notes": d.get("notes") or "",
         "source": source,
     }
 
@@ -406,6 +412,68 @@ def score_feasibility(rec, factors, metros, iso_data=None):
     return out
 
 
+# Modelled delay band per scrutiny level: (months lo, months hi, years added to
+# the announced target for the late end of the risk-adjusted completion range).
+DELAY_BANDS = [(25, "Low", 0, 3, 0), (45, "Moderate", 3, 9, 1), (65, "Elevated", 6, 15, 1), (101, "High", 12, 24, 2)]
+EVENT_POINTS = {"high": 18, "medium": 10, "low": 4}
+
+
+def score_delivery_risk(rec, factors, iso_data=None):
+    """0-100 regulatory-scrutiny / delivery-risk indicator with its drivers.
+
+    A transparent heuristic, not a forecast: approvals still pending, grid
+    interconnection state, ISO/RTO queue congestion, on-site fossil or nuclear
+    co-location (air permits / FERC co-location review), gigawatt scale, water
+    stress, plus documented regulatory, legal, local or commercial events from
+    the curated record (resolved events count half)."""
+    drivers = []
+
+    def add(pts, why):
+        if pts > 0:
+            drivers.append({"points": round(pts), "why": why})
+
+    built = rec.get("status") == "constructed"
+    permit = rec.get("permit_status", "")
+    add({"pending": 18, "permitted": 8}.get(permit, 6 if (not permit and not built) else 0),
+        "Approvals still pending" if permit == "pending" else
+        "Permitted, final approvals outstanding" if permit == "permitted" else "Approval status not disclosed")
+    ic = rec.get("interconnection_status", "")
+    add({"in queue": 14, "pending approval": 10, "behind-the-meter": 6, "approved": 3}.get(ic, 0 if built else 6),
+        {"in queue": "Grid interconnection still in queue",
+         "pending approval": "Utility supply contract awaiting regulator approval",
+         "behind-the-meter": "Behind-the-meter supply (co-location / self-generation rules)",
+         "approved": "Interconnection approved, not yet energized"}.get(ic, "Interconnection status not disclosed"))
+    onsite = (rec.get("onsite_power") or "").lower()
+    if any(k in onsite for k in ("gas", "turbine", "coal")):
+        add(14, "On-site fossil generation needs air permits")
+    elif "nuclear" in onsite and "co-located" in onsite:
+        add(12, "Nuclear co-location under FERC scrutiny")
+    iso = iso_for_state(rec.get("state"), iso_data)
+    if iso and not built:
+        add((5 - iso["availability"]) * 4, f"{iso['iso']} queue congestion (~{iso.get('avg_wait_years')} yr typical wait)")
+    cap = rec.get("capacity_mw") or 0
+    add(12 if cap >= 1500 else 9 if cap >= 1000 else 5 if cap >= 500 else 0, "Gigawatt-scale load draws regulator / public attention")
+    st = (factors or {}).get("states", {}).get(rec.get("state")) if factors else None
+    if st and st.get("water_stress", 0) >= 4:
+        add(6, "High regional water stress")
+    ev_pts = 0
+    for e in rec.get("regulatory_events") or []:
+        p = EVENT_POINTS.get(e.get("severity"), 0) * (0.5 if e.get("resolved") else 1)
+        ev_pts += p
+    add(min(ev_pts, 40), "Documented regulatory / legal / local events")
+
+    raw = sum(d["points"] for d in drivers)
+    score = round(_clamp(raw * (0.35 if built else 1.0)))
+    level, lo, hi, add_y = next((n, lo, hi, y) for cut, n, lo, hi, y in DELAY_BANDS if score < cut)
+    out = {"score": score, "level": level, "drivers": sorted(drivers, key=lambda d: -d["points"]),
+           "documented_events": len(rec.get("regulatory_events") or [])}
+    year = rec.get("year")
+    if not built and year:
+        out.update({"delay_months": [lo, hi], "target_year": year,
+                    "completion_range": [year, year + add_y], "target_estimated": rec.get("year_estimated", False)})
+    return out
+
+
 def build_dataset(download=True):
     curated = load_curated()
     log(f"Loaded {len(curated)} curated data centers.")
@@ -425,9 +493,10 @@ def build_dataset(download=True):
     for r in records:
         fs = score_feasibility(r, factors, metros, iso_data) if r["source"] == "curated" else None
         r["feasibility"] = fs
+        r["delivery"] = score_delivery_risk(r, factors, iso_data) if r["source"] == "curated" else None
         if fs:
             scored += 1
-    log(f"Scored feasibility for {scored} sites.")
+    log(f"Scored feasibility + delivery risk for {scored} sites.")
 
     totals = summarize(records)
     dataset = {

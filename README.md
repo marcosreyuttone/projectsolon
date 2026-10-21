@@ -154,6 +154,37 @@ Route popups show **indicative capacity** (Tier-1 fiber ~100–400 Tbps, Tier-2
 ~10–100 Tbps, major subsea ~100–300+ Tbps), and an on-map legend explains that
 line thickness ≈ capacity.
 
+## Regulatory scrutiny, delays & expected completion
+
+Every curated site carries a **0–100 regulatory-scrutiny / delivery-risk
+indicator** (`delivery` in `data/datacenters.json`, computed by
+`score_delivery_risk` in `app.py`). It is a transparent heuristic, **not a
+forecast**, built from: approvals still pending, grid-interconnection state,
+ISO/RTO queue congestion, on-site fossil generation (air permits) or nuclear
+co-location (FERC review), gigawatt scale, regional water stress, and
+**documented events** attached to the record (`regulatory_events`, each with a
+date, type, severity and source link; resolved events count half).
+
+- Levels: **Low** (<25), **Moderate** (25–44), **Elevated** (45–64),
+  **High** (65+). Each maps to a modelled delay band (0–3, 3–9, 6–15, 12–24
+  months) and a **risk-adjusted completion** range next to the announced target
+  year (`year`; `year_estimated: true` marks targets that weren't disclosed).
+- **Deal tracker** (top bar / filters panel) lists every pipeline project in
+  the current filter with a today→target bar, hatched delay window, scrutiny
+  level and event count; sort by capacity, scrutiny or completion.
+- Columns can be **coloured and/or sized by scrutiny**; the profile drawer shows
+  the score, its drivers, the timeline and the sourced event log.
+
+Add events to a curated record like:
+
+```jsonc
+"regulatory_events": [
+  { "date": "2026-08", "type": "regulatory", "severity": "high",
+    "text": "State PSC revoked completeness of the transmission application.",
+    "source": "https://…", "resolved": false }
+]
+```
+
 ## Interconnection-queue (grid availability)
 
 `data/iso_curated.json` carries per-ISO/RTO queue context (queue GW, typical
